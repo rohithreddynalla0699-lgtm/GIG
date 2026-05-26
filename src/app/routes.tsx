@@ -1,72 +1,86 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import PublicLayout from './layouts/PublicLayout';
 import CustomerProtectedLayout from './layouts/CustomerProtectedLayout';
 import PartnerAuthLayout from './layouts/PartnerAuthLayout';
 import PartnerDashboardLayout from './layouts/PartnerDashboardLayout';
-import HomePage from './pages/HomePage';
-import PartnerLogin from './pages/PartnerLogin';
-import BusinessSignup from './pages/BusinessSignup';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import CustomerAuth from './pages/CustomerAuth';
-import PartnerOverviewPage from './pages/partner/PartnerOverviewPage';
-import PartnerListingsPage from './pages/partner/PartnerListingsPage';
-import PartnerNewListingPage from './pages/partner/PartnerNewListingPage';
-import PartnerOrdersPage from './pages/partner/PartnerOrdersPage';
-import PartnerOrderDetailsPage from './pages/partner/PartnerOrderDetailsPage';
-import PartnerProfilePage from './pages/partner/PartnerProfilePage';
-import PartnerSubscriptionPage from './pages/partner/PartnerSubscriptionPage';
-import FindFoodPage from './pages/public/FindFoodPage';
-import StorePage from './pages/public/StorePage';
-import BagPage from './pages/public/BagPage';
-import SavedPage from './pages/public/SavedPage';
-import OrdersPage from './pages/public/OrdersPage';
-import OrderDetailsPage from './pages/public/OrderDetailsPage';
-import CustomerProfilePage from './pages/public/CustomerProfilePage';
-import SupportPage from './pages/public/SupportPage';
-import NotFoundPage from './pages/public/NotFoundPage';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const PartnerLogin = lazy(() => import('./pages/PartnerLogin'));
+const BusinessSignup = lazy(() => import('./pages/BusinessSignup'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const CustomerAuth = lazy(() => import('./pages/CustomerAuth'));
+const PartnerOverviewPage = lazy(() => import('./pages/partner/PartnerOverviewPage'));
+const PartnerListingsPage = lazy(() => import('./pages/partner/PartnerListingsPage'));
+const PartnerNewListingPage = lazy(() => import('./pages/partner/PartnerNewListingPage'));
+const PartnerOrdersPage = lazy(() => import('./pages/partner/PartnerOrdersPage'));
+const PartnerOrderDetailsPage = lazy(() => import('./pages/partner/PartnerOrderDetailsPage'));
+const PartnerProfilePage = lazy(() => import('./pages/partner/PartnerProfilePage'));
+const PartnerSubscriptionPage = lazy(() => import('./pages/partner/PartnerSubscriptionPage'));
+const FindFoodPage = lazy(() => import('./pages/public/FindFoodPage'));
+const StorePage = lazy(() => import('./pages/public/StorePage'));
+const BagPage = lazy(() => import('./pages/public/BagPage'));
+const SavedPage = lazy(() => import('./pages/public/SavedPage'));
+const OrdersPage = lazy(() => import('./pages/public/OrdersPage'));
+const OrderDetailsPage = lazy(() => import('./pages/public/OrderDetailsPage'));
+const CustomerProfilePage = lazy(() => import('./pages/public/CustomerProfilePage'));
+const SupportPage = lazy(() => import('./pages/public/SupportPage'));
+const NotFoundPage = lazy(() => import('./pages/public/NotFoundPage'));
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[220px] items-center justify-center px-4 py-10">
+      <div className="text-[14px] font-medium text-[color:var(--gig-text-muted)]">Loading...</div>
+    </div>
+  );
+}
+
+function withRouteFallback(node: React.ReactNode) {
+  return <Suspense fallback={<RouteFallback />}>{node}</Suspense>;
+}
 
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
-      { path: '/', Component: HomePage },
-      { path: '/find-food', Component: FindFoodPage },
-      { path: '/store/:id', Component: StorePage },
-      { path: '/bag/:id', Component: BagPage },
-      { path: '/support', Component: SupportPage },
-      { path: '/customer-auth', Component: CustomerAuth },
-      { path: '/privacy-policy', Component: PrivacyPolicy },
-      { path: '*', Component: NotFoundPage },
+      { path: '/', element: withRouteFallback(<HomePage />) },
+      { path: '/find-food', element: withRouteFallback(<FindFoodPage />) },
+      { path: '/store/:id', element: withRouteFallback(<StorePage />) },
+      { path: '/bag/:id', element: withRouteFallback(<BagPage />) },
+      { path: '/support', element: withRouteFallback(<SupportPage />) },
+      { path: '/customer-auth', element: withRouteFallback(<CustomerAuth />) },
+      { path: '/privacy-policy', element: withRouteFallback(<PrivacyPolicy />) },
+      { path: '*', element: withRouteFallback(<NotFoundPage />) },
     ],
   },
   {
     element: <CustomerProtectedLayout />,
     children: [
-      { path: '/saved', Component: SavedPage },
-      { path: '/orders', Component: OrdersPage },
-      { path: '/orders/:id', Component: OrderDetailsPage },
-      { path: '/customer-profile', Component: CustomerProfilePage },
+      { path: '/saved', element: withRouteFallback(<SavedPage />) },
+      { path: '/orders', element: withRouteFallback(<OrdersPage />) },
+      { path: '/orders/:id', element: withRouteFallback(<OrderDetailsPage />) },
+      { path: '/customer-profile', element: withRouteFallback(<CustomerProfilePage />) },
     ],
   },
   {
     path: '/partner',
     element: <PartnerAuthLayout />,
     children: [
-      { path: 'login', Component: PartnerLogin },
-      { path: 'onboarding', Component: BusinessSignup },
+      { path: 'login', element: withRouteFallback(<PartnerLogin />) },
+      { path: 'onboarding', element: withRouteFallback(<BusinessSignup />) },
     ],
   },
   {
     path: '/partner',
     element: <PartnerDashboardLayout />,
     children: [
-      { index: true, Component: PartnerOverviewPage },
-      { path: 'profile', Component: PartnerProfilePage },
-      { path: 'listings', Component: PartnerListingsPage },
-      { path: 'listings/new', Component: PartnerNewListingPage },
-      { path: 'orders', Component: PartnerOrdersPage },
-      { path: 'orders/:id', Component: PartnerOrderDetailsPage },
-      { path: 'billing', Component: PartnerSubscriptionPage },
+      { index: true, element: withRouteFallback(<PartnerOverviewPage />) },
+      { path: 'profile', element: withRouteFallback(<PartnerProfilePage />) },
+      { path: 'listings', element: withRouteFallback(<PartnerListingsPage />) },
+      { path: 'listings/new', element: withRouteFallback(<PartnerNewListingPage />) },
+      { path: 'orders', element: withRouteFallback(<PartnerOrdersPage />) },
+      { path: 'orders/:id', element: withRouteFallback(<PartnerOrderDetailsPage />) },
+      { path: 'billing', element: withRouteFallback(<PartnerSubscriptionPage />) },
       { path: 'payouts', element: <Navigate to="/partner" replace /> },
       { path: 'subscription', element: <Navigate to="/partner/billing" replace /> },
       { path: 'team', element: <Navigate to="/partner" replace /> },
