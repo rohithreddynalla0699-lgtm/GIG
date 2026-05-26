@@ -1,8 +1,10 @@
 import type {
+  MockPartnerLockedFeature,
   MockPartnerProfile,
+  MockPartnerWorkspaceAccessState,
   Partner,
-  PartnerOutlet,
   PartnerBillingStatus,
+  PartnerOutlet,
   PartnerSignupAcknowledgements,
   PartnerVerificationStatus,
 } from '../../types/partner';
@@ -53,6 +55,20 @@ const SEED_PARTNER_WORKSPACE_ID = currentPartner.id;
 
 export type MockPartnerActivationState = 'active' | 'verification_required' | 'billing_required';
 
+interface MockPartnerCompletionState {
+  complete: boolean;
+}
+
+interface MockPartnerOperationalReadiness {
+  verificationApproved: boolean;
+  billingActive: boolean;
+  fssaiComplete: boolean;
+  panComplete: boolean;
+  bankLinked: boolean;
+  complianceComplete: boolean;
+  activationEligible: boolean;
+}
+
 function createPartnerWorkspaceId(businessName: string) {
   const slug = businessName
     .toLowerCase()
@@ -62,10 +78,12 @@ function createPartnerWorkspaceId(businessName: string) {
   return `partner-${slug || 'workspace'}-${Date.now()}`;
 }
 
-function buildWorkspaceOutlet(profile: Pick<
-  MockPartnerProfile,
-  'workspaceId' | 'tradingName' | 'legalBusinessName' | 'city' | 'addressLine1' | 'addressLine2' | 'stateRegion'
->): PartnerOutlet {
+function buildWorkspaceOutlet(
+  profile: Pick<
+    MockPartnerProfile,
+    'workspaceId' | 'tradingName' | 'legalBusinessName' | 'city' | 'addressLine1' | 'addressLine2' | 'stateRegion'
+  >,
+): PartnerOutlet {
   const outletName = profile.tradingName.trim() || profile.legalBusinessName.trim() || 'Primary outlet';
   const addressLine = [profile.addressLine1.trim(), profile.addressLine2.trim()].filter(Boolean).join(', ');
 
@@ -98,24 +116,43 @@ function getDefaultMockPartnerProfile(): MockPartnerProfile {
     stateRegion: 'Telangana',
     pinCode: '',
     country: 'India',
-    fssaiLicenseNumber: '',
-    licenseType: 'Not sure yet',
-    licenseExpiryDate: '',
+    fssaiLicenseNumber: '13619011001234',
+    licenseType: 'State License',
+    licenseExpiryDate: '2027-12-31',
     registeredBusinessNameOnLicense: currentPartner.businessName,
-    licenseDocumentName: '',
+    licenseDocumentName: 'hearth-fssai-license.pdf',
     gstin: '',
-    pan: '',
-    confirmsSafeSurplusFood: false,
-    confirmsAccurateDisclosure: false,
-    confirmsHygieneResponsibility: false,
-    confirmsGigReviewRights: false,
-    acceptedTerms: false,
-    acknowledgedFoodSafety: false,
-    acknowledgedResponsibility: false,
-    acknowledgedLicensing: false,
-    acknowledgedPricing: false,
-    pricingAcknowledgedAt: '',
+    pan: 'AABCH1234L',
+    panNumber: 'AABCH1234L',
+    panHolderName: currentPartner.businessName,
+    authorizedRepresentativeConfirmed: true,
+    confirmsSafeSurplusFood: true,
+    confirmsEdibleSurplusFood: true,
+    confirmsNoExtraProduction: true,
+    confirmsAllergenResponsibility: true,
+    confirmsPackagingResponsibility: true,
+    confirmsStorageResponsibility: true,
+    confirmsLocalLawCompliance: true,
+    confirmsAccurateDisclosure: true,
+    confirmsHygieneResponsibility: true,
+    confirmsGigReviewRights: true,
+    bankAccountHolderName: currentPartner.businessName,
+    bankAccountNumber: '50200012345678',
+    bankIfsc: 'HDFC0001234',
+    bankName: 'HDFC Bank',
+    bankProofDocumentName: 'hearth-cancelled-cheque.pdf',
+    bankLinked: true,
+    acceptedTerms: true,
+    acknowledgedFoodSafety: true,
+    acknowledgedResponsibility: true,
+    acknowledgedLicensing: true,
+    acknowledgedPricing: true,
+    pricingAcknowledgedAt: '2026-01-10T10:00:00.000Z',
   };
+}
+
+function normalizeProfile(profile?: MockPartnerProfile) {
+  return profile ?? getMockPartnerProfile();
 }
 
 export function getMockPartnerProfile() {
@@ -137,6 +174,8 @@ export function getMockPartnerProfile() {
       ...parsed,
       partnerId: parsed.partnerId || parsed.workspaceId || fallback.partnerId,
       workspaceId: parsed.workspaceId || parsed.partnerId || fallback.workspaceId,
+      panNumber: parsed.panNumber || parsed.pan || fallback.panNumber,
+      pan: parsed.pan || parsed.panNumber || fallback.pan,
     };
   } catch {
     return fallback;
@@ -151,6 +190,8 @@ export function saveMockPartnerProfile(profile: MockPartnerProfile) {
       ...profile,
       partnerId: profile.partnerId || profile.workspaceId,
       workspaceId: profile.workspaceId || profile.partnerId,
+      pan: profile.pan || profile.panNumber,
+      panNumber: profile.panNumber || profile.pan,
     }),
   );
 }
@@ -190,6 +231,11 @@ export function initializeMockPartnerProfileFromSignup(input: SignupProfileInput
     pinCode: input.pinCode.trim(),
     country: input.country.trim() || 'India',
     registeredBusinessNameOnLicense: input.businessName.trim(),
+    gstin: '',
+    pan: '',
+    panNumber: '',
+    panHolderName: '',
+    authorizedRepresentativeConfirmed: false,
     acceptedTerms: input.acceptedTerms,
     acknowledgedFoodSafety: input.acknowledgedFoodSafety,
     acknowledgedResponsibility: input.acknowledgedResponsibility,
@@ -197,9 +243,25 @@ export function initializeMockPartnerProfileFromSignup(input: SignupProfileInput
     acknowledgedPricing: input.acknowledgedPricing,
     pricingAcknowledgedAt: input.acknowledgedPricing ? new Date().toISOString() : '',
     confirmsSafeSurplusFood: input.acknowledgedFoodSafety,
+    confirmsEdibleSurplusFood: false,
+    confirmsNoExtraProduction: false,
+    confirmsAllergenResponsibility: false,
+    confirmsPackagingResponsibility: false,
+    confirmsStorageResponsibility: false,
+    confirmsLocalLawCompliance: false,
     confirmsHygieneResponsibility: input.acknowledgedResponsibility,
     confirmsAccurateDisclosure: false,
     confirmsGigReviewRights: false,
+    bankAccountHolderName: '',
+    bankAccountNumber: '',
+    bankIfsc: '',
+    bankName: '',
+    bankProofDocumentName: '',
+    bankLinked: false,
+    fssaiLicenseNumber: '',
+    licenseType: 'Not sure yet',
+    licenseExpiryDate: '',
+    licenseDocumentName: '',
   };
 
   saveMockPartnerProfile(nextProfile);
@@ -221,6 +283,165 @@ export function setMockPartnerBillingStatus(status: PartnerBillingStatus) {
   });
 }
 
+export function getMockPartnerFssaiCompletion(profile?: MockPartnerProfile): MockPartnerCompletionState {
+  const current = normalizeProfile(profile);
+
+  return {
+    complete:
+      current.fssaiLicenseNumber.trim().length > 0 &&
+      current.registeredBusinessNameOnLicense.trim().length > 0 &&
+      current.licenseExpiryDate.trim().length > 0 &&
+      current.licenseDocumentName.trim().length > 0 &&
+      current.addressLine1.trim().length > 0 &&
+      current.city.trim().length > 0 &&
+      current.stateRegion.trim().length > 0,
+  };
+}
+
+export function getMockPartnerPanCompletion(profile?: MockPartnerProfile): MockPartnerCompletionState {
+  const current = normalizeProfile(profile);
+
+  return {
+    complete: current.panNumber.trim().length > 0 && current.panHolderName.trim().length > 0,
+  };
+}
+
+export function getMockPartnerBankCompletion(profile?: MockPartnerProfile): MockPartnerCompletionState {
+  const current = normalizeProfile(profile);
+
+  return {
+    complete:
+      current.bankLinked &&
+      current.bankAccountHolderName.trim().length > 0 &&
+      current.bankAccountNumber.trim().length > 0 &&
+      current.bankIfsc.trim().length > 0 &&
+      current.bankName.trim().length > 0 &&
+      current.bankProofDocumentName.trim().length > 0,
+  };
+}
+
+export function getMockPartnerComplianceDeclarationCompletion(profile?: MockPartnerProfile): MockPartnerCompletionState {
+  const current = normalizeProfile(profile);
+
+  return {
+    complete:
+      current.authorizedRepresentativeConfirmed &&
+      current.confirmsEdibleSurplusFood &&
+      current.confirmsNoExtraProduction &&
+      current.confirmsAllergenResponsibility &&
+      current.confirmsPackagingResponsibility &&
+      current.confirmsStorageResponsibility &&
+      current.confirmsLocalLawCompliance &&
+      current.confirmsGigReviewRights &&
+      current.acknowledgedPricing &&
+      current.acknowledgedLicensing &&
+      current.acknowledgedResponsibility &&
+      current.acknowledgedFoodSafety,
+  };
+}
+
+export function isMockPartnerFssaiComplete(profile?: MockPartnerProfile) {
+  return getMockPartnerFssaiCompletion(profile).complete;
+}
+
+export function isMockPartnerPanComplete(profile?: MockPartnerProfile) {
+  return getMockPartnerPanCompletion(profile).complete;
+}
+
+export function isMockPartnerBankLinked(profile?: MockPartnerProfile) {
+  return getMockPartnerBankCompletion(profile).complete;
+}
+
+export function isMockPartnerComplianceComplete(profile?: MockPartnerProfile) {
+  return getMockPartnerComplianceDeclarationCompletion(profile).complete;
+}
+
+export function getMockPartnerOperationalReadiness(profile?: MockPartnerProfile): MockPartnerOperationalReadiness {
+  const current = normalizeProfile(profile);
+  const verificationApproved = current.verificationStatus === 'approved';
+  const billingActive = current.billingStatus === 'active';
+  const fssaiComplete = isMockPartnerFssaiComplete(current);
+  const panComplete = isMockPartnerPanComplete(current);
+  const bankLinked = isMockPartnerBankLinked(current);
+  const complianceComplete = isMockPartnerComplianceComplete(current);
+
+  return {
+    verificationApproved,
+    billingActive,
+    fssaiComplete,
+    panComplete,
+    bankLinked,
+    complianceComplete,
+    activationEligible:
+      verificationApproved &&
+      billingActive &&
+      fssaiComplete &&
+      panComplete &&
+      bankLinked &&
+      complianceComplete,
+  };
+}
+
+export function isMockPartnerActivationEligible(profile?: MockPartnerProfile) {
+  return getMockPartnerOperationalReadiness(profile).activationEligible;
+}
+
+export function getMockPartnerWorkspaceAccessState(profile?: MockPartnerProfile): MockPartnerWorkspaceAccessState {
+  return isMockPartnerActivationEligible(profile) ? 'active' : 'restricted';
+}
+
+export function isMockPartnerWorkspaceActive(profile?: MockPartnerProfile) {
+  return getMockPartnerWorkspaceAccessState(profile) === 'active';
+}
+
+export function canMockPartnerAccessFeature(feature: MockPartnerLockedFeature, profile?: MockPartnerProfile) {
+  switch (feature) {
+    case 'listings':
+    case 'create_listing':
+    case 'orders':
+    case 'payouts':
+    case 'team':
+    case 'settings':
+    case 'help':
+      return isMockPartnerWorkspaceActive(profile);
+    default:
+      return false;
+  }
+}
+
+export function getMockPartnerLockedFeatureRoute(feature: MockPartnerLockedFeature) {
+  switch (feature) {
+    case 'listings':
+      return '/partner/listings';
+    case 'create_listing':
+      return '/partner/listings/new';
+    case 'orders':
+      return '/partner/orders';
+    case 'payouts':
+      return '/partner/payouts';
+    case 'team':
+      return '/partner/team';
+    case 'settings':
+      return '/partner/settings';
+    case 'help':
+      return '/partner/help';
+    default:
+      return '/partner/profile';
+  }
+}
+
+export function isMockPartnerRouteAllowed(pathname: string, profile?: MockPartnerProfile) {
+  if (isMockPartnerWorkspaceActive(profile)) {
+    return true;
+  }
+
+  return pathname === '/partner' || pathname === '/partner/profile' || pathname === '/partner/billing';
+}
+
+export function getMockPartnerRestrictedRouteRedirect(pathname: string, profile?: MockPartnerProfile) {
+  return isMockPartnerRouteAllowed(pathname, profile) ? pathname : '/partner/profile';
+}
+
 export function getMockPartnerActivationState(): MockPartnerActivationState {
   const profile = getMockPartnerProfile();
 
@@ -232,7 +453,7 @@ export function getMockPartnerActivationState(): MockPartnerActivationState {
     return 'billing_required';
   }
 
-  return 'active';
+  return isMockPartnerActivationEligible(profile) ? 'active' : 'verification_required';
 }
 
 export function getMockPartnerWorkspaceId() {
@@ -291,21 +512,15 @@ export function getMockPartnerWorkspaceOrders() {
 }
 
 export function getMockPartnerCreateBagRoute() {
-  const activationState = getMockPartnerActivationState();
-
-  if (activationState === 'active') {
+  if (isMockPartnerWorkspaceActive()) {
     return '/partner/listings/new';
-  }
-
-  if (activationState === 'billing_required') {
-    return '/partner/billing';
   }
 
   return '/partner/profile';
 }
 
 export function isMockPartnerVerified() {
-  return getMockPartnerActivationState() === 'active';
+  return isMockPartnerWorkspaceActive();
 }
 
 export function isMockPartnerSignedIn() {

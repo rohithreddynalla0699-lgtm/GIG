@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import SectionCard from '../../components/shared/SectionCard';
 import {
-  getMockPartnerCreateBagRoute,
   getMockPartnerProfile,
   PARTNER_COMMISSION_RATE,
   PARTNER_PLATFORM_FEE_INR,
@@ -18,10 +16,10 @@ const licenseTypes: PartnerLicenseType[] = [
 ] as const;
 
 const inputClass =
-  'w-full rounded-[18px] border border-[color:var(--gig-border)] bg-white px-4 py-[14px] text-[15px] text-[color:var(--gig-text)] outline-none transition-colors placeholder:text-[color:var(--gig-text-soft)] focus:border-[color:var(--gig-green)]';
+  'w-full rounded-[16px] border border-[color:var(--gig-border)] bg-white px-4 py-3 text-[14px] text-[color:var(--gig-text)] outline-none transition-colors placeholder:text-[color:var(--gig-text-soft)] focus:border-[color:var(--gig-green)]';
 
 const checkboxClass =
-  'mt-1 h-4 w-4 rounded border-[color:var(--gig-border)] text-[color:var(--gig-green-deep)] focus:ring-[rgba(11,122,77,0.16)]';
+  'mt-0.5 h-4 w-4 rounded border-[color:var(--gig-border)] text-[color:var(--gig-green-deep)] focus:ring-[rgba(11,122,77,0.16)]';
 
 type ProfileStep = 'business' | 'verification';
 
@@ -44,17 +42,36 @@ function getProfileCompletion(profile: MockPartnerProfile) {
       isFilled(profile.stateRegion) &&
       isFilled(profile.pinCode) &&
       isFilled(profile.country),
-    foodLicense:
+    fssai:
       isFilled(profile.fssaiLicenseNumber) &&
       isFilled(profile.licenseType) &&
       isFilled(profile.licenseExpiryDate) &&
-      isFilled(profile.registeredBusinessNameOnLicense),
-    confirmations:
+      isFilled(profile.registeredBusinessNameOnLicense) &&
+      isFilled(profile.licenseDocumentName),
+    pan:
+      isFilled(profile.panNumber) &&
+      isFilled(profile.panHolderName),
+    bankAccount:
+      isFilled(profile.bankAccountHolderName) &&
+      isFilled(profile.bankAccountNumber) &&
+      isFilled(profile.bankIfsc) &&
+      isFilled(profile.bankName) &&
+      isFilled(profile.bankProofDocumentName) &&
+      profile.bankLinked,
+    complianceDeclarations:
+      profile.authorizedRepresentativeConfirmed &&
+      profile.confirmsEdibleSurplusFood &&
+      profile.confirmsNoExtraProduction &&
+      profile.confirmsAllergenResponsibility &&
+      profile.confirmsPackagingResponsibility &&
+      profile.confirmsStorageResponsibility &&
+      profile.confirmsLocalLawCompliance &&
       profile.acknowledgedFoodSafety &&
       profile.acknowledgedResponsibility &&
       profile.acknowledgedLicensing &&
       profile.confirmsGigReviewRights &&
       profile.acknowledgedPricing,
+    billingAcknowledgement: profile.acknowledgedPricing,
   };
 }
 
@@ -63,11 +80,11 @@ function getVerificationStatusLabel(status: PartnerVerificationStatus) {
     case 'approved':
       return 'Approved';
     case 'ready_for_review':
-      return 'Ready for approval';
+      return 'Ready for review';
     case 'submitted_for_review':
-      return 'Submitted for review';
+      return 'Submitted';
     default:
-      return 'Pending verification';
+      return 'In progress';
   }
 }
 
@@ -90,6 +107,41 @@ function getNextVerificationStatus(
   return 'ready_for_review';
 }
 
+function CompactPanel({
+  title,
+  description,
+  children,
+  className = '',
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4 ${className}`}>
+      <div className="mb-3">
+        <h2 className="text-[16px] font-semibold text-[#1E1E1E]">{title}</h2>
+        {description ? <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{description}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ChecklistChip({ label, done }: { label: string; done: boolean }) {
+  return (
+    <div className={`rounded-[16px] border px-3 py-2.5 ${done ? 'border-[rgba(11,122,77,0.12)] bg-[rgba(11,122,77,0.06)]' : 'border-[rgba(32,38,28,0.08)] bg-white/78'}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[13px] font-semibold text-[#1E1E1E]">{label}</span>
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${done ? 'bg-[#0b7a4d] text-white' : 'bg-[rgba(32,38,28,0.05)] text-[color:var(--gig-text-soft)]'}`}>
+          {done ? 'Done' : 'Pending'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function PartnerProfilePage() {
   const [profile, setProfile] = useState(() => getMockPartnerProfile());
   const [savedNotice, setSavedNotice] = useState('');
@@ -102,26 +154,15 @@ export default function PartnerProfilePage() {
 
   const completion = useMemo(() => getProfileCompletion(profile), [profile]);
   const allComplete = useMemo(() => Object.values(completion).every(Boolean), [completion]);
-  const createBagRoute = getMockPartnerCreateBagRoute();
-
-  const steps = [
-    {
-      key: 'business' as const,
-      label: 'Business details',
-      caption: 'Identity and pickup address',
-    },
-    {
-      key: 'verification' as const,
-      label: 'Verification details',
-      caption: 'License, confirmations, and billing terms',
-    },
-  ];
 
   const checklist = [
-    { label: 'Business identity', done: completion.businessIdentity },
-    { label: 'Pickup outlet address', done: completion.pickupAddress },
-    { label: 'Food license', done: completion.foodLicense },
-    { label: 'Partner confirmations', done: completion.confirmations },
+    { label: 'Business', done: completion.businessIdentity },
+    { label: 'Address', done: completion.pickupAddress },
+    { label: 'Food license', done: completion.fssai },
+    { label: 'PAN', done: completion.pan },
+    { label: 'Bank', done: completion.bankAccount },
+    { label: 'Safety', done: completion.complianceDeclarations },
+    { label: 'Billing', done: completion.billingAcknowledgement },
   ];
 
   const buildSavedProfile = (nextVerificationStatus: PartnerVerificationStatus) => ({
@@ -130,6 +171,7 @@ export default function PartnerProfilePage() {
     billingStatus:
       nextVerificationStatus === 'approved' ? 'billing_setup_required' : profile.billingStatus,
     confirmsSafeSurplusFood: profile.acknowledgedFoodSafety,
+    pan: profile.panNumber.trim(),
     confirmsHygieneResponsibility: profile.acknowledgedResponsibility,
     confirmsAccurateDisclosure: profile.acknowledgedResponsibility,
     pricingAcknowledgedAt:
@@ -151,147 +193,111 @@ export default function PartnerProfilePage() {
     persistProfile(
       nextProfile,
       allComplete
-        ? 'Verification details saved locally. Your profile is now ready for approval.'
-        : 'Verification details saved locally. Complete every required section and partner confirmation to move this profile to review.',
+        ? 'Saved. Your profile is ready for review.'
+        : 'Saved. Complete all required fields to move this profile to review.',
     );
   };
 
   const handleSubmitForReview = () => {
     if (!allComplete) {
-      setSavedNotice('Finish all required business, address, license, and confirmation details before submitting for review.');
+      setSavedNotice('Complete all required fields before you submit for review.');
       return;
     }
 
     const nextProfile = buildSavedProfile('submitted_for_review');
-    persistProfile(
-      nextProfile,
-      'Submitted for review. In this frontend-only demo, you can use the mock approval action below to continue to billing setup.',
-    );
+    persistProfile(nextProfile, 'Submitted for review. Use the demo approval button below to continue.');
   };
 
   const handleMockApprove = () => {
     const nextProfile = buildSavedProfile('approved');
-    persistProfile(
-      nextProfile,
-      'Verification approved in demo mode. Billing setup is now required before this partner can post rescue bags.',
-    );
+    persistProfile(nextProfile, 'Approved for demo. Billing is the next step.');
   };
 
   return (
-    <div className="space-y-6 md:space-y-7">
-      <section className="surface-card overflow-hidden p-6 md:p-7">
-        <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr] xl:items-start">
-          <div className="max-w-[56rem]">
-            <div className="editorial-eyebrow mb-3">Partner profile</div>
-            <h1 className="font-['Fraunces',serif] text-[32px] leading-[1.08] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[38px]">
-              Complete business verification before posting rescue bags.
+    <div className="space-y-4">
+      <section className="flex flex-col gap-3 rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.88)] p-4 md:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="editorial-eyebrow mb-2">Profile</div>
+            <h1 className="font-['Fraunces',serif] text-[28px] leading-[1.02] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[32px]">
+              Profile setup
             </h1>
-            <p className="body-large mt-3 max-w-[62ch]">
-              Your partner account has been created. Add your business verification details now so GIG can review the outlet before rescue bags go live.
+            <p className="mt-1 text-[13px] text-[color:var(--gig-text-muted)]">
+              Complete your business details and verification to move to review.
             </p>
           </div>
 
-          <div className="rounded-[28px] bg-[#1E2F24] p-5 text-white md:p-6">
-            <div className="editorial-eyebrow !text-[#A8D8B7]">Verification status</div>
-            <div className="mt-3 inline-flex rounded-full bg-white/10 px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white/84">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center rounded-full border border-[rgba(32,38,28,0.08)] bg-white/78 px-3 py-2 text-[12px] font-medium text-[#4D5E53]">
               {getVerificationStatusLabel(profile.verificationStatus)}
             </div>
-            <p className="mt-4 text-[14px] leading-7 text-white/76">
-              {profile.verificationStatus === 'approved'
-                ? 'Verification is approved in this demo, but posting stays blocked until billing setup is completed.'
-                : profile.verificationStatus === 'submitted_for_review'
-                  ? 'Your verification details have been submitted for review. Posting remains blocked until approval and billing setup are completed.'
-                  : profile.verificationStatus === 'ready_for_review'
-                    ? 'All required verification details are complete. Save and submit this profile for review before billing setup can begin.'
-                    : 'Verification is required before your business can post rescue bags. You can still review the dashboard, listings, and reserved orders while approval is pending.'}
-            </p>
+            {profile.verificationStatus === 'approved' && profile.billingStatus === 'billing_setup_required' ? (
+              <Link to="/partner/billing" className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]">
+                Go to billing
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
 
       {savedNotice ? (
-        <div className="rounded-[22px] border border-[rgba(11,122,77,0.12)] bg-[rgba(11,122,77,0.05)] px-5 py-4 text-[14px] leading-7 text-[#1E2F24]">
+        <div className="rounded-[18px] border border-[rgba(11,122,77,0.12)] bg-[rgba(11,122,77,0.05)] px-4 py-3 text-[13px] leading-6 text-[#1E2F24]">
           {savedNotice}
         </div>
       ) : null}
 
-      <SectionCard
-        title="Verification checklist"
-        description="Complete each section below to prepare your partner account for review."
-      >
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Checklist</h2>
+            <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Complete each section.</p>
+          </div>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {checklist.map((item) => (
-            <div
-              key={item.label}
-              className={`rounded-[20px] px-4 py-4 ${
-                item.done
-                  ? 'bg-[rgba(11,122,77,0.08)] text-[#0b7a4d]'
-                  : 'bg-[rgba(32,38,28,0.04)] text-[color:var(--gig-text)]'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold ${
-                    item.done ? 'bg-[#0b7a4d] text-white' : 'bg-white text-[color:var(--gig-text-soft)]'
-                  }`}
-                >
-                  {item.done ? '✓' : '•'}
-                </span>
-                <span className="text-[14px] font-semibold">{item.label}</span>
-              </div>
-              <p className="mt-2 text-[12px] uppercase tracking-[0.14em] opacity-72">
-                {item.done ? 'Complete' : 'Incomplete'}
-              </p>
-            </div>
+            <ChecklistChip key={item.label} label={item.label} done={item.done} />
           ))}
         </div>
-      </SectionCard>
+      </section>
 
-      <SectionCard
-        title="Verification flow"
-        description="Move through the account details first, then complete the compliance and billing review step."
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          {steps.map((item, index) => {
-            const active = step === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setStep(item.key)}
-                className={`rounded-[22px] border px-4 py-4 text-left transition ${
-                  active
-                    ? 'border-[rgba(11,122,77,0.14)] bg-[rgba(11,122,77,0.06)]'
-                    : 'border-[color:var(--gig-border)] bg-[rgba(255,255,255,0.72)] hover:bg-white'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${
-                      active ? 'bg-[#0b7a4d] text-white' : 'bg-[rgba(32,38,28,0.06)] text-[color:var(--gig-text-soft)]'
-                    }`}
-                  >
-                    {index + 1}
-                  </span>
-                  <div>
-                    <div className="text-[15px] font-semibold text-[color:var(--gig-text)]">{item.label}</div>
-                    <div className="metadata-caption mt-1">{item.caption}</div>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </SectionCard>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {step === 'business' ? (
-          <>
-            <SectionCard
-              title="Business identity"
-              description="These are the core details GIG will use when reviewing your business account."
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-2">
+          <div className="grid gap-2 md:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setStep('business')}
+              className={`rounded-[16px] px-4 py-3 text-left transition ${
+                step === 'business'
+                  ? 'bg-[#1E2F24] text-white'
+                  : 'bg-white/70 text-[#4D5E53] hover:bg-white'
+              }`}
             >
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="text-[14px] font-semibold">Business</div>
+              <div className={`mt-0.5 text-[12px] ${step === 'business' ? 'text-white/72' : 'text-[color:var(--gig-text-muted)]'}`}>
+                Business and address
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep('verification')}
+              className={`rounded-[16px] px-4 py-3 text-left transition ${
+                step === 'verification'
+                  ? 'bg-[#1E2F24] text-white'
+                  : 'bg-white/70 text-[#4D5E53] hover:bg-white'
+              }`}
+            >
+              <div className="text-[14px] font-semibold">Verification</div>
+              <div className={`mt-0.5 text-[12px] ${step === 'verification' ? 'text-white/72' : 'text-[color:var(--gig-text-muted)]'}`}>
+                Food license, PAN, bank, and safety
+              </div>
+            </button>
+          </div>
+        </section>
+
+        {step === 'business' ? (
+          <div className="grid gap-4 xl:grid-cols-2">
+            <CompactPanel title="Business details" description="Add your business details.">
+              <div className="grid gap-3 md:grid-cols-2">
                 <label className="block md:col-span-2">
                   <span className="operational-label mb-2 block">Legal business name</span>
                   <input
@@ -302,7 +308,7 @@ export default function PartnerProfilePage() {
                   />
                 </label>
                 <label className="block md:col-span-2">
-                  <span className="operational-label mb-2 block">Trading / outlet name</span>
+                  <span className="operational-label mb-2 block">Outlet name</span>
                   <input
                     value={profile.tradingName}
                     onChange={(event) => updateField('tradingName', event.target.value)}
@@ -327,7 +333,7 @@ export default function PartnerProfilePage() {
                   </select>
                 </label>
                 <label className="block">
-                  <span className="operational-label mb-2 block">Owner / authorized contact name</span>
+                  <span className="operational-label mb-2 block">Contact name</span>
                   <input
                     value={profile.ownerContactName}
                     onChange={(event) => updateField('ownerContactName', event.target.value)}
@@ -355,13 +361,10 @@ export default function PartnerProfilePage() {
                   />
                 </label>
               </div>
-            </SectionCard>
+            </CompactPanel>
 
-            <SectionCard
-              title="Pickup outlet address"
-              description="Use the address where customers will actually collect rescue bags."
-            >
-              <div className="grid gap-4 md:grid-cols-2">
+            <CompactPanel title="Pickup address" description="Add your pickup address.">
+              <div className="grid gap-3 md:grid-cols-2">
                 <label className="block md:col-span-2">
                   <span className="operational-label mb-2 block">Address line 1</span>
                   <input
@@ -395,7 +398,7 @@ export default function PartnerProfilePage() {
                   />
                 </label>
                 <label className="block">
-                  <span className="operational-label mb-2 block">State / Province / Region</span>
+                  <span className="operational-label mb-2 block">State</span>
                   <input
                     value={profile.stateRegion}
                     onChange={(event) => updateField('stateRegion', event.target.value)}
@@ -404,7 +407,7 @@ export default function PartnerProfilePage() {
                   />
                 </label>
                 <label className="block">
-                  <span className="operational-label mb-2 block">PIN / Postal code</span>
+                  <span className="operational-label mb-2 block">PIN code</span>
                   <input
                     value={profile.pinCode}
                     onChange={(event) => updateField('pinCode', event.target.value)}
@@ -422,79 +425,97 @@ export default function PartnerProfilePage() {
                   />
                 </label>
               </div>
-            </SectionCard>
-          </>
+            </CompactPanel>
+          </div>
         ) : (
-          <>
-            <SectionCard
-              title="Food license and compliance"
-              description="Add the licensing details GIG should review before your outlet can start posting rescue bags."
-            >
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="block">
-                  <span className="operational-label mb-2 block">FSSAI license or registration number</span>
-                  <input
-                    value={profile.fssaiLicenseNumber}
-                    onChange={(event) => updateField('fssaiLicenseNumber', event.target.value)}
-                    placeholder="Enter FSSAI number"
-                    className={inputClass}
-                  />
-                </label>
-                <label className="block">
-                  <span className="operational-label mb-2 block">License type</span>
-                  <select
-                    value={profile.licenseType}
-                    onChange={(event) => updateField('licenseType', event.target.value as PartnerLicenseType)}
-                    className={inputClass}
-                  >
-                    {licenseTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block">
-                  <span className="operational-label mb-2 block">License expiry date</span>
-                  <input
-                    type="date"
-                    value={profile.licenseExpiryDate}
-                    onChange={(event) => updateField('licenseExpiryDate', event.target.value)}
-                    className={inputClass}
-                  />
-                </label>
-                <label className="block">
-                  <span className="operational-label mb-2 block">Registered business name on license</span>
-                  <input
-                    value={profile.registeredBusinessNameOnLicense}
-                    onChange={(event) => updateField('registeredBusinessNameOnLicense', event.target.value)}
-                    placeholder="Exact name shown on the license"
-                    className={inputClass}
-                  />
-                </label>
-                <label className="block md:col-span-2">
-                  <span className="operational-label mb-2 block">License document upload</span>
-                  <div className="rounded-[18px] border border-[color:var(--gig-border)] bg-white px-4 py-4">
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(event) => updateField('licenseDocumentName', event.target.files?.[0]?.name ?? '')}
-                      className="block w-full text-[14px] text-[color:var(--gig-text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[rgba(11,122,77,0.08)] file:px-4 file:py-2 file:text-[13px] file:font-semibold file:text-[#0b7a4d]"
-                    />
-                    <p className="mt-3 text-[13px] leading-6 text-[color:var(--gig-text-soft)]">
-                      Frontend demo placeholder only. We store the selected filename locally for now.
-                    </p>
-                    {profile.licenseDocumentName ? (
-                      <p className="mt-2 text-[14px] text-[color:var(--gig-text)]">Selected: {profile.licenseDocumentName}</p>
-                    ) : null}
-                  </div>
-                </label>
-              </div>
-
-              <div className="mt-5 rounded-[20px] bg-[rgba(32,38,28,0.03)] px-4 py-4">
-                <div className="operational-label mb-3">Optional tax details</div>
-                <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-2">
+              <CompactPanel title="Food license" description="Add your FSSAI details.">
+                <div className="grid gap-3 md:grid-cols-2">
                   <label className="block">
+                    <span className="operational-label mb-2 block">FSSAI number</span>
+                    <input
+                      value={profile.fssaiLicenseNumber}
+                      onChange={(event) => updateField('fssaiLicenseNumber', event.target.value)}
+                      placeholder="Enter FSSAI number"
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="operational-label mb-2 block">License type</span>
+                    <select
+                      value={profile.licenseType}
+                      onChange={(event) => updateField('licenseType', event.target.value as PartnerLicenseType)}
+                      className={inputClass}
+                    >
+                      {licenseTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="operational-label mb-2 block">Expiry date</span>
+                    <input
+                      type="date"
+                      value={profile.licenseExpiryDate}
+                      onChange={(event) => updateField('licenseExpiryDate', event.target.value)}
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="operational-label mb-2 block">Registered business name</span>
+                    <input
+                      value={profile.registeredBusinessNameOnLicense}
+                      onChange={(event) => updateField('registeredBusinessNameOnLicense', event.target.value)}
+                      placeholder="Name on the license"
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="block md:col-span-2">
+                    <span className="operational-label mb-2 block">License document</span>
+                    <div className="rounded-[16px] border border-[color:var(--gig-border)] bg-white px-4 py-3">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(event) => updateField('licenseDocumentName', event.target.files?.[0]?.name ?? '')}
+                        className="block w-full text-[13px] text-[color:var(--gig-text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[rgba(11,122,77,0.08)] file:px-4 file:py-2 file:text-[12px] file:font-semibold file:text-[#0b7a4d]"
+                      />
+                      {profile.licenseDocumentName ? (
+                        <p className="mt-2 text-[13px] text-[color:var(--gig-text)]">Selected: {profile.licenseDocumentName}</p>
+                      ) : (
+                        <p className="mt-2 text-[12px] text-[color:var(--gig-text-soft)]">Demo file only.</p>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              </CompactPanel>
+
+              <CompactPanel title="PAN" description="Add PAN details.">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label className="block">
+                    <span className="operational-label mb-2 block">PAN number</span>
+                    <input
+                      value={profile.panNumber}
+                      onChange={(event) => {
+                        updateField('panNumber', event.target.value.toUpperCase());
+                        updateField('pan', event.target.value.toUpperCase());
+                      }}
+                      placeholder="ABCDE1234F"
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="operational-label mb-2 block">PAN holder name</span>
+                    <input
+                      value={profile.panHolderName}
+                      onChange={(event) => updateField('panHolderName', event.target.value)}
+                      placeholder="Exact name on PAN"
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="block md:col-span-2">
                     <span className="operational-label mb-2 block">
                       GSTIN
                       <span className="ml-2 text-[11px] font-medium normal-case tracking-normal text-[color:var(--gig-text-soft)]">
@@ -508,179 +529,256 @@ export default function PartnerProfilePage() {
                       className={inputClass}
                     />
                   </label>
-                  <label className="block">
-                    <span className="operational-label mb-2 block">
-                      PAN
-                      <span className="ml-2 text-[11px] font-medium normal-case tracking-normal text-[color:var(--gig-text-soft)]">
-                        Optional
-                      </span>
-                    </span>
-                    <input
-                      value={profile.pan}
-                      onChange={(event) => updateField('pan', event.target.value)}
-                      placeholder="Enter PAN if available"
-                      className={inputClass}
-                    />
-                  </label>
                 </div>
-              </div>
-            </SectionCard>
+              </CompactPanel>
+            </div>
 
-            <SectionCard
-              title="Partner confirmations"
-              description="Confirm the core safety, compliance, and pricing responsibilities before your account can be reviewed."
-            >
-              <div className="grid gap-3">
-                {[
-                  {
-                    key: 'acknowledgedFoodSafety' as const,
-                    label: 'I confirm that food listed on GIG will be safe, edible surplus, and fit for customer pickup.',
-                  },
-                  {
-                    key: 'acknowledgedResponsibility' as const,
-                    label: 'I confirm that my business is responsible for hygiene, packaging, allergen disclosure, and handover quality.',
-                  },
-                  {
-                    key: 'acknowledgedLicensing' as const,
-                    label: 'I confirm that my business has the required licenses and registrations and will provide them before activation.',
-                  },
-                  {
-                    key: 'confirmsGigReviewRights' as const,
-                    label: 'I understand that GIG may review, pause, or suspend listings for safety or policy concerns.',
-                  },
-                  {
-                    key: 'acknowledgedPricing' as const,
-                    label: `I understand that GIG charges a Rs. ${PARTNER_PLATFORM_FEE_INR}/month recurring platform fee and a ${Math.round(PARTNER_COMMISSION_RATE * 100)}% commission on sales made through the platform.`,
-                  },
-                ].map((item) => (
-                  <label key={item.key} className="flex gap-3 rounded-[18px] border border-[color:var(--gig-border)] bg-white/70 px-4 py-3.5">
+            <CompactPanel title="Bank" description="Add bank details.">
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block">
+                  <span className="operational-label mb-2 block">Account holder name</span>
+                  <input
+                    value={profile.bankAccountHolderName}
+                    onChange={(event) => updateField('bankAccountHolderName', event.target.value)}
+                    placeholder="Name on bank account"
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block">
+                  <span className="operational-label mb-2 block">Account number</span>
+                  <input
+                    value={profile.bankAccountNumber}
+                    onChange={(event) => updateField('bankAccountNumber', event.target.value)}
+                    placeholder="Enter account number"
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block">
+                  <span className="operational-label mb-2 block">IFSC</span>
+                  <input
+                    value={profile.bankIfsc}
+                    onChange={(event) => updateField('bankIfsc', event.target.value.toUpperCase())}
+                    placeholder="HDFC0001234"
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block">
+                  <span className="operational-label mb-2 block">Bank name</span>
+                  <input
+                    value={profile.bankName}
+                    onChange={(event) => updateField('bankName', event.target.value)}
+                    placeholder="Enter bank name"
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="operational-label mb-2 block">Cancelled cheque / passbook</span>
+                  <div className="rounded-[16px] border border-[color:var(--gig-border)] bg-white px-4 py-3">
                     <input
-                      type="checkbox"
-                      checked={profile[item.key]}
-                      onChange={(event) => updateField(item.key, event.target.checked)}
-                      className={checkboxClass}
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(event) => updateField('bankProofDocumentName', event.target.files?.[0]?.name ?? '')}
+                      className="block w-full text-[13px] text-[color:var(--gig-text-muted)] file:mr-4 file:rounded-full file:border-0 file:bg-[rgba(11,122,77,0.08)] file:px-4 file:py-2 file:text-[12px] file:font-semibold file:text-[#0b7a4d]"
                     />
-                    <span className="text-[14px] leading-[1.7] text-[color:var(--gig-text)]">{item.label}</span>
-                  </label>
-                ))}
+                    {profile.bankProofDocumentName ? (
+                      <p className="mt-2 text-[13px] text-[color:var(--gig-text)]">Selected: {profile.bankProofDocumentName}</p>
+                    ) : (
+                      <p className="mt-2 text-[12px] text-[color:var(--gig-text-soft)]">Demo file only.</p>
+                    )}
+                  </div>
+                </label>
+                <label className="flex gap-3 rounded-[16px] border border-[color:var(--gig-border)] bg-white/70 px-4 py-3 md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={profile.bankLinked}
+                    onChange={(event) => updateField('bankLinked', event.target.checked)}
+                    className={checkboxClass}
+                  />
+                  <span className="text-[13px] leading-6 text-[color:var(--gig-text)]">
+                    Bank linked for demo.
+                  </span>
+                </label>
               </div>
-            </SectionCard>
+            </CompactPanel>
 
-            <SectionCard
-              title="Partner plan"
-              description="Commercial terms are informational here for the frontend MVP. Billing starts only after partner approval and activation."
-            >
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-                  <p className="operational-label mb-1">Platform fee</p>
-                  <p className="text-[16px] font-semibold text-[#1E1E1E]">Rs. {PARTNER_PLATFORM_FEE_INR}/month</p>
+            <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+              <CompactPanel title="Safety" description="Confirm these items.">
+                <div className="grid gap-2 md:grid-cols-2">
+                  {[
+                    {
+                      key: 'authorizedRepresentativeConfirmed' as const,
+                      label: 'I can manage this business account.',
+                    },
+                    {
+                      key: 'acknowledgedFoodSafety' as const,
+                      label: 'Food is safe and edible.',
+                    },
+                    {
+                      key: 'confirmsEdibleSurplusFood' as const,
+                      label: 'Food is real surplus, not made only for GIG.',
+                    },
+                    {
+                      key: 'confirmsNoExtraProduction' as const,
+                      label: 'No extra food is made only for GIG.',
+                    },
+                    {
+                      key: 'acknowledgedResponsibility' as const,
+                      label: 'I will hand over food safely.',
+                    },
+                    {
+                      key: 'confirmsAllergenResponsibility' as const,
+                      label: 'I will share allergen details correctly.',
+                    },
+                    {
+                      key: 'confirmsPackagingResponsibility' as const,
+                      label: 'I will pack and store food safely.',
+                    },
+                    {
+                      key: 'confirmsStorageResponsibility' as const,
+                      label: 'I will keep food stored safely.',
+                    },
+                    {
+                      key: 'confirmsLocalLawCompliance' as const,
+                      label: 'I will follow local food rules.',
+                    },
+                    {
+                      key: 'acknowledgedLicensing' as const,
+                      label: 'I will provide the required licenses.',
+                    },
+                    {
+                      key: 'confirmsGigReviewRights' as const,
+                      label: 'I understand GIG may review my account.',
+                    },
+                    {
+                      key: 'acknowledgedPricing' as const,
+                      label: `I understand GIG charges ₹${PARTNER_PLATFORM_FEE_INR}/month and ${Math.round(PARTNER_COMMISSION_RATE * 100)}% commission.`,
+                    },
+                  ].map((item) => (
+                    <label key={item.key} className="flex gap-3 rounded-[16px] border border-[color:var(--gig-border)] bg-white/70 px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={profile[item.key]}
+                        onChange={(event) => updateField(item.key, event.target.checked)}
+                        className={checkboxClass}
+                      />
+                      <span className="text-[13px] leading-6 text-[color:var(--gig-text)]">{item.label}</span>
+                    </label>
+                  ))}
                 </div>
-                <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-                  <p className="operational-label mb-1">Sales commission</p>
-                  <p className="text-[16px] font-semibold text-[#1E1E1E]">{Math.round(PARTNER_COMMISSION_RATE * 100)}% of sales</p>
+              </CompactPanel>
+
+              <CompactPanel title="Billing" description="Demo only. No payment is collected.">
+                <div className="space-y-2.5">
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="meta-text mb-1">Monthly fee</div>
+                    <div className="text-[14px] font-semibold text-[#1E1E1E]">Rs. {PARTNER_PLATFORM_FEE_INR}/month</div>
+                  </div>
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="meta-text mb-1">Sales commission</div>
+                    <div className="text-[14px] font-semibold text-[#1E1E1E]">{Math.round(PARTNER_COMMISSION_RATE * 100)}% of sales</div>
+                  </div>
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="meta-text mb-1">Billing status</div>
+                    <div className="text-[14px] font-semibold text-[#1E1E1E]">
+                      {profile.billingStatus === 'active'
+                        ? 'Active'
+                        : profile.billingStatus === 'billing_setup_required'
+                          ? 'Ready to activate'
+                          : 'Not active yet'}
+                    </div>
+                  </div>
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="meta-text mb-1">Billing</div>
+                    <div className="text-[14px] font-semibold text-[#1E1E1E]">
+                      {profile.acknowledgedPricing ? 'Done' : 'Pending'}
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-                  <p className="operational-label mb-1">Billing status</p>
-                  <p className="text-[16px] font-semibold text-[#1E1E1E]">
-                    {profile.billingStatus === 'active'
-                      ? 'Active'
-                      : profile.billingStatus === 'billing_setup_required'
-                        ? 'Billing setup required'
-                        : 'Not activated / pending verification'}
-                  </p>
-                </div>
-                <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-                  <p className="operational-label mb-1">Pricing terms</p>
-                  <p className="text-[16px] font-semibold text-[#1E1E1E]">
-                    {profile.acknowledgedPricing ? 'Acknowledged' : 'Pending acknowledgement'}
-                  </p>
-                  <p className="metadata-caption mt-1">
-                    Billing is informational here only. No payment is collected on this page.
-                  </p>
-                </div>
-              </div>
-            </SectionCard>
-          </>
+              </CompactPanel>
+            </div>
+          </div>
         )}
 
-        <div className="flex flex-col gap-3 rounded-[24px] border border-[color:var(--gig-border)] bg-[rgba(255,255,255,0.7)] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[15px] font-semibold text-[color:var(--gig-text)]">
-              {step === 'business'
-                ? 'Continue to verification details'
-                : profile.verificationStatus === 'approved'
-                  ? 'Verification approved in demo mode'
-                  : 'Save verification details'}
-            </p>
-            <p className="mt-1 text-[14px] leading-7 text-[color:var(--gig-text-muted)]">
-              {step === 'business'
-                ? 'Your typed values stay in place as you move between steps.'
-                : profile.verificationStatus === 'approved'
-                  ? 'Billing setup is the next required step before this partner can post rescue bags.'
-                  : profile.verificationStatus === 'submitted_for_review'
-                    ? 'This profile has been submitted for review. You can use the demo approval action to unlock billing setup.'
-                    : profile.verificationStatus === 'ready_for_review'
-                      ? 'Saving keeps every field locally and marks the profile ready for approval once every required section is complete.'
-                      : 'Saving keeps every field locally and updates the profile status once the required verification details are complete.'}
-            </p>
-          </div>
+        <section className="sticky bottom-3 z-10 rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.94)] p-4 shadow-[0_10px_30px_rgba(31,34,29,0.08)] backdrop-blur-[10px]">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-[14px] font-semibold text-[color:var(--gig-text)]">
+                {step === 'business'
+                  ? 'Business step'
+                  : profile.verificationStatus === 'approved'
+                    ? 'Approved for demo'
+                    : 'Verification step'}
+              </p>
+              <p className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">
+                {step === 'business'
+                  ? 'Your details stay saved.'
+                  : profile.verificationStatus === 'approved'
+                    ? 'Go to billing next.'
+                    : profile.verificationStatus === 'submitted_for_review'
+                      ? 'Your profile is under review.'
+                      : profile.verificationStatus === 'ready_for_review'
+                        ? 'Save, then submit for review.'
+                        : 'Save to keep your changes.'}
+              </p>
+            </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {step === 'verification' ? (
-              <button
-                type="button"
-                onClick={() => setStep('business')}
-                className="btn-secondary justify-center whitespace-nowrap"
-              >
-                Back to business details
-              </button>
-            ) : null}
-
-            {step === 'business' ? (
-              <button
-                type="button"
-                onClick={() => setStep('verification')}
-                className="btn-primary justify-center whitespace-nowrap"
-              >
-                Continue
-              </button>
-            ) : (
-              <>
-                <button type="submit" className="btn-primary justify-center whitespace-nowrap">
-                  Save verification details
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {step === 'verification' ? (
+                <button
+                  type="button"
+                  onClick={() => setStep('business')}
+                  className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[13px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]"
+                >
+                  Back
                 </button>
-                {profile.verificationStatus === 'ready_for_review' ? (
-                  <button
-                    type="button"
-                    onClick={handleSubmitForReview}
-                    className="btn-secondary justify-center whitespace-nowrap"
-                  >
-                    Submit for review
+              ) : null}
+
+              {step === 'business' ? (
+                <button
+                  type="button"
+                  onClick={() => setStep('verification')}
+                  className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]"
+                >
+                  Continue
+                </button>
+              ) : (
+                <>
+                  <button type="submit" className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]">
+                    Save
                   </button>
-                ) : null}
-                {profile.verificationStatus === 'submitted_for_review' ? (
-                  <button
-                    type="button"
-                    onClick={handleMockApprove}
-                    className="btn-secondary justify-center whitespace-nowrap"
-                  >
-                    Mock approve verification
-                  </button>
-                ) : null}
-                {profile.verificationStatus === 'approved' && profile.billingStatus === 'billing_setup_required' ? (
-                  <Link to="/partner/billing" className="btn-secondary justify-center whitespace-nowrap">
-                    Complete billing setup
-                  </Link>
-                ) : null}
-                {profile.verificationStatus === 'approved' && profile.billingStatus === 'active' ? (
-                  <Link to={createBagRoute} className="btn-secondary justify-center whitespace-nowrap">
-                    Create rescue bag
-                  </Link>
-                ) : null}
-              </>
-            )}
+                  {profile.verificationStatus === 'ready_for_review' ? (
+                    <button
+                      type="button"
+                      onClick={handleSubmitForReview}
+                      className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[13px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]"
+                    >
+                      Submit for review
+                    </button>
+                  ) : null}
+                  {profile.verificationStatus === 'submitted_for_review' ? (
+                    <button
+                      type="button"
+                      onClick={handleMockApprove}
+                      className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[13px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]"
+                    >
+                      Approve for demo
+                    </button>
+                  ) : null}
+                  {profile.verificationStatus === 'approved' && profile.billingStatus === 'billing_setup_required' ? (
+                    <Link to="/partner/billing" className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[13px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]">
+                      Go to billing
+                    </Link>
+                  ) : null}
+                  {profile.verificationStatus === 'approved' && profile.billingStatus === 'active' ? (
+                    <Link to="/partner/listings" className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[13px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]">
+                      Go to Rescue Bags
+                    </Link>
+                  ) : null}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </section>
       </form>
     </div>
   );

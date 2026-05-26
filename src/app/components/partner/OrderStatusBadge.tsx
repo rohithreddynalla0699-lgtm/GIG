@@ -7,7 +7,7 @@ interface OrderStatusBadgeProps {
 
 export default function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-[7px] text-[12px] font-semibold ${getOrderStatusClasses(status)}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${getOrderStatusClasses(status)}`}>
       {getOrderStatusLabel(status)}
     </span>
   );

@@ -23,42 +23,37 @@ interface ListingFormValues {
 }
 
 const inputClass =
-  'w-full rounded-[18px] border border-[color:var(--gig-border)] bg-white px-4 py-[14px] text-[15px] text-[color:var(--gig-text)] outline-none transition-colors placeholder:text-[color:var(--gig-text-soft)] focus:border-[color:var(--gig-green)]';
+  'w-full rounded-[16px] border border-[color:var(--gig-border)] bg-white px-4 py-3 text-[14px] text-[color:var(--gig-text)] outline-none transition-colors placeholder:text-[color:var(--gig-text-soft)] focus:border-[color:var(--gig-green)]';
 
 function getInitialValues(outletId: string): ListingFormValues {
   return {
-  title: '',
-  outletId,
-  listingType: 'Surprise Bag',
-  category: '',
-  originalPrice: '',
-  rescuePrice: '',
-  quantity: '',
-  pickupStart: '',
-  pickupEnd: '',
-  vegType: 'veg',
-  dietaryTags: '',
-  allergenNote: '',
-  collectionInstructions: '',
-  status: 'draft',
+    title: '',
+    outletId,
+    listingType: 'Surprise Bag',
+    category: '',
+    originalPrice: '',
+    rescuePrice: '',
+    quantity: '',
+    pickupStart: '',
+    pickupEnd: '',
+    vegType: 'veg',
+    dietaryTags: '',
+    allergenNote: '',
+    collectionInstructions: '',
+    status: 'draft',
   };
 }
 
 function FormGroup({
   title,
-  description,
   children,
 }: {
   title: string;
-  description: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5 md:p-6">
-      <div className="mb-4">
-        <div className="text-[20px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{title}</div>
-        <p className="mt-1 text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">{description}</p>
-      </div>
+    <section className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/76 p-4">
+      <div className="mb-3 text-[15px] font-semibold text-[color:var(--gig-text)]">{title}</div>
       {children}
     </section>
   );
@@ -102,59 +97,60 @@ export default function ListingForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="surface-card rounded-[30px] p-6 md:p-8">
-        <div className="space-y-5">
-          <FormGroup title="Rescue bag basics" description="Define what the customer sees first and which outlet will fulfill the pickup.">
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="block md:col-span-2">
-                <span className="operational-label mb-2 block">Rescue bag title</span>
-                <input
-                  value={values.title}
-                  onChange={(event) => updateField('title', event.target.value)}
-                  placeholder="Example: Evening Bake Rescue Bag"
-                  className={inputClass}
-                  required
-                />
-              </label>
-              <label className="block">
-                <span className="operational-label mb-2 block">Store outlet</span>
-                <select value={values.outletId} onChange={(event) => updateField('outletId', event.target.value)} className={inputClass}>
-                  {workspaceOutlets.map((outlet) => (
-                    <option key={outlet.id} value={outlet.id}>{outlet.name}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="block">
-                <span className="operational-label mb-2 block">Bag type</span>
-                <select value={values.listingType} onChange={(event) => updateField('listingType', event.target.value as ListingType)} className={inputClass}>
-                  <option value="Surprise Bag">Surprise Bag</option>
-                  <option value="Fixed Meal Box">Fixed Meal Box</option>
-                </select>
-              </label>
-              <label className="block">
-                <span className="operational-label mb-2 block">Category</span>
-                <input
-                  value={values.category}
-                  onChange={(event) => updateField('category', event.target.value)}
-                  placeholder="Bakery, lunch, desserts"
-                  className={inputClass}
-                  required
-                />
-              </label>
-              <label className="block">
-                <span className="operational-label mb-2 block">Food type</span>
-                <select value={values.vegType} onChange={(event) => updateField('vegType', event.target.value as VegType)} className={inputClass}>
-                  <option value="veg">Veg</option>
-                  <option value="non-veg">Non-veg</option>
-                  <option value="mixed">Mixed</option>
-                  <option value="egg">Egg possible</option>
-                </select>
-              </label>
-            </div>
-          </FormGroup>
+    <form onSubmit={handleSubmit} className="rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4 md:p-5">
+      <div className="space-y-3">
+        <FormGroup title="Bag details">
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="block md:col-span-2">
+              <span className="operational-label mb-2 block">Rescue bag title</span>
+              <input
+                value={values.title}
+                onChange={(event) => updateField('title', event.target.value)}
+                placeholder="Example: Evening bakery bag"
+                className={inputClass}
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="operational-label mb-2 block">Outlet</span>
+              <select value={values.outletId} onChange={(event) => updateField('outletId', event.target.value)} className={inputClass}>
+                {workspaceOutlets.map((outlet) => (
+                  <option key={outlet.id} value={outlet.id}>{outlet.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="operational-label mb-2 block">Type</span>
+              <select value={values.listingType} onChange={(event) => updateField('listingType', event.target.value as ListingType)} className={inputClass}>
+                <option value="Surprise Bag">Surprise Bag</option>
+                <option value="Fixed Meal Box">Fixed Meal Box</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="operational-label mb-2 block">Category</span>
+              <input
+                value={values.category}
+                onChange={(event) => updateField('category', event.target.value)}
+                placeholder="Bakery, lunch, desserts"
+                className={inputClass}
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="operational-label mb-2 block">Food type</span>
+              <select value={values.vegType} onChange={(event) => updateField('vegType', event.target.value as VegType)} className={inputClass}>
+                <option value="veg">Veg</option>
+                <option value="non-veg">Non-veg</option>
+                <option value="mixed">Mixed</option>
+                <option value="egg">Egg possible</option>
+              </select>
+            </label>
+          </div>
+        </FormGroup>
 
-          <FormGroup title="Pricing and quantity" description="Set the original value, rescue price, and how many units the team can actually fulfill.">
-            <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 xl:grid-cols-2">
+          <FormGroup title="Price and quantity">
+            <div className="grid gap-3 md:grid-cols-3">
               <label className="block">
                 <span className="operational-label mb-2 block">Original price</span>
                 <input value={values.originalPrice} onChange={(event) => updateField('originalPrice', event.target.value)} inputMode="numeric" placeholder="540" className={inputClass} required />
@@ -170,8 +166,8 @@ export default function ListingForm() {
             </div>
           </FormGroup>
 
-          <FormGroup title="Pickup window" description="Keep timing realistic for both kitchen prep and front-counter handover.">
-            <div className="grid gap-4 md:grid-cols-3">
+          <FormGroup title="Pickup time">
+            <div className="grid gap-3 md:grid-cols-3">
               <label className="block">
                 <span className="operational-label mb-2 block">Pickup start</span>
                 <input value={values.pickupStart} onChange={(event) => updateField('pickupStart', event.target.value)} placeholder="7:30 PM" className={inputClass} required />
@@ -193,52 +189,53 @@ export default function ListingForm() {
               </label>
             </div>
           </FormGroup>
-
-          <FormGroup title="Food safety and details" description="Set dietary context and clear counter instructions before the rescue bag is shared with customers.">
-            <div className="grid gap-4">
-              <label className="block">
-                <span className="operational-label mb-2 block">Dietary tags</span>
-                <input
-                  value={values.dietaryTags}
-                  onChange={(event) => updateField('dietaryTags', event.target.value)}
-                  placeholder="Vegetarian, high-protein, dessert box"
-                  className={inputClass}
-                />
-              </label>
-              <label className="block">
-                <span className="operational-label mb-2 block">Allergen note</span>
-                <textarea
-                  value={values.allergenNote}
-                  onChange={(event) => updateField('allergenNote', event.target.value)}
-                  placeholder="Contains wheat, dairy, and may contain nuts."
-                  rows={3}
-                  className={inputClass}
-                  required
-                />
-              </label>
-              <label className="block">
-                <span className="operational-label mb-2 block">Collection instructions</span>
-                <textarea
-                  value={values.collectionInstructions}
-                  onChange={(event) => updateField('collectionInstructions', event.target.value)}
-                  placeholder="Explain where staff should keep the order and what to verify at handover."
-                  rows={4}
-                  className={inputClass}
-                  required
-                />
-              </label>
-            </div>
-          </FormGroup>
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 border-t border-[color:var(--gig-border)] pt-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-[620px] text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">
-            Use drafts while prep is uncertain, scheduled once timing is locked, and live only when the counter is ready to hand orders over without confusion.
+        <FormGroup title="Food details">
+          <div className="grid gap-3">
+            <label className="block">
+              <span className="operational-label mb-2 block">Dietary tags</span>
+              <input
+                value={values.dietaryTags}
+                onChange={(event) => updateField('dietaryTags', event.target.value)}
+                placeholder="Vegetarian, high-protein, dessert box"
+                className={inputClass}
+              />
+            </label>
+            <label className="block">
+              <span className="operational-label mb-2 block">Allergen note</span>
+              <textarea
+                value={values.allergenNote}
+                onChange={(event) => updateField('allergenNote', event.target.value)}
+                placeholder="Contains wheat, dairy, and may contain nuts."
+                rows={3}
+                className={inputClass}
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="operational-label mb-2 block">Pickup instructions</span>
+              <textarea
+                value={values.collectionInstructions}
+                onChange={(event) => updateField('collectionInstructions', event.target.value)}
+                placeholder="Tell staff where to keep the order and what to check."
+                rows={3}
+                className={inputClass}
+                required
+              />
+            </label>
           </div>
-          <button type="submit" className="btn-primary justify-center whitespace-nowrap">
-            Create rescue bag
-          </button>
+        </FormGroup>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 border-t border-[color:var(--gig-border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-[12px] text-[color:var(--gig-text-muted)]">
+          Save as draft if you are not ready to go live yet.
         </div>
-      </form>
+        <button type="submit" className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c] whitespace-nowrap">
+          Create rescue bag
+        </button>
+      </div>
+    </form>
   );
 }

@@ -3,7 +3,13 @@ import { Navigate, ScrollRestoration, useLocation, useNavigate } from 'react-rou
 import PartnerSidebar from '../components/partner/PartnerSidebar';
 import PartnerTopbar from '../components/partner/PartnerTopbar';
 import RouteTransitionOutlet from '../components/shared/RouteTransitionOutlet';
-import { clearMockPartnerSession, isMockPartnerSignedIn } from '../data/mock/partners';
+import {
+  clearMockPartnerSession,
+  getMockPartnerProfile,
+  getMockPartnerRestrictedRouteRedirect,
+  isMockPartnerRouteAllowed,
+  isMockPartnerSignedIn,
+} from '../data/mock/partners';
 
 export default function PartnerDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,16 +37,21 @@ export default function PartnerDashboardLayout() {
     return <Navigate to="/partner/login" replace state={{ from: redirectPath }} />;
   }
 
+  const profile = getMockPartnerProfile();
+  if (!isMockPartnerRouteAllowed(location.pathname, profile)) {
+    return <Navigate to={getMockPartnerRestrictedRouteRedirect(location.pathname, profile)} replace />;
+  }
+
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f7f5ee_0%,#fbfaf6_12%,#ffffff_36%)]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f7f5ee_0%,#fbfaf6_10%,#ffffff_26%)]">
       <ScrollRestoration />
       <PartnerTopbar onMenuToggle={() => setSidebarOpen(true)} onSignOut={handleSignOut} />
-      <div className="grid min-h-[calc(100vh-76px)] grid-cols-1 lg:grid-cols-[280px_1fr]">
-        <div className="hidden border-r border-[rgba(32,38,28,0.08)] lg:sticky lg:top-[76px] lg:block lg:h-[calc(100vh-76px)]">
+      <div className="grid min-h-[calc(100vh-64px)] grid-cols-1 lg:grid-cols-[248px_1fr]">
+        <div className="hidden border-r border-[rgba(32,38,28,0.08)] lg:sticky lg:top-[64px] lg:block lg:h-[calc(100vh-64px)]">
           <PartnerSidebar onSignOut={handleSignOut} />
         </div>
         <main className="w-full">
-          <div className="mx-auto max-w-[1440px] px-[5%] py-7 md:py-8">
+          <div className="mx-auto max-w-[1320px] px-4 py-5 sm:px-5 md:px-6 md:py-6 lg:px-7">
             <RouteTransitionOutlet />
           </div>
         </main>
@@ -53,12 +64,12 @@ export default function PartnerDashboardLayout() {
         onClick={() => setSidebarOpen(false)}
       />
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-[86%] max-w-[320px] border-r border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.98)] shadow-[var(--gig-shadow-lg)] transition-transform duration-[var(--gig-motion-base)] lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-[84%] max-w-[304px] border-r border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.98)] shadow-[var(--gig-shadow-lg)] transition-transform duration-[var(--gig-motion-base)] lg:hidden ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-[rgba(32,38,28,0.08)] px-5 py-4">
-          <div className="operational-label text-[#0b7a4d]">Partner console</div>
+        <div className="flex items-center justify-between border-b border-[rgba(32,38,28,0.08)] px-4 py-3">
+          <div className="operational-label text-[#0b7a4d]">Partner</div>
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}

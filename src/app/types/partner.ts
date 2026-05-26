@@ -16,6 +16,17 @@ export type PartnerVerificationStatus =
 
 export type PartnerBillingStatus = 'inactive' | 'billing_setup_required' | 'active';
 
+export type MockPartnerWorkspaceAccessState = 'restricted' | 'active';
+
+export type MockPartnerLockedFeature =
+  | 'listings'
+  | 'create_listing'
+  | 'orders'
+  | 'payouts'
+  | 'team'
+  | 'settings'
+  | 'help';
+
 export interface Partner {
   id: string;
   businessName: string;
@@ -68,10 +79,25 @@ export interface MockPartnerProfile {
   licenseDocumentName: string;
   gstin: string;
   pan: string;
+  panNumber: string;
+  panHolderName: string;
+  authorizedRepresentativeConfirmed: boolean;
   confirmsSafeSurplusFood: boolean;
+  confirmsEdibleSurplusFood: boolean;
+  confirmsNoExtraProduction: boolean;
+  confirmsAllergenResponsibility: boolean;
+  confirmsPackagingResponsibility: boolean;
+  confirmsStorageResponsibility: boolean;
+  confirmsLocalLawCompliance: boolean;
   confirmsAccurateDisclosure: boolean;
   confirmsHygieneResponsibility: boolean;
   confirmsGigReviewRights: boolean;
+  bankAccountHolderName: string;
+  bankAccountNumber: string;
+  bankIfsc: string;
+  bankName: string;
+  bankProofDocumentName: string;
+  bankLinked: boolean;
   acceptedTerms: boolean;
   acknowledgedFoodSafety: boolean;
   acknowledgedResponsibility: boolean;

@@ -1,7 +1,14 @@
 import { Link } from 'react-router';
 import ListingForm from '../../components/partner/ListingForm';
-import SectionCard from '../../components/shared/SectionCard';
 import { getMockPartnerActivationState, isMockPartnerVerified } from '../../data/mock/partners';
+
+function HelpItem({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3 text-[13px] leading-6 text-[color:var(--gig-text)]">
+      {children}
+    </div>
+  );
+}
 
 export default function PartnerNewListingPage() {
   const canPostBags = isMockPartnerVerified();
@@ -9,90 +16,68 @@ export default function PartnerNewListingPage() {
 
   if (!canPostBags) {
     return (
-      <div className="space-y-7 md:space-y-8">
-        <section className="surface-card p-6 md:p-7">
-          <div className="editorial-eyebrow mb-3">
-            {activationState === 'billing_required' ? 'Billing setup required' : 'Verification required'}
-          </div>
-          <h1 className="page-title max-w-[14ch]">
-            {activationState === 'billing_required'
-              ? 'Complete billing setup before posting rescue bags.'
-              : 'Complete partner verification before posting rescue bags.'}
-          </h1>
-          <p className="body-large mt-3 max-w-[66ch]">
-            {activationState === 'billing_required'
-              ? 'Your business has been approved in demo mode, but rescue bag posting stays blocked until billing setup is completed.'
-              : 'Your account has been created, but rescue bag posting stays blocked until your business verification details are reviewed.'}
-          </p>
-          <div className="mt-6">
-            <Link
-              to={activationState === 'billing_required' ? '/partner/billing' : '/partner/profile'}
-              className="btn-primary justify-center whitespace-nowrap"
-            >
-              {activationState === 'billing_required' ? 'Complete billing setup' : 'Complete verification details'}
-            </Link>
+      <div className="space-y-4">
+        <section className="flex flex-col gap-3 rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.88)] p-4 md:p-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="editorial-eyebrow mb-2">Rescue bags</div>
+              <h1 className="font-['Fraunces',serif] text-[28px] leading-[1.02] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[32px]">
+                Finish setup
+              </h1>
+              <p className="mt-1 max-w-[58ch] text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                Complete your profile, food license, bank details, and billing to start selling rescue bags.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(32,38,28,0.08)] bg-white/78 px-3 py-2 text-[12px] font-medium text-[#4D5E53]">
+                <span className="h-2 w-2 rounded-full bg-[#d6a06a]"></span>
+                Locked until setup is complete
+              </div>
+              <Link
+                to={activationState === 'billing_required' ? '/partner/billing' : '/partner/profile'}
+                className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]"
+              >
+                Continue setup
+              </Link>
+            </div>
           </div>
         </section>
-
-        <SectionCard
-          title="What happens next"
-          description="This frontend-only MVP keeps the approval state simple while still making the verification step visible."
-        >
-          <div className="space-y-3 body-regular">
-            {activationState === 'billing_required' ? (
-              <>
-                <p>Verification is already complete in this demo flow, so the next step is billing activation.</p>
-                <p>Billing setup stays frontend-only for now and acts as the final gate before posting is enabled.</p>
-                <p>Once billing is active later, Create bag will reopen the normal rescue-bag posting flow.</p>
-              </>
-            ) : (
-              <>
-                <p>Save your business identity, address, and food license details in Partner Profile.</p>
-                <p>Your verification status remains pending until a real review workflow is added later.</p>
-                <p>Once approved, Create bag will move to billing setup before the normal posting flow opens.</p>
-              </>
-            )}
-          </div>
-        </SectionCard>
       </div>
     );
   }
 
   return (
-    <div className="space-y-7 md:space-y-8">
-      <section className="surface-card p-6 md:p-7">
-        <div className="editorial-eyebrow mb-3">New bag</div>
-        <h1 className="page-title max-w-[13ch]">Create a rescue bag the outlet team can prep and hand over smoothly.</h1>
-        <p className="body-large mt-3 max-w-[66ch]">
-          Group the basics first, set clear rescue pricing, define the pickup window, and keep safety notes practical for counter staff.
-        </p>
+    <div className="space-y-4">
+      <section className="flex flex-col gap-3 rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.88)] p-4 md:p-5">
+        <Link to="/partner/listings" className="inline-flex text-[12px] font-medium text-[color:var(--gig-text-muted)] transition hover:text-[#1E2F24]">
+          Back to Rescue bags
+        </Link>
+        <div className="flex flex-col gap-2">
+          <div className="editorial-eyebrow">New bag</div>
+          <h1 className="font-['Fraunces',serif] text-[28px] leading-[1.02] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[32px]">
+            Create rescue bag
+          </h1>
+          <p className="text-[13px] text-[color:var(--gig-text-muted)]">
+            Add the bag details, price, pickup time, and food notes.
+          </p>
+        </div>
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-4 xl:grid-cols-[1fr_248px]">
         <ListingForm />
 
-        <div className="space-y-5">
-          <SectionCard
-            title="Before you publish"
-            description="A calm checklist for staff-facing accuracy."
-          >
-            <div className="space-y-3 body-regular">
-              <p>Use the title to describe the bag clearly, not to market it.</p>
-              <p>Keep original and rescue pricing close to what the counter staff can explain quickly.</p>
-              <p>Choose a pickup slot that the kitchen or pastry counter can actually support on time.</p>
+        <aside className="space-y-3">
+          <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+            <div className="mb-3">
+              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Quick tips</h2>
             </div>
-          </SectionCard>
-
-          <SectionCard
-            title="How this demo flow works"
-            description="This is still a frontend-only partner demo, but the bag you create will appear in Rescue bags right away."
-          >
-            <div className="space-y-3 body-regular">
-              <p>Submit to create a mock rescue bag using the shared local demo data source.</p>
-              <p>Refresh keeps the created bag visible until the local demo data is cleared.</p>
+            <div className="space-y-2.5">
+              <HelpItem>Use a clear title.</HelpItem>
+              <HelpItem>Set real pickup time.</HelpItem>
+              <HelpItem>Only post surplus food.</HelpItem>
             </div>
-          </SectionCard>
-        </div>
+          </section>
+        </aside>
       </div>
     </div>
   );

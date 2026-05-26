@@ -10,62 +10,72 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing, outlet }: ListingCardProps) {
   return (
-    <article className="surface-card rounded-[26px] p-5 md:p-6">
-      <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <div className="mb-2 text-[13px] font-medium text-[color:var(--gig-green-deep)]">{outlet.name}</div>
-          <h3 className="text-[22px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{listing.title}</h3>
-          <div className="mt-1 text-[14px] text-[color:var(--gig-text-muted)]">
-            {listing.listingType} · {listing.category} · {getVegTypeLabel(listing.vegType)}
+    <article className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3.5 transition hover:-translate-y-[1px] hover:bg-white">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--gig-text-muted)]">
+            <span className="font-medium text-[color:var(--gig-green-deep)]">{outlet.name}</span>
+            <span>•</span>
+            <span>{listing.category}</span>
+            <span>•</span>
+            <span>{getVegTypeLabel(listing.vegType)}</span>
+          </div>
+          <h3 className="truncate text-[17px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">{listing.title}</h3>
+          <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">
+            {listing.listingType} · {listing.createdAtLabel}
           </div>
         </div>
-        <span className={`inline-flex self-start rounded-full px-3 py-[8px] text-[12px] font-semibold ${getListingStatusClasses(listing.status)}`}>
+        <span className={`inline-flex self-start rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${getListingStatusClasses(listing.status)}`}>
           {getListingStatusLabel(listing.status)}
         </span>
       </div>
 
-      <div className="grid gap-3 rounded-[22px] bg-[rgba(32,38,28,0.04)] p-4 md:grid-cols-4">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
         <div>
-          <div className="meta-text mb-1">Rescue price</div>
-          <div className="text-[18px] font-semibold text-[color:var(--gig-text)]">{formatINR(listing.rescuePrice)}</div>
+          <div className="meta-text mb-1">Price</div>
+          <div className="text-[15px] font-semibold text-[color:var(--gig-text)]">{formatINR(listing.rescuePrice)}</div>
         </div>
         <div>
-          <div className="meta-text mb-1">Quantity left</div>
-          <div className="text-[15px] font-medium text-[color:var(--gig-text)]">{listing.quantityLeft} / {listing.quantity} left</div>
+          <div className="meta-text mb-1">Left</div>
+          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.quantityLeft} / {listing.quantity}</div>
         </div>
         <div>
           <div className="meta-text mb-1">Pickup</div>
-          <div className="text-[15px] font-medium text-[color:var(--gig-text)]">{listing.pickupStart} to {listing.pickupEnd}</div>
+          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.pickupStart} - {listing.pickupEnd}</div>
         </div>
         <div>
           <div className="meta-text mb-1">Status</div>
-          <div className="text-[15px] font-medium text-[color:var(--gig-text)]">{getListingStatusLabel(listing.status)}</div>
+          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{getListingStatusLabel(listing.status)}</div>
+        </div>
+        <div>
+          <div className="meta-text mb-1">Updated</div>
+          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.createdAtLabel}</div>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-[color:var(--gig-text-muted)]">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-[color:var(--gig-text-muted)]">
         <span className="line-through">{formatINR(listing.originalPrice)}</span>
-        <span>{listing.createdAtLabel}</span>
+        <span>{listing.quantityLeft === 0 ? 'Sold through' : `${listing.quantityLeft} left`}</span>
       </div>
 
-      {listing.dietaryTags.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
+      {listing.dietaryTags.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {listing.dietaryTags.map((tag) => (
-            <span key={tag} className="rounded-full bg-[rgba(32,38,28,0.05)] px-3 py-[7px] text-[12px] font-medium text-[color:var(--gig-text-muted)]">
+            <span key={tag} className="rounded-full bg-[rgba(32,38,28,0.05)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--gig-text-muted)]">
               {tag}
             </span>
           ))}
         </div>
-      )}
+      ) : null}
 
-      <div className="mt-4 grid gap-4 border-t border-[color:var(--gig-border)] pt-4 md:grid-cols-2">
+      <div className="mt-3 grid gap-3 border-t border-[color:var(--gig-border)] pt-3 md:grid-cols-2">
         <div>
           <div className="operational-label mb-1">Allergen note</div>
-          <p className="text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">{listing.allergenNote}</p>
+          <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{listing.allergenNote}</p>
         </div>
         <div>
-          <div className="operational-label mb-1">Collection</div>
-          <p className="text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">{listing.collectionInstructions}</p>
+          <div className="operational-label mb-1">Pickup</div>
+          <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{listing.collectionInstructions}</p>
         </div>
       </div>
     </article>

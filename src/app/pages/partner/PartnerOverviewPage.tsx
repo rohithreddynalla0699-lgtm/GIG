@@ -1,11 +1,10 @@
 import { Link } from 'react-router';
-import EmptyState from '../../components/shared/EmptyState';
-import SectionCard from '../../components/shared/SectionCard';
 import { getMockPartnerWorkspaceListings } from '../../data/mock/partnerListings';
 import {
   getMockPartnerActivationState,
-  getMockPartnerCreateBagRoute,
+  getMockPartnerOperationalReadiness,
   getMockPartnerProfile,
+  getMockPartnerWorkspaceAccessState,
   getMockPartnerWorkspaceOrders,
   getMockPartnerWorkspaceOutlets,
   isMockPartnerVerified,
@@ -18,11 +17,77 @@ function pluralize(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+function CompactStat({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string | number;
+  note?: string;
+}) {
+  return (
+    <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">{label}</div>
+      <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{value}</div>
+      {note ? <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{note}</div> : null}
+    </div>
+  );
+}
+
+function CompactRow({
+  title,
+  meta,
+  trailing,
+}: {
+  title: string;
+  meta: string;
+  trailing?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/74 px-4 py-3">
+      <div className="min-w-0">
+        <div className="truncate text-[14px] font-semibold text-[#1E1E1E]">{title}</div>
+        <div className="mt-0.5 truncate text-[12px] text-[color:var(--gig-text-muted)]">{meta}</div>
+      </div>
+      {trailing ? <div className="shrink-0 text-[12px] font-medium text-[#4D5E53]">{trailing}</div> : null}
+    </div>
+  );
+}
+
+function CompactEmptyState({
+  title,
+  description,
+  actionLabel,
+  actionTo,
+}: {
+  title: string;
+  description: string;
+  actionLabel?: string;
+  actionTo?: string;
+}) {
+  return (
+    <div className="rounded-[16px] border border-dashed border-[rgba(32,38,28,0.12)] px-4 py-6 text-center">
+      <div className="text-[14px] font-medium text-[#1E1E1E]">{title}</div>
+      <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">{description}</div>
+      {actionLabel && actionTo ? (
+        <Link
+          to={actionTo}
+          className="mt-4 inline-flex min-h-[38px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[12px] font-semibold text-[#1E2F24] transition hover:bg-white"
+        >
+          {actionLabel}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
 export default function PartnerOverviewPage() {
   const profile = getMockPartnerProfile();
   const canPostBags = isMockPartnerVerified();
   const activationState = getMockPartnerActivationState();
-  const createBagRoute = getMockPartnerCreateBagRoute();
+  const workspaceAccessState = getMockPartnerWorkspaceAccessState(profile);
+  const readiness = getMockPartnerOperationalReadiness(profile);
   const listings = getMockPartnerWorkspaceListings();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const partnerOrders = getMockPartnerWorkspaceOrders();
@@ -34,218 +99,239 @@ export default function PartnerOverviewPage() {
   const newestListings = [...listings]
     .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     .slice(0, 3);
+  const readinessItems = [
+    { label: 'Profile', done: readiness.verificationApproved },
+    { label: 'Food license', done: readiness.fssaiComplete },
+    { label: 'Bank', done: readiness.bankLinked && readiness.panComplete && readiness.complianceComplete },
+    { label: 'Billing', done: readiness.billingActive },
+  ];
+  const completedReadiness = readinessItems.filter((item) => item.done).length;
+
+  if (workspaceAccessState === 'restricted') {
+    return (
+      <div className="space-y-4">
+        <section className="flex flex-col gap-3 rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.88)] p-4 md:p-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="editorial-eyebrow mb-2">Dashboard</div>
+              <h1 className="font-['Fraunces',serif] text-[28px] leading-[1.02] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[32px]">
+                Finish setup
+              </h1>
+              <p className="mt-2 max-w-[58ch] text-[14px] leading-6 text-[color:var(--gig-text-muted)]">
+                Complete your profile, food license, bank details, and billing to start selling rescue bags.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(32,38,28,0.08)] bg-white/78 px-3 py-2 text-[12px] font-medium text-[#4D5E53]">
+                <span className="h-2 w-2 rounded-full bg-[#d6a06a]"></span>
+                Locked until setup is complete
+              </div>
+              {activationState === 'billing_required' ? (
+                <Link
+                  to="/partner/billing"
+                  className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[rgba(30,47,36,0.12)] px-4 py-2 text-[13px] font-semibold text-[#1E2F24] transition hover:border-[rgba(30,47,36,0.24)] hover:bg-white"
+                >
+                  Activate billing
+                </Link>
+              ) : null}
+              <Link
+                to="/partner/profile"
+                className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]"
+              >
+                Continue setup
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[13px] font-semibold text-[#1E1E1E]">Setup progress</div>
+                  <div className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{completedReadiness} of {readinessItems.length} done</div>
+                </div>
+                <div className="text-[24px] font-semibold tracking-[-0.04em] text-[#1E1E1E]">{completedReadiness}/{readinessItems.length}</div>
+              </div>
+            </div>
+            <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+              <div className="text-[13px] font-semibold text-[#1E1E1E]">Next step</div>
+              <div className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">
+                {activationState === 'billing_required' ? 'Activate billing' : 'Complete your profile'}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {readinessItems.map((item) => (
+            <div key={item.label} className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/76 px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-[13px] font-semibold text-[#1E1E1E]">{item.label}</div>
+                <span className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${item.done ? 'bg-[rgba(11,122,77,0.08)] text-[#0b7a4d]' : 'bg-[rgba(32,38,28,0.05)] text-[color:var(--gig-text-soft)]'}`}>
+                  {item.done ? 'Done' : 'Pending'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 md:space-y-7">
+    <div className="space-y-4">
       {!canPostBags ? (
-        <div className="rounded-[24px] border border-[rgba(214,160,106,0.22)] bg-[rgba(214,160,106,0.12)] px-5 py-4 text-[14px] leading-7 text-[#43352b]">
+        <div className="rounded-[18px] border border-[rgba(214,160,106,0.22)] bg-[rgba(214,160,106,0.12)] px-4 py-3 text-[13px] leading-6 text-[#43352b]">
           {activationState === 'billing_required' ? (
             <>
-              Verification has been approved in demo mode, but posting stays blocked until billing setup is completed.
+              Activate billing to unlock rescue bags.
               <Link to="/partner/billing" className="ml-2 font-semibold text-[#1E2F24] underline underline-offset-4">
-                Complete billing setup
+                Activate billing
               </Link>
             </>
           ) : profile.verificationStatus === 'submitted_for_review' ? (
             <>
-              Your verification details have been submitted for review. Demo approval is completed from Partner Profile before billing setup can begin.
+              Your profile is under review.
               <Link to="/partner/profile" className="ml-2 font-semibold text-[#1E2F24] underline underline-offset-4">
-                Return to profile
+                View profile
               </Link>
             </>
           ) : (
             <>
-              Complete partner verification before posting rescue bags. Your account is currently <span className="font-semibold">pending verification</span>.
+              Finish setup to unlock rescue bags.
               <Link to="/partner/profile" className="ml-2 font-semibold text-[#1E2F24] underline underline-offset-4">
-                Complete verification details
+                Continue setup
               </Link>
             </>
           )}
         </div>
       ) : null}
 
-      <section className="surface-card overflow-hidden p-6 md:p-7">
-        <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr] xl:items-start">
-          <div className="max-w-[56rem]">
-            <div className="editorial-eyebrow mb-3">Partner dashboard</div>
-            <h1 className="font-['Fraunces',serif] text-[32px] leading-[1.08] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[38px]">
-              Run rescue bags and pickups without the dashboard clutter.
+      <section className="flex flex-col gap-4 rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.88)] p-4 md:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="editorial-eyebrow mb-2">Dashboard</div>
+            <h1 className="font-['Fraunces',serif] text-[28px] leading-[1.02] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[32px]">
+              Partner dashboard
             </h1>
-            <p className="body-large mt-3 max-w-[60ch]">
-              Start with the essentials: how many rescue bags are active, which orders are reserved, and what needs to be handed over today.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to={createBagRoute}
-                className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#1E2F24] px-5 py-3 text-[14px] font-semibold text-white transition hover:bg-[#17241c]"
-              >
-                {canPostBags
-                  ? 'Create rescue bag'
-                  : activationState === 'billing_required'
-                    ? 'Complete billing setup'
-                    : 'Complete verification details'}
-              </Link>
-              <Link
-                to="/partner/orders"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-[rgba(30,47,36,0.12)] px-5 py-3 text-[14px] font-semibold text-[#1E2F24] transition hover:border-[rgba(30,47,36,0.24)] hover:bg-white"
-              >
-                {partnerOrders.length === 0 ? 'Review order workspace' : 'View reserved orders'}
-              </Link>
-            </div>
-            {partnerOrders.length === 0 ? (
-              <p className="mt-3 text-[14px] leading-7 text-[color:var(--gig-text-muted)]">
-                Orders stay empty until customers start reserving rescue bags from this workspace.
-              </p>
-            ) : null}
           </div>
-
-          <div className="rounded-[28px] bg-[#1E2F24] p-5 text-white md:p-6">
-            <div className="editorial-eyebrow !text-[#A8D8B7]">Today at a glance</div>
-            <p className="mt-3 text-[14px] leading-7 text-white/72">
-              {activationState === 'active'
-                ? 'Your partner account is approved and can start posting rescue bags.'
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(32,38,28,0.08)] bg-white/78 px-3 py-2 text-[12px] font-medium text-[#4D5E53]">
+              <span className="h-2 w-2 rounded-full bg-[#0b7a4d]"></span>
+              Active
+            </div>
+            <Link
+              to={canPostBags ? '/partner/listings' : activationState === 'billing_required' ? '/partner/billing' : '/partner/profile'}
+              className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]"
+            >
+              {canPostBags
+                ? 'Go to Rescue Bags'
                 : activationState === 'billing_required'
-                  ? 'Verification is approved, but billing setup must be completed before rescue bag posting goes live.'
-                  : 'Verification is still pending. Rescue bag posting stays blocked until GIG approves your business.'}
-            </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-3 xl:grid-cols-1 xl:gap-5">
-              <div>
-                <div className="text-[13px] font-medium uppercase tracking-[0.16em] text-white/58">Active rescue bags</div>
-                <div className="mt-2 text-[34px] font-semibold tracking-[-0.04em] text-white">{activeListings.length}</div>
-                <p className="mt-1 text-[14px] leading-6 text-white/72">
-                  {pluralize(activeListings.filter((listing) => listing.status === 'live').length, 'bag is live', 'bags are live')} now.
-                </p>
-              </div>
-              <div>
-                <div className="text-[13px] font-medium uppercase tracking-[0.16em] text-white/58">Reserved orders</div>
-                <div className="mt-2 text-[34px] font-semibold tracking-[-0.04em] text-white">{reservedOrders.length}</div>
-                <p className="mt-1 text-[14px] leading-6 text-white/72">
-                  Orders waiting to be prepared or handed over.
-                </p>
-              </div>
-              <div>
-                <div className="text-[13px] font-medium uppercase tracking-[0.16em] text-white/58">Today&apos;s pickups</div>
-                <div className="mt-2 text-[34px] font-semibold tracking-[-0.04em] text-white">{todayPickups.length}</div>
-                <p className="mt-1 text-[14px] leading-6 text-white/72">
-                  Pickup windows scheduled across your outlets today.
-                </p>
-              </div>
-            </div>
+                  ? 'Activate billing'
+                  : 'Complete your profile'}
+            </Link>
           </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-3">
+          <CompactStat
+            label="Rescue bags"
+            value={activeListings.length}
+            note={pluralize(activeListings.filter((listing) => listing.status === 'live').length, 'live bag', 'live bags')}
+          />
+          <CompactStat label="Orders" value={reservedOrders.length} note="Reserved now" />
+          <CompactStat label="Today" value={todayPickups.length} note="Pickups today" />
         </div>
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
-        <SectionCard
-          title="Reserved orders"
-          description="The next customer pickups your team needs to be ready for."
-        >
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Recent orders</h2>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Next pickups</p>
+            </div>
+            <Link to="/partner/orders" className="text-[12px] font-semibold text-[#0b7a4d]">
+              View all
+            </Link>
+          </div>
           {nextOrders.length === 0 ? (
-            <EmptyState
-              title="No reserved orders yet"
-              description="Reserved orders will appear here after customers reserve your rescue bags."
+            <CompactEmptyState
+              title="Nothing here yet."
+              description="Activity will appear after you create rescue bags and receive orders."
             />
           ) : (
             <div className="space-y-3">
               {nextOrders.map((order) => (
-                <Link
-                  key={order.id}
-                  to={`/partner/orders/${order.id}`}
-                  className="block rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4 transition hover:-translate-y-[1px] hover:bg-white"
-                >
-                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="operational-label mb-1">Order #{order.id}</p>
-                      <h3 className="text-[17px] font-semibold text-[#1E1E1E]">{order.listingTitle}</h3>
-                      <p className="metadata-caption mt-1">
-                        {order.customerName} · {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
-                      </p>
-                    </div>
-                    <div className="text-left md:text-right">
-                      <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#516156]">Pickup code</div>
-                      <div className="mt-1 text-[16px] font-semibold tracking-[0.12em] text-[#1E1E1E]">{order.pickupCode}</div>
-                    </div>
-                  </div>
+                <Link key={order.id} to={`/partner/orders/${order.id}`} className="block transition hover:-translate-y-[1px]">
+                  <CompactRow
+                    title={order.listingTitle}
+                    meta={`${order.customerName} · ${formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}`}
+                    trailing={order.pickupCode}
+                  />
                 </Link>
               ))}
             </div>
           )}
-        </SectionCard>
-      </div>
+        </section>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
-        <SectionCard
-          title="Billing summary"
-          description="A simple view of the partner plan while activation is still pending."
-        >
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-              <p className="operational-label mb-1">Plan</p>
-              <p className="text-[16px] font-semibold text-[#1E1E1E]">Partner starter</p>
+        <div className="space-y-4">
+          <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Recent rescue bags</h2>
+                <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Latest updates</p>
+              </div>
+              <Link to="/partner/listings" className="text-[12px] font-semibold text-[#0b7a4d]">
+                View all
+              </Link>
             </div>
-            <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-              <p className="operational-label mb-1">Status</p>
-              <p className="text-[16px] font-semibold text-[#1E1E1E]">
-                {profile.billingStatus === 'active'
-                  ? 'Active'
-                  : profile.billingStatus === 'billing_setup_required'
-                    ? 'Billing setup required'
-                    : 'Pending activation'}
-              </p>
-            </div>
-            <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-              <p className="operational-label mb-1">Platform fee</p>
-              <p className="text-[16px] font-semibold text-[#1E1E1E]">Rs. {PARTNER_PLATFORM_FEE_INR}/month</p>
-            </div>
-            <div className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-              <p className="operational-label mb-1">Commission</p>
-              <p className="text-[16px] font-semibold text-[#1E1E1E]">{Math.round(PARTNER_COMMISSION_RATE * 100)}% of sales</p>
-            </div>
-          </div>
-          <p className="mt-4 text-[14px] leading-7 text-[color:var(--gig-text-muted)]">
-            Billing activation is mocked in this frontend demo. No real payment is collected here yet, and Razorpay autopay setup comes later.
-          </p>
-        </SectionCard>
+            {newestListings.length === 0 ? (
+              <CompactEmptyState
+                title="Nothing here yet."
+                description="Activity will appear after you create rescue bags and receive orders."
+                actionLabel={canPostBags ? 'Create rescue bag' : undefined}
+                actionTo={canPostBags ? '/partner/listings/new' : undefined}
+              />
+            ) : (
+              <div className="space-y-2.5">
+                {newestListings.map((listing) => {
+                  const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
+                  return (
+                    <CompactRow
+                      key={listing.id}
+                      title={listing.title}
+                      meta={`${outlet?.name ?? 'Partner outlet'} · ${listing.pickupStart} - ${listing.pickupEnd} · Qty ${listing.quantityLeft}/${listing.quantity}`}
+                      trailing={`Rs. ${listing.rescuePrice}`}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
-        <SectionCard
-          title="Recent rescue bags"
-          description="A quick view of the bags your team is currently running or preparing."
-        >
-          {newestListings.length === 0 ? (
-            <EmptyState
-              title="No rescue bags yet"
-              description="Create your first rescue bag to start building this partner workspace."
-              actionLabel={canPostBags ? 'Create rescue bag' : undefined}
-              actionTo={canPostBags ? '/partner/listings/new' : undefined}
-            />
-          ) : (
-            <div className="space-y-3">
-              {newestListings.map((listing) => {
-                const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
-                return (
-                  <div key={listing.id} className="rounded-[20px] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <p className="operational-label mb-1">
-                          {outlet?.name ?? 'Partner outlet'} · {listing.status.replace('_', ' ')}
-                        </p>
-                        <h3 className="text-[17px] font-semibold text-[#1E1E1E]">{listing.title}</h3>
-                        <p className="metadata-caption mt-1">
-                          {listing.pickupStart} - {listing.pickupEnd} · Qty {listing.quantityLeft}/{listing.quantity}
-                        </p>
-                      </div>
-                      <div className="text-left md:text-right">
-                        <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#516156]">Rescue price</div>
-                        <div className="mt-1 text-[16px] font-semibold text-[#1E1E1E]">Rs. {listing.rescuePrice}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+          <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+            <div className="mb-3">
+              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Billing</h2>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Current plan</p>
             </div>
-          )}
-        </SectionCard>
+            <div className="space-y-2.5">
+              <CompactRow title="Plan" meta="Partner starter" />
+              <CompactRow
+                title="Status"
+                meta={
+                  profile.billingStatus === 'active'
+                    ? 'Active'
+                    : profile.billingStatus === 'billing_setup_required'
+                      ? 'Billing setup required'
+                      : 'Pending activation'
+                }
+              />
+              <CompactRow title="Monthly fee" meta={`Rs. ${PARTNER_PLATFORM_FEE_INR}/month`} />
+              <CompactRow title="Commission" meta={`${Math.round(PARTNER_COMMISSION_RATE * 100)}% of sales`} />
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
