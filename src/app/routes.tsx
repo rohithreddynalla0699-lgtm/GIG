@@ -14,11 +14,7 @@ import PartnerNewListingPage from './pages/partner/PartnerNewListingPage';
 import PartnerOrdersPage from './pages/partner/PartnerOrdersPage';
 import PartnerOrderDetailsPage from './pages/partner/PartnerOrderDetailsPage';
 import PartnerProfilePage from './pages/partner/PartnerProfilePage';
-import PartnerPayoutsPage from './pages/partner/PartnerPayoutsPage';
 import PartnerSubscriptionPage from './pages/partner/PartnerSubscriptionPage';
-import PartnerTeamPage from './pages/partner/PartnerTeamPage';
-import PartnerSettingsPage from './pages/partner/PartnerSettingsPage';
-import PartnerHelpPage from './pages/partner/PartnerHelpPage';
 import FindFoodPage from './pages/public/FindFoodPage';
 import StorePage from './pages/public/StorePage';
 import BagPage from './pages/public/BagPage';
@@ -71,11 +67,11 @@ export const router = createBrowserRouter([
       { path: 'orders', Component: PartnerOrdersPage },
       { path: 'orders/:id', Component: PartnerOrderDetailsPage },
       { path: 'billing', Component: PartnerSubscriptionPage },
-      { path: 'payouts', Component: PartnerPayoutsPage },
-      { path: 'subscription', Component: PartnerSubscriptionPage },
-      { path: 'team', Component: PartnerTeamPage },
-      { path: 'settings', Component: PartnerSettingsPage },
-      { path: 'help', Component: PartnerHelpPage },
+      { path: 'payouts', element: <Navigate to="/partner" replace /> },
+      { path: 'subscription', element: <Navigate to="/partner/billing" replace /> },
+      { path: 'team', element: <Navigate to="/partner" replace /> },
+      { path: 'settings', element: <Navigate to="/partner/profile" replace /> },
+      { path: 'help', element: <Navigate to="/partner" replace /> },
     ],
   },
   { path: '/partner-login', element: <Navigate to="/partner/login" replace /> },
