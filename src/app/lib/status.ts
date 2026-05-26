@@ -1,8 +1,6 @@
 import type { OrderStatus } from '../types/order';
 import type { ListingStatus } from '../types/listing';
-import type { InvoiceStatus } from '../types/invoice';
 import type { PayoutStatus } from '../types/payout';
-import type { SubscriptionStatus } from '../types/subscription';
 import type { VegType } from '../types/store';
 import type { TeamMemberStatus } from '../types/team';
 
@@ -123,32 +121,6 @@ const payoutStatusClasses: Record<PayoutStatus, string> = {
   failed: 'bg-[#FFE8E6] text-[#FF3B30]',
 };
 
-const invoiceStatusLabels: Record<InvoiceStatus, string> = {
-  paid: 'Paid',
-  due: 'Due',
-  failed: 'Failed',
-};
-
-const invoiceStatusClasses: Record<InvoiceStatus, string> = {
-  paid: 'bg-[#E8F5E9] text-[#00A661]',
-  due: 'bg-[#FFF4D6] text-[#A66B00]',
-  failed: 'bg-[#FFE8E6] text-[#FF3B30]',
-};
-
-const subscriptionStatusLabels: Record<SubscriptionStatus, string> = {
-  active: 'Active',
-  past_due: 'Past due',
-  paused: 'Paused',
-  cancelled: 'Cancelled',
-};
-
-const subscriptionStatusClasses: Record<SubscriptionStatus, string> = {
-  active: 'bg-[#E8F5E9] text-[#00A661]',
-  past_due: 'bg-[#FFF4D6] text-[#A66B00]',
-  paused: 'bg-[#EEF5FF] text-[#245C9A]',
-  cancelled: 'bg-[#F5F5F5] text-[#5A5A5A]',
-};
-
 const teamMemberStatusLabels: Record<TeamMemberStatus, string> = {
   active: 'Active',
   invited: 'Invited',
@@ -167,22 +139,6 @@ export function getPayoutStatusLabel(status: PayoutStatus) {
 
 export function getPayoutStatusClasses(status: PayoutStatus) {
   return payoutStatusClasses[status];
-}
-
-export function getInvoiceStatusLabel(status: InvoiceStatus) {
-  return invoiceStatusLabels[status];
-}
-
-export function getInvoiceStatusClasses(status: InvoiceStatus) {
-  return invoiceStatusClasses[status];
-}
-
-export function getSubscriptionStatusLabel(status: SubscriptionStatus) {
-  return subscriptionStatusLabels[status];
-}
-
-export function getSubscriptionStatusClasses(status: SubscriptionStatus) {
-  return subscriptionStatusClasses[status];
 }
 
 export function getTeamMemberStatusLabel(status: TeamMemberStatus) {
