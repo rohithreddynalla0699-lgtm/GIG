@@ -30,7 +30,12 @@ const NotFoundPage = lazy(() => import('./pages/public/NotFoundPage'));
 function RouteFallback() {
   return (
     <div className="flex min-h-[220px] items-center justify-center px-4 py-10">
-      <div className="text-[14px] font-medium text-[color:var(--gig-text-muted)]">Loading...</div>
+      <div className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.92)] px-5 py-4 shadow-[0_10px_24px_rgba(31,34,29,0.05)]">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#0b7a4d]/80" />
+          <span className="text-[14px] font-medium tracking-[-0.01em] text-[#1E2F24]">Loading</span>
+        </div>
+      </div>
     </div>
   );
 }
