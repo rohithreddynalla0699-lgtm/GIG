@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grab It Good — App Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#00A661;--green-dark:#008A51;--green-pale:#E8F5E9;
+  --black:#212121;--gray:#5A5A5A;--gray2:#9E9E9E;--border:#E0E0E0;
+  --bg:#FAFAFA;--white:#fff;--yellow:#FFF9E6;--red:#FF3B30;
+}
+body{font-family:'DM Sans',sans-serif;background:#F0F0F0;color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── PAGE HEADER ── */
+.page-header{background:var(--white);border-bottom:2px solid var(--border);padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between}
+.ph-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.ph-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:10px;display:flex;align-items:center;justify-content:center}
+.ph-brand{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--black)}
+.ph-brand span{color:var(--green)}
+.ph-back{font-size:14px;color:var(--gray);text-decoration:none;font-weight:500;transition:color .2s}
+.ph-back:hover{color:var(--green)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;gap:40px;padding:40px 5%;max-width:1200px;margin:0 auto;align-items:flex-start}
+.left-info{flex:1;min-width:0}
+.phone-wrap{flex-shrink:0;position:sticky;top:24px}
+
+/* ── LEFT INFO ── */
+.section-badge{font-size:12px;font-weight:600;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.info-title{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,42px);font-weight:700;color:var(--black);letter-spacing:-1.5px;line-height:1.1;margin-bottom:14px}
+.info-title em{font-style:italic;color:var(--green)}
+.info-desc{font-size:16px;color:var(--gray);line-height:1.8;margin-bottom:32px}
+.feature-list{display:flex;flex-direction:column;gap:14px;margin-bottom:36px}
+.feature-item{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;background:var(--white);border:2px solid var(--border);border-radius:16px;cursor:pointer;transition:all .2s}
+.feature-item:hover,.feature-item.active{border-color:var(--green);background:var(--green-pale)}
+.fi-icon{width:40px;height:40px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.feature-item.active .fi-icon{background:var(--green);filter:brightness(10)}
+.fi-title{font-size:15px;font-weight:600;color:var(--black);margin-bottom:3px}
+.fi-desc{font-size:13px;color:var(--gray);line-height:1.5}
+.screen-label{font-size:12px;font-weight:600;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.app-download-btns{display:flex;gap:12px;flex-wrap:wrap}
+.store-btn{display:flex;align-items:center;gap:10px;background:var(--black);color:white;padding:12px 20px;border-radius:12px;text-decoration:none;transition:background .2s}
+.store-btn:hover{background:#333}
+.store-btn-icon{font-size:22px}
+.store-btn-text{line-height:1.3}
+.store-btn-sub{font-size:10px;color:rgba(255,255,255,.6)}
+.store-btn-name{font-size:14px;font-weight:600}
+.note{font-size:13px;color:var(--gray2);margin-top:12px;line-height:1.6}
+
+/* ── PHONE DEVICE ── */
+.phone-device{width:340px;background:#1A1A1A;border-radius:50px;padding:14px;box-shadow:0 40px 80px rgba(0,0,0,0.3),0 0 0 1px rgba(255,255,255,0.06)}
+.phone-notch{width:100px;height:28px;background:#1A1A1A;border-radius:0 0 18px 18px;margin:0 auto 0;position:absolute;left:50%;transform:translateX(-50%);top:14px;z-index:10}
+.phone-screen{background:var(--bg);border-radius:40px;overflow:hidden;position:relative;height:680px}
+.phone-status{background:var(--white);display:flex;justify-content:space-between;align-items:center;padding:14px 20px 8px;font-size:11px;font-weight:600;color:var(--black)}
+.status-time{font-size:14px;font-weight:700}
+.status-icons{display:flex;gap:4px;align-items:center;font-size:12px}
+
+/* ── APP SCREENS ── */
+.app-screen{display:none;flex-direction:column;height:calc(680px - 44px);overflow:hidden}
+.app-screen.active{display:flex}
+
+/* Screen 1: Onboarding / Location */
+.onboard-bg{background:linear-gradient(135deg,var(--green),var(--green-dark));padding:32px 20px 24px;text-align:center;flex-shrink:0}
+.ob-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:white;margin-bottom:4px}
+.ob-logo span{opacity:.8}
+.ob-tag{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:20px}
+.ob-illustration{font-size:72px;margin-bottom:12px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ob-title{font-size:20px;font-weight:700;color:white;margin-bottom:6px;line-height:1.3}
+.ob-sub{font-size:13px;color:rgba(255,255,255,.8);line-height:1.5}
+.location-card{background:var(--white);margin:16px 16px 0;border-radius:20px;padding:20px;flex:1}
+.lc-title{font-size:15px;font-weight:700;color:var(--black);margin-bottom:16px}
+.location-options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.loc-opt{display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;background:var(--white)}
+.loc-opt.selected{border-color:var(--green);background:var(--green-pale)}
+.loc-opt-icon{font-size:20px;width:36px;height:36px;border-radius:10px;background:#F5F5F5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.loc-opt.selected .loc-opt-icon{background:var(--green)}
+.loc-opt-title{font-size:14px;font-weight:600;color:var(--black)}
+.loc-opt-sub{font-size:12px;color:var(--gray)}
+.radius-row{margin-bottom:16px}
+.radius-label{font-size:13px;font-weight:600;color:var(--black);margin-bottom:8px;display:flex;justify-content:space-between}
+.radius-label span{color:var(--green)}
+.radius-slider{width:100%;height:6px;border-radius:3px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--green) 50%,var(--border) 50%);outline:none;cursor:pointer}
+.radius-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,166,97,.4)}
+.radius-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.rc-chip{font-size:11px;padding:4px 10px;border-radius:100px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:all .2s;font-weight:500;color:var(--gray)}
+.rc-chip.active{border-color:var(--green);background:var(--green-pale);color:var(--green)}
+.pincode-input-wrap{display:flex;gap:8px;margin-bottom:16px}
+.pincode-field{flex:1;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.pincode-field:focus{border-color:var(--green)}
+.pincode-field::placeholder{color:var(--gray2)}
+.app-btn{width:100%;background:var(--green);color:white;border:none;padding:14px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.app-btn:hover{background:var(--green-dark)}
+.app-btn.outline{background:transparent;color:var(--green);border:2px solid var(--green)}
+
+/* Screen 2: Food Map / Store List */
+.screen-header{background:var(--white);padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sh-location{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--black)}
+.sh-loc-icon{font-size:16px}
+.sh-loc-change{font-size:11px;color:var(--green);font-weight:600}
+.sh-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.sh-filters::-webkit-scrollbar{display:none}
+.filter-chip{white-space:nowrap;padding:6px 12px;border-radius:100px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;flex-shrink:0;transition:all .2s}
+.filter-chip.active{border-color:var(--green);background:var(--green-pale);color:var(--green)}
+/* Map placeholder */
+.map-area{background:linear-gradient(135deg,#E8F5E9 0%,#C8E6C9 100%);height:160px;position:relative;flex-shrink:0;overflow:hidden}
+.map-bg{position:absolute;inset:0;opacity:.3}
+.map-road-h{position:absolute;height:2px;background:white;left:0;right:0}
+.map-road-v{position:absolute;width:2px;background:white;top:0;bottom:0}
+.map-pin{position:absolute;font-size:24px;transform:translate(-50%,-100%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));cursor:pointer;transition:transform .2s}
+.map-pin:hover{transform:translate(-50%,-100%) scale(1.2)}
+.map-you{position:absolute;width:16px;height:16px;background:var(--green);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,166,97,.4);transform:translate(-50%,-50%)}
+.map-radius{position:absolute;border:2px dashed rgba(0,166,97,.4);border-radius:50%;transform:translate(-50%,-50%);background:rgba(0,166,97,.05)}
+.map-controls{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px}
+.map-ctrl-btn{width:32px;height:32px;background:white;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Store list */
+.store-list-area{flex:1;overflow-y:auto;padding:12px}
+.store-list-area::-webkit-scrollbar{width:3px}
+.store-list-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.sl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sl-count{font-size:13px;font-weight:600;color:var(--black)}
+.sl-sort{font-size:11px;color:var(--green);font-weight:600;cursor:pointer}
+.store-item{background:var(--white);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.store-item:hover,.store-item.selected{border-color:var(--green);box-shadow:0 4px 12px rgba(0,166,97,.12)}
+.si-thumb{width:56px;height:56px;border-radius:12px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:28px;background:#F5F5F5;flex-shrink:0}
+.si-body{flex:1;min-width:0}
+.si-name{font-size:14px;font-weight:700;color:var(--black);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si-type{font-size:11px;color:var(--gray);margin-bottom:5px}
+.si-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.si-tag{font-size:10px;padding:2px 7px;border-radius:100px;background:var(--green-pale);color:var(--green);font-weight:600}
+.si-tag.yellow{background:#FFF9E6;color:#B45309}
+.si-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gray)}
+.si-dot{width:3px;height:3px;border-radius:50%;background:var(--gray2)}
+.si-right{text-align:right;flex-shrink:0}
+.si-price{font-size:15px;font-weight:700;color:var(--green);margin-bottom:2px}
+.si-orig{font-size:11px;color:var(--gray2);text-decoration:line-through;margin-bottom:4px}
+.si-bags{font-size:11px;font-weight:600;color:var(--black)}
+
+/* Screen 3: Store Detail */
+.store-hero{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);padding:20px;text-align:center;flex-shrink:0;position:relative}
+.back-btn-phone{position:absolute;left:14px;top:14px;width:32px;height:32px;background:white;border-radius:50%;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.fav-btn{position:absolute;right:14px;top:14px;width:32px;height:32px;background:white;border-radius:50%;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.store-avatar{font-size:56px;margin-bottom:8px;display:block}
+.store-name-big{font-size:18px;font-weight:700;color:var(--black);margin-bottom:2px}
+.store-type-badge{font-size:11px;color:var(--green);background:var(--green-pale);padding:3px 10px;border-radius:100px;display:inline-block;font-weight:600;margin-bottom:6px}
+.store-rating-row{display:flex;align-items:center;justify-content:center;gap:12px;font-size:12px;color:var(--gray)}
+.store-detail-body{flex:1;overflow-y:auto;padding:14px}
+.store-detail-body::-webkit-scrollbar{display:none}
+.sdb-section{margin-bottom:18px}
+.sdb-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.info-pills{display:flex;gap:8px;flex-wrap:wrap}
+.info-pill{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray);background:var(--bg);padding:6px 10px;border-radius:100px}
+/* Bag cards in store detail */
+.bag-listing{background:var(--white);border:2px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.bag-listing:hover{border-color:var(--green)}
+.bl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.bl-name{font-size:14px;font-weight:700;color:var(--black);margin-bottom:2px}
+.bl-desc{font-size:12px;color:var(--gray);line-height:1.4}
+.bl-price-col{text-align:right;flex-shrink:0}
+.bl-price{font-size:18px;font-weight:700;color:var(--green);line-height:1}
+.bl-orig{font-size:11px;color:var(--gray2);text-decoration:line-through;margin-bottom:2px}
+.bl-save{font-size:10px;color:var(--green);font-weight:600;background:var(--green-pale);padding:2px 6px;border-radius:100px}
+.bl-meta-row{display:flex;align-items:center;justify-content:space-between}
+.bl-time{font-size:11px;color:var(--gray);display:flex;align-items:center;gap:4px}
+.bl-bar-wrap{display:flex;align-items:center;gap:6px}
+.bl-bar{height:4px;width:60px;background:var(--border);border-radius:2px;overflow:hidden}
+.bl-bar-fill{height:100%;background:var(--green);border-radius:2px}
+.bl-left{font-size:11px;font-weight:600;color:var(--green)}
+.allergen-row{display:flex;gap:6px;flex-wrap:wrap}
+.allergen-tag{font-size:10px;padding:3px 8px;border-radius:100px;background:#FFF0EE;color:#D32F2F;border:1px solid #FFCDD2;font-weight:500}
+/* Reviews in store */
+.review-mini{padding:10px 0;border-bottom:1px solid var(--border)}
+.review-mini:last-child{border-bottom:none}
+.rm-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.rm-name{font-size:12px;font-weight:600;color:var(--black)}
+.rm-stars{font-size:10px}
+.rm-text{font-size:12px;color:var(--gray);line-height:1.5;font-style:italic}
+
+/* Screen 4: Bag Detail / Order */
+.bag-hero{background:linear-gradient(135deg,var(--green-pale),#C8E6C9);padding:20px;text-align:center;flex-shrink:0;position:relative}
+.bag-big-icon{font-size:72px;margin-bottom:4px;display:block;animation:float 3s ease-in-out infinite}
+.bag-hero-name{font-size:18px;font-weight:700;color:var(--black);margin-bottom:2px}
+.bag-hero-store{font-size:13px;color:var(--gray)}
+.bag-order-body{flex:1;overflow-y:auto;padding:14px}
+.bag-order-body::-webkit-scrollbar{display:none}
+.price-highlight{background:var(--green);border-radius:16px;padding:16px;text-align:center;margin-bottom:14px}
+.ph-you-pay{font-size:11px;color:rgba(255,255,255,.8);margin-bottom:4px}
+.ph-price{font-size:32px;font-weight:700;color:white;line-height:1;margin-bottom:4px}
+.ph-orig{font-size:13px;color:rgba(255,255,255,.7);text-decoration:line-through}
+.ph-save{font-size:12px;color:white;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:100px;display:inline-block;margin-top:4px;font-weight:600}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.dr-label{color:var(--gray)}
+.dr-val{font-weight:600;color:var(--black)}
+.dr-val.green{color:var(--green)}
+.contents-box{background:var(--yellow);border:1.5px solid var(--yellow-border,#FFE082);border-radius:12px;padding:12px;margin-bottom:14px}
+.cb-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:6px}
+.cb-text{font-size:12px;color:var(--gray);line-height:1.6}
+.payment-methods{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pm-btn{flex:1;min-width:60px;padding:10px 6px;border:2px solid var(--border);border-radius:12px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;text-align:center;transition:all .2s}
+.pm-btn.active{border-color:var(--green);color:var(--green);background:var(--green-pale)}
+.order-sticky{background:var(--white);padding:12px 14px 20px;border-top:2px solid var(--border);flex-shrink:0}
+.os-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.os-label{font-size:13px;color:var(--gray)}
+.os-amount{font-size:18px;font-weight:700;color:var(--black)}
+
+/* Screen 5: Confirmation */
+.confirm-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;background:var(--white)}
+.confirm-icon{width:80px;height:80px;background:var(--green-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 20px;animation:popIn .4s ease}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+.confirm-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--black);margin-bottom:8px}
+.confirm-sub{font-size:14px;color:var(--gray);line-height:1.6;margin-bottom:24px}
+.code-display{background:var(--green);border-radius:20px;padding:20px;margin-bottom:20px;width:100%}
+.cd-label{font-size:11px;color:rgba(255,255,255,.75);margin-bottom:6px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.cd-code{font-size:48px;font-weight:700;color:white;letter-spacing:12px;line-height:1;font-family:monospace}
+.cd-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:6px}
+.pickup-info{background:var(--bg);border-radius:14px;padding:14px;width:100%;text-align:left;margin-bottom:16px}
+.pi-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.pi-label{color:var(--gray)}
+.pi-val{font-weight:600;color:var(--black)}
+
+/* Bottom nav */
+.bottom-nav{background:var(--white);border-top:2px solid var(--border);display:flex;align-items:center;padding:8px 0 14px;flex-shrink:0}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:color .2s;padding:4px 0}
+.bn-icon{font-size:20px;line-height:1}
+.bn-label{font-size:10px;font-weight:600;color:var(--gray2)}
+.bn-item.active .bn-label{color:var(--green)}
+.bn-item.active .bn-icon{filter:none}
+.bn-badge{position:absolute;top:-2px;right:-4px;width:14px;height:14px;background:var(--red);border-radius:50%;font-size:9px;color:white;font-weight:700;display:flex;align-items:center;justify-content:center}
+.bn-icon-wrap{position:relative}
+
+/* ── APP SCREEN 6: Search with Pincode ── */
+.search-header{background:var(--white);padding:12px 16px 0;flex-shrink:0}
+.search-input-wrap{display:flex;gap:8px;margin-bottom:12px}
+.search-input{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;background:var(--bg)}
+.search-input:focus{border-color:var(--green);background:var(--white)}
+.search-btn{background:var(--green);color:white;border:none;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* Responsive */
+@media(max-width:900px){
+  .layout{flex-direction:column;align-items:center}
+  .phone-wrap{position:static;width:100%;display:flex;justify-content:center}
+  .left-info{max-width:100%}
+}
+@media(max-width:400px){.phone-device{width:300px}.phone-screen{height:600px}}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <a href="grabitgood.html" class="ph-logo">
+    <div class="ph-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.5 8.5L22 9.5L17 14.5L18 21L12 18L6 21L7 14.5L2 9.5L8.5 8.5L12 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+    <span class="ph-brand">Grab It <span>Good</span></span>
+  </a>
+  <a href="grabitgood.html" class="ph-back">← Back to website</a>
+</div>
+
+<div class="layout">
+  <!-- LEFT INFO -->
+  <div class="left-info">
+    <div class="section-badge">📱 Customer App Preview</div>
+    <h1 class="info-title">The full Grab It Good<br><em>app experience</em></h1>
+    <p class="info-desc">This is an interactive preview of exactly what customers see in the app. Click any screen below to explore — from finding food near you, to placing your order and getting your 4-digit pickup code.</p>
+
+    <div class="feature-list" id="feature-list">
+      <div class="feature-item active" onclick="showScreen(1, this)">
+        <div class="fi-icon">📍</div>
+        <div>
+          <div class="fi-title">Set your location or pincode</div>
+          <div class="fi-desc">Enter your 6-digit pincode or use your current location. Choose a radius from 1 km to 10 km to find nearby stores.</div>
+          <div class="screen-label">Screen 1 of 5</div>
+        </div>
+      </div>
+      <div class="feature-item" onclick="showScreen(2, this)">
+        <div class="fi-icon">🗺️</div>
+        <div>
+          <div class="fi-title">Browse stores on map + list</div>
+          <div class="fi-desc">See all stores on an interactive map and a scrollable list. Filter by bakery, restaurant, café, grocery. Sort by distance, price, or rating.</div>
+          <div class="screen-label">Screen 2 of 5</div>
+        </div>
+      </div>
+      <div class="feature-item" onclick="showScreen(3, this)">
+        <div class="fi-icon">🏪</div>
+        <div>
+          <div class="fi-title">View complete store details</div>
+          <div class="fi-desc">See everything about a store — all their listed bags, prices, pickup times, allergen info, ratings, and reviews.</div>
+          <div class="screen-label">Screen 3 of 5</div>
+        </div>
+      </div>
+      <div class="feature-item" onclick="showScreen(4, this)">
+        <div class="fi-icon">🛒</div>
+        <div>
+          <div class="fi-title">Select a bag and pay in-app</div>
+          <div class="fi-desc">Choose your surprise bag, see exactly what's inside, pay via UPI/card/wallet. No cash. No delivery. Pure in-app payment.</div>
+          <div class="screen-label">Screen 4 of 5</div>
+        </div>
+      </div>
+      <div class="feature-item" onclick="showScreen(5, this)">
+        <div class="fi-icon">🔢</div>
+        <div>
+          <div class="fi-title">Get your 4-digit pickup code</div>
+          <div class="fi-desc">Instantly get a unique 4-digit code. Walk to the store, tell the staff your code, collect your bag. Done.</div>
+          <div class="screen-label">Screen 5 of 5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-download-btns">
+      <a href="#" class="store-btn">
+        <div class="store-btn-icon">🤖</div>
+        <div class="store-btn-text"><div class="store-btn-sub">Get it on</div><div class="store-btn-name">Google Play</div></div>
+      </a>
+      <a href="#" class="store-btn">
+        <div class="store-btn-icon">🍎</div>
+        <div class="store-btn-text"><div class="store-btn-sub">Download on the</div><div class="store-btn-name">App Store</div></div>
+      </a>
+    </div>
+    <div class="note">📌 App coming soon. Join the waitlist by signing up on the website.</div>
+  </div>
+
+  <!-- PHONE -->
+  <div class="phone-wrap">
+    <div class="phone-device">
+      <div style="position:relative">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <!-- Status bar -->
+          <div class="phone-status">
+            <span class="status-time">9:41</span>
+            <span class="status-icons">▲ 📶 🔋</span>
+          </div>
+
+          <!-- ── SCREEN 1: Location / Pincode ── -->
+          <div class="app-screen active" id="screen1">
+            <div class="onboard-bg">
+              <div class="ob-logo">Grab It <span>Good</span></div>
+              <div class="ob-tag">Fresh food. Half price. Near you.</div>
+              <span class="ob-illustration">🍱</span>
+              <div class="ob-title">Find great food<br>near you</div>
+              <div class="ob-sub">Set your location to see what's available</div>
+            </div>
+            <div class="location-card">
+              <div class="lc-title">How do you want to find food?</div>
+              <div class="location-options">
+                <div class="loc-opt selected" onclick="selectLocOpt(this)">
+                  <div class="loc-opt-icon">📍</div>
+                  <div>
+                    <div class="loc-opt-title">Use my location</div>
+                    <div class="loc-opt-sub">Find stores around me automatically</div>
+                  </div>
+                </div>
+                <div class="loc-opt" onclick="selectLocOpt(this)">
+                  <div class="loc-opt-icon">🔢</div>
+                  <div>
+                    <div class="loc-opt-title">Enter pincode</div>
+                    <div class="loc-opt-sub">Search a specific area</div>
+                  </div>
+                </div>
+              </div>
+              <div class="pincode-input-wrap" id="pincode-wrap" style="display:none">
+                <input class="pincode-field" placeholder="Enter 6-digit pincode" maxlength="6" type="text" inputmode="numeric">
+              </div>
+              <div class="radius-row">
+                <div class="radius-label">Search radius <span id="radius-val">5 km</span></div>
+                <input type="range" class="radius-slider" min="1" max="10" value="5" oninput="updateRadius(this.value)" id="rad-slider">
+                <div class="radius-chips">
+                  <div class="rc-chip" onclick="setRadius(1)">1 km</div>
+                  <div class="rc-chip" onclick="setRadius(2)">2 km</div>
+                  <div class="rc-chip active" onclick="setRadius(5)">5 km</div>
+                  <div class="rc-chip" onclick="setRadius(8)">8 km</div>
+                  <div class="rc-chip" onclick="setRadius(10)">10 km</div>
+                </div>
+              </div>
+              <button class="app-btn" onclick="showScreen(2, null)">🔍 &nbsp;Find food near me</button>
+            </div>
+          </div>
+
+          <!-- ── SCREEN 2: Store List + Map ── -->
+          <div class="app-screen" id="screen2">
+            <div class="screen-header">
+              <div class="sh-top">
+                <div class="sh-location"><span class="sh-loc-icon">📍</span>Siddipet, 502103 · 5 km<span class="sh-loc-change" onclick="showScreen(1,null)">Change</span></div>
+                <span style="font-size:18px;cursor:pointer" onclick="showScreen(3,null)">🔔</span>
+              </div>
+              <div class="sh-filters">
+                <div class="filter-chip active">All</div>
+                <div class="filter-chip">🥐 Bakery</div>
+                <div class="filter-chip">🍽️ Restaurant</div>
+                <div class="filter-chip">☕ Café</div>
+                <div class="filter-chip">🛒 Grocery</div>
+                <div class="filter-chip">🧁 Sweets</div>
+              </div>
+            </div>
+            <!-- Map -->
+            <div class="map-area">
+              <div class="map-road-h" style="top:50%"></div>
+              <div class="map-road-h" style="top:30%"></div>
+              <div class="map-road-v" style="left:40%"></div>
+              <div class="map-road-v" style="left:70%"></div>
+              <div class="map-radius" style="width:120px;height:120px;left:50%;top:50%"></div>
+              <div class="map-you" style="left:50%;top:50%"></div>
+              <div class="map-pin" style="left:35%;top:35%" onclick="showScreen(3,null)">🥐</div>
+              <div class="map-pin" style="left:62%;top:42%" onclick="showScreen(3,null)">🍕</div>
+              <div class="map-pin" style="left:45%;top:65%" onclick="showScreen(3,null)">🍱</div>
+              <div class="map-pin" style="left:72%;top:60%" onclick="showScreen(3,null)">🧁</div>
+              <div class="map-pin" style="left:28%;top:58%" onclick="showScreen(3,null)">☕</div>
+              <div class="map-controls">
+                <button class="map-ctrl-btn">+</button>
+                <button class="map-ctrl-btn">−</button>
+                <button class="map-ctrl-btn">📍</button>
+              </div>
+            </div>
+            <!-- Store list -->
+            <div class="store-list-area">
+              <div class="sl-header"><span class="sl-count">6 stores nearby</span><span class="sl-sort">Sort: Distance ↓</span></div>
+              <div class="store-item" onclick="showScreen(3,null)">
+                <div class="si-thumb">🥐</div>
+                <div class="si-body">
+                  <div class="si-name">Sunrise Bakery</div>
+                  <div class="si-type">Bakery · 0.3 km away</div>
+                  <div class="si-tags"><span class="si-tag">Fresh today</span><span class="si-tag yellow">2 bags left</span></div>
+                  <div class="si-meta"><span>⏰ 7:30–8:00 PM</span><span class="si-dot"></span><span>⭐ 4.8</span></div>
+                </div>
+                <div class="si-right"><div class="si-price">₹149</div><div class="si-orig">₹450</div><div class="si-bags">5 bags</div></div>
+              </div>
+              <div class="store-item" onclick="showScreen(3,null)">
+                <div class="si-thumb">🍕</div>
+                <div class="si-body">
+                  <div class="si-name">Pizza Junction</div>
+                  <div class="si-type">Restaurant · 0.6 km</div>
+                  <div class="si-tags"><span class="si-tag">Hot food</span><span class="si-tag yellow">3 left</span></div>
+                  <div class="si-meta"><span>⏰ 8:00–9:00 PM</span><span class="si-dot"></span><span>⭐ 4.6</span></div>
+                </div>
+                <div class="si-right"><div class="si-price">₹99</div><div class="si-orig">₹350</div><div class="si-bags">4 bags</div></div>
+              </div>
+              <div class="store-item" onclick="showScreen(3,null)">
+                <div class="si-thumb">🍱</div>
+                <div class="si-body">
+                  <div class="si-name">Spice Garden</div>
+                  <div class="si-type">Restaurant · 0.8 km</div>
+                  <div class="si-tags"><span class="si-tag">Veg options</span></div>
+                  <div class="si-meta"><span>⏰ 9:00–9:30 PM</span><span class="si-dot"></span><span>⭐ 4.5</span></div>
+                </div>
+                <div class="si-right"><div class="si-price">₹129</div><div class="si-orig">₹380</div><div class="si-bags">3 bags</div></div>
+              </div>
+              <div class="store-item" onclick="showScreen(3,null)">
+                <div class="si-thumb">🧁</div>
+                <div class="si-body">
+                  <div class="si-name">Sweet Corner</div>
+                  <div class="si-type">Bakery & Sweets · 1.1 km</div>
+                  <div class="si-tags"><span class="si-tag">Desserts</span><span class="si-tag yellow">5 left</span></div>
+                  <div class="si-meta"><span>⏰ 6:00–7:00 PM</span><span class="si-dot"></span><span>⭐ 4.7</span></div>
+                </div>
+                <div class="si-right"><div class="si-price">₹79</div><div class="si-orig">₹250</div><div class="si-bags">8 bags</div></div>
+              </div>
+              <div class="store-item" onclick="showScreen(3,null)">
+                <div class="si-thumb">☕</div>
+                <div class="si-body">
+                  <div class="si-name">Morning Brew Café</div>
+                  <div class="si-type">Café & Bakery · 1.4 km</div>
+                  <div class="si-tags"><span class="si-tag">Pastries</span></div>
+                  <div class="si-meta"><span>⏰ 7:00–7:30 PM</span><span class="si-dot"></span><span>⭐ 4.9</span></div>
+                </div>
+                <div class="si-right"><div class="si-price">₹119</div><div class="si-orig">₹320</div><div class="si-bags">2 bags</div></div>
+              </div>
+              <div class="store-item" onclick="showScreen(3,null)">
+                <div class="si-thumb">🍛</div>
+                <div class="si-body">
+                  <div class="si-name">Andhra Bhavan</div>
+                  <div class="si-type">Restaurant · 1.8 km</div>
+                  <div class="si-tags"><span class="si-tag">Biryani</span><span class="si-tag">Curry</span></div>
+                  <div class="si-meta"><span>⏰ 9:30–10:00 PM</span><span class="si-dot"></span><span>⭐ 4.4</span></div>
+                </div>
+                <div class="si-right"><div class="si-price">₹149</div><div class="si-orig">₹420</div><div class="si-bags">5 bags</div></div>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="bn-item active"><span class="bn-icon">🏠</span><span class="bn-label">Home</span></div>
+              <div class="bn-item" onclick="showScreen(2,null)"><div class="bn-icon-wrap"><span class="bn-icon">🔍</span></div><span class="bn-label">Search</span></div>
+              <div class="bn-item"><div class="bn-icon-wrap"><span class="bn-icon">🛍️</span><span class="bn-badge">0</span></div><span class="bn-label">Orders</span></div>
+              <div class="bn-item"><span class="bn-icon">❤️</span><span class="bn-label">Saved</span></div>
+              <div class="bn-item"><span class="bn-icon">👤</span><span class="bn-label">Profile</span></div>
+            </div>
+          </div>
+
+          <!-- ── SCREEN 3: Store Detail ── -->
+          <div class="app-screen" id="screen3">
+            <div class="store-hero">
+              <button class="back-btn-phone" onclick="showScreen(2,null)">←</button>
+              <button class="fav-btn">♡</button>
+              <span class="store-avatar">🥐</span>
+              <div class="store-name-big">Sunrise Bakery</div>
+              <span class="store-type-badge">Bakery</span>
+              <div class="store-rating-row"><span>⭐ 4.8</span><span>·</span><span>32 reviews</span><span>·</span><span>📍 0.3 km</span></div>
+            </div>
+            <div class="store-detail-body">
+              <div class="sdb-section">
+                <div class="info-pills">
+                  <span class="info-pill">⏰ Open now</span>
+                  <span class="info-pill">🕐 Pickup 7:30–8:00 PM</span>
+                  <span class="info-pill">✅ FSSAI verified</span>
+                  <span class="info-pill">📍 Shop 4, Lalitha Nagar</span>
+                </div>
+              </div>
+              <div class="sdb-section">
+                <div class="sdb-title">Available bags today</div>
+                <div class="bag-listing" onclick="showScreen(4,null)">
+                  <div class="bl-top">
+                    <div>
+                      <div class="bl-name">🥐 Bakery Mix</div>
+                      <div class="bl-desc">Fresh breads, pastries, croissants & baked goods from today. Contents vary daily.</div>
+                    </div>
+                    <div class="bl-price-col">
+                      <div class="bl-price">₹149</div>
+                      <div class="bl-orig">₹450</div>
+                      <span class="bl-save">Save 67%</span>
+                    </div>
+                  </div>
+                  <div class="bl-meta-row">
+                    <span class="bl-time">⏰ 7:30 – 8:00 PM</span>
+                    <div class="bl-bar-wrap"><div class="bl-bar"><div class="bl-bar-fill" style="width:60%"></div></div><span class="bl-left">3 left</span></div>
+                  </div>
+                </div>
+                <div class="bag-listing" onclick="showScreen(4,null)">
+                  <div class="bl-top">
+                    <div>
+                      <div class="bl-name">🍞 Bread & Rolls</div>
+                      <div class="bl-desc">Assorted fresh bread loaves, dinner rolls, and sandwich bread from today's bake.</div>
+                    </div>
+                    <div class="bl-price-col">
+                      <div class="bl-price">₹89</div>
+                      <div class="bl-orig">₹280</div>
+                      <span class="bl-save">Save 68%</span>
+                    </div>
+                  </div>
+                  <div class="bl-meta-row">
+                    <span class="bl-time">⏰ 7:30 – 8:00 PM</span>
+                    <div class="bl-bar-wrap"><div class="bl-bar"><div class="bl-bar-fill" style="width:40%"></div></div><span class="bl-left">2 left</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="sdb-section">
+                <div class="sdb-title">Allergen information</div>
+                <div class="allergen-row">
+                  <span class="allergen-tag">🌾 Gluten</span>
+                  <span class="allergen-tag">🥛 Dairy</span>
+                  <span class="allergen-tag">🥚 Eggs</span>
+                </div>
+              </div>
+              <div class="sdb-section">
+                <div class="sdb-title">Customer reviews</div>
+                <div class="review-mini">
+                  <div class="rm-top"><span class="rm-name">Priya K.</span><span class="rm-stars">⭐⭐⭐⭐⭐</span></div>
+                  <div class="rm-text">"Got fresh croissants, rolls and cake. So much better than expected!"</div>
+                </div>
+                <div class="review-mini">
+                  <div class="rm-top"><span class="rm-name">Amit R.</span><span class="rm-stars">⭐⭐⭐⭐⭐</span></div>
+                  <div class="rm-text">"Great value. Pickup was super smooth with the 4-digit code."</div>
+                </div>
+                <div class="review-mini">
+                  <div class="rm-top"><span class="rm-name">Sneha M.</span><span class="rm-stars">⭐⭐⭐⭐☆</span></div>
+                  <div class="rm-text">"Nice variety in the bag. Pickup window was a bit short but overall great."</div>
+                </div>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="bn-item" onclick="showScreen(2,null)"><span class="bn-icon">🏠</span><span class="bn-label">Home</span></div>
+              <div class="bn-item"><span class="bn-icon">🔍</span><span class="bn-label">Search</span></div>
+              <div class="bn-item"><div class="bn-icon-wrap"><span class="bn-icon">🛍️</span></div><span class="bn-label">Orders</span></div>
+              <div class="bn-item"><span class="bn-icon">❤️</span><span class="bn-label">Saved</span></div>
+              <div class="bn-item"><span class="bn-icon">👤</span><span class="bn-label">Profile</span></div>
+            </div>
+          </div>
+
+          <!-- ── SCREEN 4: Bag Detail / Order ── -->
+          <div class="app-screen" id="screen4">
+            <div class="bag-hero">
+              <button class="back-btn-phone" onclick="showScreen(3,null)">←</button>
+              <span class="bag-big-icon">🥐</span>
+              <div class="bag-hero-name">Bakery Mix</div>
+              <div class="bag-hero-store">Sunrise Bakery · 0.3 km away</div>
+            </div>
+            <div class="bag-order-body">
+              <div class="price-highlight">
+                <div class="ph-you-pay">YOU PAY</div>
+                <div class="ph-price">₹149</div>
+                <div class="ph-orig">Original value ₹450</div>
+                <span class="ph-save">You save ₹301 (67% off)</span>
+              </div>
+              <div class="contents-box">
+                <div class="cb-title">💡 What's typically inside</div>
+                <div class="cb-text">Fresh breads, pastries, croissants, rolls, and baked goods from today. Exact contents vary — that's the surprise! Store hints: usually 4–6 items.</div>
+              </div>
+              <div style="background:var(--white);border:2px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px">
+                <div class="detail-row"><span class="dr-label">Pickup window</span><span class="dr-val">7:30 PM – 8:00 PM</span></div>
+                <div class="detail-row"><span class="dr-label">Pickup address</span><span class="dr-val" style="text-align:right;max-width:160px;font-size:12px">Shop 4, Lalitha Nagar, Siddipet</span></div>
+                <div class="detail-row"><span class="dr-label">Allergens</span><span class="dr-val" style="font-size:12px">Gluten, Dairy, Eggs</span></div>
+                <div class="detail-row"><span class="dr-label">FSSAI verified</span><span class="dr-val green">✅ Yes</span></div>
+                <div class="detail-row"><span class="dr-label">Bags remaining</span><span class="dr-val green">3 left</span></div>
+              </div>
+              <div style="font-size:13px;font-weight:600;color:var(--black);margin-bottom:8px">Pay with</div>
+              <div class="payment-methods">
+                <div class="pm-btn active">💳 UPI</div>
+                <div class="pm-btn" onclick="selPay(this)">🏦 Card</div>
+                <div class="pm-btn" onclick="selPay(this)">📱 Wallet</div>
+              </div>
+              <div style="font-size:11px;color:var(--gray2);text-align:center;margin-bottom:4px">🔒 Secure payment · No cash accepted · Refund if store cancels</div>
+            </div>
+            <div class="order-sticky">
+              <div class="os-total">
+                <span class="os-label">Total to pay</span>
+                <span class="os-amount">₹149</span>
+              </div>
+              <button class="app-btn" onclick="showScreen(5,null)">Reserve & Pay ₹149 →</button>
+            </div>
+          </div>
+
+          <!-- ── SCREEN 5: Confirmation ── -->
+          <div class="app-screen" id="screen5">
+            <div style="background:var(--white);padding:10px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--black)">Order confirmed</div>
+            <div class="confirm-screen">
+              <div class="confirm-icon">✅</div>
+              <div class="confirm-title">You're all set!</div>
+              <div class="confirm-sub">Your order is confirmed. Head to Sunrise Bakery during the pickup window and show them your code.</div>
+              <div class="code-display">
+                <div class="cd-label">Your pickup code</div>
+                <div class="cd-code">7823</div>
+                <div class="cd-sub">Show this to store staff · Expires after pickup</div>
+              </div>
+              <div class="pickup-info">
+                <div class="pi-row"><span class="pi-label">Store</span><span class="pi-val">Sunrise Bakery</span></div>
+                <div class="pi-row"><span class="pi-label">Bag</span><span class="pi-val">Bakery Mix</span></div>
+                <div class="pi-row"><span class="pi-label">Pickup time</span><span class="pi-val">7:30 – 8:00 PM</span></div>
+                <div class="pi-row"><span class="pi-label">Amount paid</span><span class="pi-val" style="color:var(--green)">₹149</span></div>
+                <div class="pi-row"><span class="pi-label">Address</span><span class="pi-val" style="font-size:12px;text-align:right;max-width:160px">Shop 4, Lalitha Nagar</span></div>
+              </div>
+              <button class="app-btn" onclick="showScreen(2,null)" style="width:100%;font-size:14px">Find more food →</button>
+            </div>
+            <div class="bottom-nav">
+              <div class="bn-item" onclick="showScreen(2,null)"><span class="bn-icon">🏠</span><span class="bn-label">Home</span></div>
+              <div class="bn-item"><span class="bn-icon">🔍</span><span class="bn-label">Search</span></div>
+              <div class="bn-item active"><div class="bn-icon-wrap"><span class="bn-icon">🛍️</span><span class="bn-badge">1</span></div><span class="bn-label">Orders</span></div>
+              <div class="bn-item"><span class="bn-icon">❤️</span><span class="bn-label">Saved</span></div>
+              <div class="bn-item"><span class="bn-icon">👤</span><span class="bn-label">Profile</span></div>
+            </div>
+          </div>
+
+        </div><!-- end phone-screen -->
+      </div>
+    </div><!-- end phone-device -->
+  </div><!-- end phone-wrap -->
+</div><!-- end layout -->
+
+<script>
+function showScreen(n, featureEl) {
+  document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen' + n).classList.add('active');
+  if (featureEl) {
+    document.querySelectorAll('.feature-item').forEach(f => f.classList.remove('active'));
+    featureEl.classList.add('active');
+  } else {
+    // Auto-highlight matching feature
+    const items = document.querySelectorAll('.feature-item');
+    items.forEach(f => f.classList.remove('active'));
+    if (items[n-1]) items[n-1].classList.add('active');
+  }
+  // Scroll feature item into view
+  const activeFeature = document.querySelector('.feature-item.active');
+  if (activeFeature) activeFeature.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function selectLocOpt(el) {
+  document.querySelectorAll('.loc-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const isPincode = el.querySelector('.loc-opt-title').textContent.includes('pincode');
+  document.getElementById('pincode-wrap').style.display = isPincode ? 'flex' : 'none';
+}
+
+function updateRadius(val) {
+  document.getElementById('radius-val').textContent = val + ' km';
+  document.getElementById('rad-slider').style.background =
+    `linear-gradient(to right, var(--green) ${val*10}%, var(--border) ${val*10}%)`;
+  document.querySelectorAll('.rc-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent.trim() === val + ' km');
+  });
+}
+
+function setRadius(val) {
+  document.getElementById('rad-slider').value = val;
+  updateRadius(val);
+}
+
+function selPay(el) {
+  document.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

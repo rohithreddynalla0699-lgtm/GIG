@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join as Partner — Grab It Good</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#00A661;--green-dark:#008A51;--green-pale:#E8F5E9;--green-light:#F8FFF6;--black:#212121;--gray:#5A5A5A;--gray2:#9E9E9E;--border:#E0E0E0;--red:#FF3B30;--yellow-bg:#FFF9E6;--yellow-border:#FFE082;--white:#fff}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(to bottom,var(--green-light),var(--white));min-height:100vh;color:var(--black);-webkit-font-smoothing:antialiased}
+.wrap{max-width:700px;margin:0 auto;padding:80px 5% 60px}
+/* Logo */
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;text-decoration:none}
+.logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:12px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--black)}
+.logo-text span{color:var(--green)}
+.page-header{text-align:center;margin-bottom:40px}
+.page-title{font-family:'Fraunces',serif;font-size:clamp(32px,5vw,44px);font-weight:700;color:var(--black);letter-spacing:-1.5px;margin-bottom:8px}
+.page-sub{font-size:16px;color:var(--gray);line-height:1.6}
+/* Progress */
+.progress{margin-bottom:40px}
+.progress-steps{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ps-item{display:flex;align-items:center;flex:1}
+.ps-circle{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;transition:all .3s;flex-shrink:0;background:var(--border);color:var(--gray2)}
+.ps-circle.active{background:var(--green);color:white}
+.ps-circle.done{background:var(--green);color:white}
+.ps-line{flex:1;height:2px;background:var(--border);margin:0 8px;transition:background .3s}
+.ps-line.done{background:var(--green)}
+.progress-labels{display:flex;justify-content:space-between;padding:0 4px}
+.pl-item{font-size:12px;color:var(--gray2);flex:1;text-align:center}
+.pl-item:first-child{text-align:left}
+.pl-item:last-child{text-align:right}
+.pl-item.active{color:var(--green);font-weight:600}
+/* Card */
+.card{background:var(--white);border-radius:24px;border:2px solid var(--border);padding:40px;box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+/* Form */
+.step{display:none}
+.step.active{display:block}
+.step-title{font-size:24px;font-weight:700;color:var(--black);margin-bottom:6px}
+.step-sub{font-size:15px;color:var(--gray);margin-bottom:24px}
+.field{margin-bottom:20px}
+label{display:block;font-size:14px;font-weight:600;color:var(--black);margin-bottom:8px}
+.req{color:var(--red)}
+.opt{font-size:13px;font-weight:400;color:var(--gray2)}
+input[type=text],input[type=email],input[type=tel],input[type=password]{width:100%;padding:16px 20px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--black);outline:none;transition:border-color .2s;background:var(--white)}
+input:focus{border-color:var(--green)}
+input::placeholder{color:var(--gray2)}
+.hint{font-size:12px;color:var(--gray);margin-top:6px}
+.hint a{color:var(--green)}
+/* Business type grid */
+.btype-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btype-btn{padding:16px;border:2px solid var(--border);border-radius:12px;background:var(--white);cursor:pointer;text-align:left;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btype-btn:hover{border-color:#B0B0B0}
+.btype-btn.selected{border-color:var(--green);background:var(--green-pale)}
+.btype-icon{font-size:28px;margin-bottom:4px}
+.btype-label{font-size:14px;font-weight:600;color:var(--black)}
+/* Info boxes */
+.info-box{border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start}
+.info-box.green{background:var(--green-pale);border:2px solid #C8E6C9}
+.info-box.green .ib-text{font-size:13px;color:#2E7D32;line-height:1.6}
+.info-box.yellow{background:var(--yellow-bg);border:2px solid var(--yellow-border)}
+.ib-icon{font-size:24px;flex-shrink:0}
+/* Revenue box */
+.revenue-box{background:var(--green-pale);border:2px solid var(--green);border-radius:16px;padding:24px;margin-bottom:24px}
+.rev-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.rev-title{font-size:18px;font-weight:700;color:var(--black)}
+.rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.rev-cell{background:var(--white);border-radius:12px;padding:16px;text-align:center}
+.rev-num{font-size:36px;font-weight:700;color:var(--green);line-height:1}
+.rev-lbl{font-size:14px;color:var(--gray);margin-top:4px}
+.rev-note{font-size:13px;color:#2E7D32;line-height:1.6}
+/* Subscription box */
+.sub-box{background:var(--yellow-bg);border:2px solid var(--yellow-border);border-radius:16px;padding:24px;margin-bottom:24px}
+.sub-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sub-title{font-size:18px;font-weight:700;color:var(--black)}
+.sub-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.sub-list li{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--gray)}
+.sub-list .check{color:var(--green);margin-top:2px;flex-shrink:0}
+/* Quality box */
+.quality-box{background:var(--white);border:2px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.qbox-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.qbox-title{font-size:18px;font-weight:700;color:var(--black)}
+/* Quality rules */
+.quality-rules{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.qr-section{margin-bottom:4px}
+.qr-label{font-size:14px;font-weight:600;color:var(--black);margin-bottom:8px}
+.qr-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.qr-list li{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--gray);line-height:1.6}
+.qr-dot-green{color:var(--green);flex-shrink:0;margin-top:2px}
+.qr-dot-red{color:var(--red);flex-shrink:0;margin-top:2px}
+.qr-warning{background:#FFF0EE;border:1.5px solid #FFCDD2;border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red);font-weight:500;line-height:1.6}
+/* Checkboxes */
+.checkbox-row{display:flex;align-items:flex-start;gap:12px;padding:16px;background:#F5F5F5;border-radius:12px;cursor:pointer;transition:background .2s;margin-bottom:12px}
+.checkbox-row:hover{background:var(--green-pale)}
+.checkbox-row input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.checkbox-row span{font-size:14px;color:var(--black);line-height:1.6}
+/* Success box */
+.success-box{background:var(--green-pale);border:2px solid #C8E6C9;border-radius:12px;padding:20px;margin-top:24px}
+.sb-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.sb-steps{list-style:none;display:flex;flex-direction:column;gap:8px;padding-left:44px}
+.sb-steps li{display:flex;gap:8px;font-size:13px;color:#2E7D32}
+/* Success screen */
+.success-screen{display:none;text-align:center;padding:40px 0}
+.success-screen.show{display:block}
+.success-icon{width:80px;height:80px;background:var(--green-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 24px}
+.success-title{font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--black);margin-bottom:10px}
+.success-sub{font-size:15px;color:var(--gray);line-height:1.7;margin-bottom:24px}
+/* Buttons */
+.btn-row{display:flex;gap:12px;margin-top:32px}
+.btn-primary{flex:1;background:var(--green);color:white;border:none;padding:16px;border-radius:100px;font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 4px 12px rgba(0,166,97,0.2)}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-primary:disabled{background:var(--border);color:var(--gray2);cursor:not-allowed;box-shadow:none}
+.btn-back{flex:1;background:transparent;color:var(--black);border:2px solid var(--border);padding:16px;border-radius:100px;font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-back:hover{border-color:var(--green);color:var(--green)}
+.btn-full{width:100%}
+/* Footer link */
+.footer-link{text-align:center;margin-top:24px;font-size:14px;color:var(--gray)}
+.footer-link a{color:var(--green);font-weight:600;text-decoration:none}
+.footer-link a:hover{text-decoration:underline}
+@media(max-width:600px){.btype-grid{grid-template-columns:1fr 1fr}.rev-grid{grid-template-columns:1fr 1fr}.card{padding:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Logo -->
+  <a href="grabitgood.html" class="logo">
+    <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.5 8.5L22 9.5L17 14.5L18 21L12 18L6 21L7 14.5L2 9.5L8.5 8.5L12 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+    <span class="logo-text">Grab It <span>Good</span></span>
+  </a>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Join as a partner business</h1>
+    <p class="page-sub">Turn your surplus food into revenue. Setup takes less than 5 minutes.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress" id="progress-bar">
+    <div class="progress-steps">
+      <div class="ps-item"><div class="ps-circle active" id="ps1">1</div><div class="ps-line" id="pl1"></div></div>
+      <div class="ps-item"><div class="ps-circle" id="ps2">2</div><div class="ps-line" id="pl2"></div></div>
+      <div class="ps-item"><div class="ps-circle" id="ps3">3</div><div class="ps-line" id="pl3"></div></div>
+      <div class="ps-item" style="flex:0"><div class="ps-circle" id="ps4">4</div></div>
+    </div>
+    <div class="progress-labels">
+      <span class="pl-item active" id="lbl1">Business</span>
+      <span class="pl-item" id="lbl2">Details</span>
+      <span class="pl-item" id="lbl3">Agreement</span>
+      <span class="pl-item" id="lbl4">Setup</span>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- STEP 1: Business -->
+    <div class="step active" id="step1">
+      <div class="step-title">Find your business</div>
+      <div class="step-sub">Enter your business address to get started. We'll verify the location.</div>
+      <div class="field">
+        <label>Business name <span class="req">*</span></label>
+        <input type="text" id="s1-name" placeholder="e.g., Sunrise Bakery">
+      </div>
+      <div class="field">
+        <label>Complete address <span class="req">*</span></label>
+        <input type="text" id="s1-address" placeholder="Shop no., Building, Street, Area">
+      </div>
+      <div class="field">
+        <label>Pincode <span class="req">*</span></label>
+        <input type="text" id="s1-pincode" maxlength="6" placeholder="e.g., 502103">
+      </div>
+      <div class="info-box green" style="margin-top:4px">
+        <div class="ib-icon">📍</div>
+        <div class="ib-text"><strong>Location verification:</strong> After signup, our team will verify your business location within 24-48 hours before activation.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary btn-full" id="s1-next" onclick="goStep(2)" disabled>Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Details -->
+    <div class="step" id="step2">
+      <div class="step-title">Business details</div>
+      <div class="step-sub">Help us understand your business better.</div>
+      <div class="field">
+        <label>Business type <span class="req">*</span></label>
+        <div class="btype-grid" id="btype-grid">
+          <button class="btype-btn" onclick="selectType(this,'restaurant')"><div class="btype-icon">🍽️</div><div class="btype-label">Restaurant</div></button>
+          <button class="btype-btn" onclick="selectType(this,'bakery')"><div class="btype-icon">🥐</div><div class="btype-label">Bakery</div></button>
+          <button class="btype-btn" onclick="selectType(this,'cafe')"><div class="btype-icon">☕</div><div class="btype-label">Café</div></button>
+          <button class="btype-btn" onclick="selectType(this,'grocery')"><div class="btype-icon">🛒</div><div class="btype-label">Grocery Store</div></button>
+          <button class="btype-btn" onclick="selectType(this,'sweet-shop')"><div class="btype-icon">🧁</div><div class="btype-label">Sweet Shop</div></button>
+          <button class="btype-btn" onclick="selectType(this,'other')"><div class="btype-icon">🏪</div><div class="btype-label">Other</div></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Owner / Manager name <span class="req">*</span></label>
+        <input type="text" id="s2-owner" placeholder="Full name">
+      </div>
+      <div class="field">
+        <label>Phone number <span class="req">*</span></label>
+        <input type="tel" id="s2-phone" placeholder="+91 98765 43210">
+      </div>
+      <div class="field">
+        <label>Business email <span class="req">*</span></label>
+        <input type="email" id="s2-email" placeholder="business@example.com">
+      </div>
+      <div class="field">
+        <label>GST number <span class="opt">(if applicable)</span></label>
+        <input type="text" id="s2-gst" placeholder="22AAAAA0000A1Z5">
+      </div>
+      <div class="field">
+        <label>FSSAI license number <span class="req">*</span></label>
+        <input type="text" id="s2-fssai" placeholder="12345678901234">
+        <div class="hint">Required for all food businesses. Get yours at <a href="https://foscos.fssai.gov.in" target="_blank">foscos.fssai.gov.in</a></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(1)">Back</button>
+        <button class="btn-primary" id="s2-next" onclick="goStep(3)" disabled>Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Agreement -->
+    <div class="step" id="step3">
+      <div class="step-title">Partnership terms</div>
+      <div class="step-sub">Please review and accept our partnership agreement carefully.</div>
+
+      <!-- Revenue split -->
+      <div class="revenue-box">
+        <div class="rev-header"><span style="font-size:32px">💰</span><span class="rev-title">Revenue sharing model</span></div>
+        <div class="rev-grid">
+          <div class="rev-cell"><div class="rev-num">80%</div><div class="rev-lbl">Goes to you</div></div>
+          <div class="rev-cell"><div class="rev-num">20%</div><div class="rev-lbl">Platform fee</div></div>
+        </div>
+        <div class="rev-note">Example: Sell a surprise bag for ₹200 → you receive ₹160, we take ₹40. Payouts are made weekly directly to your bank account.</div>
+      </div>
+
+      <!-- Subscription -->
+      <div class="sub-box">
+        <div class="sub-header"><span style="font-size:32px">📅</span><span class="sub-title">Monthly subscription: ₹199/month</span></div>
+        <ul class="sub-list">
+          <li><span class="check">✓</span><span>Unlimited listings — list as many bags as you want every day</span></li>
+          <li><span class="check">✓</span><span>Smart analytics dashboard with earnings and CO₂ impact</span></li>
+          <li><span class="check">✓</span><span>Priority support and onboarding assistance</span></li>
+          <li><span class="check">✓</span><span>First 30 days free — cancel anytime</span></li>
+        </ul>
+      </div>
+
+      <!-- Food quality commitment -->
+      <div class="quality-box">
+        <div class="qbox-header"><span style="font-size:32px">🛡️</span><span class="qbox-title">Food quality commitment</span></div>
+        <div class="quality-rules">
+          <div class="qr-section">
+            <div class="qr-label">✅ You MUST only list:</div>
+            <ul class="qr-list">
+              <li><span class="qr-dot-green">•</span><span>100% fresh, safe-to-eat food prepared or packaged on the same day</span></li>
+              <li><span class="qr-dot-green">•</span><span>Food that meets all FSSAI safety and hygiene standards</span></li>
+              <li><span class="qr-dot-green">•</span><span>Unsold surplus food — not expired, stale, or unfit for consumption</span></li>
+              <li><span class="qr-dot-green">•</span><span>Food that smells good, looks good, and is completely edible</span></li>
+              <li><span class="qr-dot-green">•</span><span>Properly stored and handled food with no contamination risk</span></li>
+            </ul>
+          </div>
+          <div class="qr-section">
+            <div class="qr-label" style="color:var(--red)">❌ You must NEVER list:</div>
+            <ul class="qr-list">
+              <li><span class="qr-dot-red">•</span><span>Expired, stale, or past-date food items</span></li>
+              <li><span class="qr-dot-red">•</span><span>Food that smells bad, looks discoloured, or is visibly spoiled</span></li>
+              <li><span class="qr-dot-red">•</span><span>Food that poses any health or allergy risk without disclosure</span></li>
+              <li><span class="qr-dot-red">•</span><span>Food stored in unhygienic conditions or improper temperatures</span></li>
+              <li><span class="qr-dot-red">•</span><span>Any food not fit for human consumption for any reason</span></li>
+              <li><span class="qr-dot-red">•</span><span>Food from previous days or reheated multiple times</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="qr-warning">⚠️ <strong>Violations result in immediate account suspension.</strong> Our mission is reducing waste while ensuring every rescued meal is 100% safe, fresh, and delicious. Any report of unsafe food will be taken seriously and investigated immediately.</div>
+        <br>
+        <label class="checkbox-row" style="margin-bottom:0">
+          <input type="checkbox" id="quality-check" onchange="checkAgreements()">
+          <span><strong>I confirm</strong> that I will only list 100% fresh, safe, and healthy surplus food. I understand that I am fully responsible for any issues arising from food I provide, and that violations may result in suspension and legal action.</span>
+        </label>
+      </div>
+
+      <!-- Terms -->
+      <label class="checkbox-row">
+        <input type="checkbox" id="terms-check" onchange="checkAgreements()">
+        <span>I agree to the <a href="#" style="color:var(--green);font-weight:600">Terms of Service</a>, <a href="#" style="color:var(--green);font-weight:600">Partner Agreement</a>, and <a href="privacy-policy.html" style="color:var(--green);font-weight:600">Privacy Policy</a> of Grab It Good.</span>
+      </label>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(2)">Back</button>
+        <button class="btn-primary" id="s3-next" onclick="goStep(4)" disabled>Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Setup -->
+    <div class="step" id="step4">
+      <div class="step-title">Create your account</div>
+      <div class="step-sub">Set a secure password to access your partner dashboard.</div>
+      <div class="field">
+        <label>Password <span class="req">*</span></label>
+        <input type="password" id="s4-pass" placeholder="At least 8 characters" oninput="checkPasswords()">
+        <div class="hint">Must be at least 8 characters with letters and numbers</div>
+      </div>
+      <div class="field">
+        <label>Confirm password <span class="req">*</span></label>
+        <input type="password" id="s4-pass2" placeholder="Re-enter your password" oninput="checkPasswords()">
+        <div id="pass-mismatch" style="font-size:12px;color:var(--red);margin-top:4px;display:none">Passwords do not match</div>
+      </div>
+      <div class="success-box">
+        <div class="sb-header"><span style="font-size:28px">🎉</span><div><strong style="font-size:16px">You're almost done!</strong><br><span style="font-size:14px;color:#2E7D32">After you complete signup:</span></div></div>
+        <ul class="sb-steps">
+          <li><span>1.</span><span>We'll verify your business location within 24-48 hours</span></li>
+          <li><span>2.</span><span>You'll receive login access to your partner dashboard</span></li>
+          <li><span>3.</span><span>Start listing surprise bags and earning from surplus food</span></li>
+        </ul>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(3)">Back</button>
+        <button class="btn-primary" id="s4-submit" onclick="submitForm()" disabled>Complete signup</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Application submitted!</div>
+      <div class="success-sub">Thank you for joining Grab It Good as a partner. Our team will verify your business within 24-48 hours. You'll receive an email with your login details once verified.</div>
+      <div class="info-box green" style="text-align:left;margin-bottom:24px">
+        <div class="ib-icon">📧</div>
+        <div class="ib-text">Check your inbox for a confirmation email. If you don't see it, check your spam folder.</div>
+      </div>
+      <a href="partner-login.html" class="btn-primary btn-full" style="display:block;text-align:center;text-decoration:none;padding:16px;border-radius:100px;font-size:16px;font-weight:600;color:white">Go to Partner Login</a>
+    </div>
+
+  </div>
+
+  <!-- Footer link -->
+  <div class="footer-link">
+    Already have an account? <a href="partner-login.html">Log in as a partner</a>
+  </div>
+</div>
+
+<script>
+let selectedType = '';
+
+function selectType(btn, val) {
+  document.querySelectorAll('.btype-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedType = val;
+  validateStep2();
+}
+
+function validateStep1() {
+  const n = document.getElementById('s1-name').value.trim();
+  const a = document.getElementById('s1-address').value.trim();
+  const p = document.getElementById('s1-pincode').value.trim();
+  document.getElementById('s1-next').disabled = !(n && a && p.length === 6 && !isNaN(+p));
+}
+
+function validateStep2() {
+  const o = document.getElementById('s2-owner').value.trim();
+  const ph = document.getElementById('s2-phone').value.trim();
+  const e = document.getElementById('s2-email').value.trim();
+  const f = document.getElementById('s2-fssai').value.trim();
+  document.getElementById('s2-next').disabled = !(selectedType && o && ph && e && f);
+}
+
+function checkAgreements() {
+  const q = document.getElementById('quality-check').checked;
+  const t = document.getElementById('terms-check').checked;
+  document.getElementById('s3-next').disabled = !(q && t);
+}
+
+function checkPasswords() {
+  const p1 = document.getElementById('s4-pass').value;
+  const p2 = document.getElementById('s4-pass2').value;
+  const mismatch = document.getElementById('pass-mismatch');
+  if (p2 && p1 !== p2) { mismatch.style.display = 'block'; }
+  else { mismatch.style.display = 'none'; }
+  document.getElementById('s4-submit').disabled = !(p1.length >= 8 && p1 === p2);
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  updateProgress(n);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function updateProgress(n) {
+  for (let i = 1; i <= 4; i++) {
+    const c = document.getElementById('ps' + i);
+    const l = document.getElementById('lbl' + i);
+    c.className = 'ps-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+    c.textContent = i < n ? '✓' : i;
+    if (l) { l.className = 'pl-item' + (i === n ? ' active' : ''); }
+    if (i < 4) {
+      const line = document.getElementById('pl' + i);
+      if (line) line.className = 'ps-line' + (i < n ? ' done' : '');
+    }
+  }
+}
+
+function submitForm() {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('progress-bar').style.display = 'none';
+  document.getElementById('success-screen').classList.add('show');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Add input listeners
+['s1-name','s1-address','s1-pincode'].forEach(id => {
+  document.getElementById(id).addEventListener('input', validateStep1);
+});
+['s2-owner','s2-phone','s2-email','s2-fssai'].forEach(id => {
+  document.getElementById(id).addEventListener('input', validateStep2);
+});
+</script>
+</body>
+</html>

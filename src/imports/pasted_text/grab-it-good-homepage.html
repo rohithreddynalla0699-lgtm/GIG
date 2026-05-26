@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grab It Good — Good Food. Not Waste.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --orange: #F4621F;
+  --orange-light: #FF8A50;
+  --orange-pale: #FFF4EE;
+  --orange-dark: #C44A10;
+  --green: #1A6B3C;
+  --green-light: #E8F5EE;
+  --black: #0F0D0B;
+  --gray: #6B6560;
+  --gray-light: #F7F5F3;
+  --white: #FEFCFA;
+  --border: #EDE8E3;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%; height: 68px;
+  background: rgba(254,252,250,0.93); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--black); text-decoration: none; letter-spacing: -0.5px; }
+.nav-logo span { color: var(--orange); }
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a { font-size: 14px; font-weight: 400; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover { color: var(--black); }
+.nav-btn { background: var(--black) !important; color: white !important; padding: 10px 22px; border-radius: 100px; font-weight: 500 !important; }
+.nav-btn:hover { background: var(--orange) !important; color: white !important; }
+.nav-btn-outline { border: 1.5px solid var(--border) !important; padding: 9px 20px; border-radius: 100px; font-weight: 500 !important; }
+.nav-btn-outline:hover { border-color: var(--orange) !important; color: var(--orange) !important; }
+
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 120px 5% 80px; position: relative; overflow: hidden;
+}
+.hero-bg { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 80% 60% at 50% 40%, #FFF0E6 0%, transparent 65%); }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--green-light); border: 1px solid #B2D8C4;
+  border-radius: 100px; padding: 6px 16px;
+  font-size: 13px; font-weight: 500; color: var(--green);
+  margin-bottom: 28px; animation: fadeUp 0.6s ease both;
+}
+.hero-eyebrow-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 700; line-height: 1.0; letter-spacing: -3px;
+  color: var(--black); margin-bottom: 12px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 em { font-style: italic; color: var(--orange); }
+.hero-sub {
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: clamp(20px, 3vw, 30px); color: var(--gray);
+  font-weight: 300; letter-spacing: -0.5px;
+  margin-bottom: 24px; animation: fadeUp 0.6s 0.15s ease both;
+}
+.hero-desc {
+  font-size: 17px; font-weight: 300; color: var(--gray);
+  line-height: 1.75; max-width: 560px; margin: 0 auto 40px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+.hero-desc strong { color: var(--black); font-weight: 500; }
+.hero-actions {
+  display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.25s ease both;
+}
+.btn-orange { display: inline-flex; align-items: center; gap: 10px; background: var(--orange); color: white; padding: 16px 32px; border-radius: 100px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-orange:hover { background: var(--orange-dark); transform: translateY(-2px); }
+.btn-dark { display: inline-flex; align-items: center; gap: 10px; background: var(--black); color: white; padding: 16px 32px; border-radius: 100px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+.btn-dark:hover { background: #2a2520; transform: translateY(-2px); }
+.hero-scroll { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--gray); display: flex; flex-direction: column; align-items: center; gap: 6px; animation: fadeUp 1s 0.5s ease both; letter-spacing: 0.05em; }
+.scroll-line { width: 1px; height: 36px; background: var(--border); }
+
+/* WASTE STRIP */
+.waste-strip { background: var(--black); padding: 60px 5%; display: grid; grid-template-columns: repeat(3,1fr); }
+.waste-item { padding: 40px 5%; border-right: 1px solid rgba(255,255,255,0.08); text-align: center; }
+.waste-item:last-child { border-right: none; }
+.waste-num { font-family: 'Fraunces', serif; font-size: clamp(38px,5vw,60px); font-weight: 700; color: var(--orange); letter-spacing: -2px; line-height: 1; margin-bottom: 10px; }
+.waste-lbl { font-size: 14px; color: rgba(255,255,255,0.45); font-weight: 300; line-height: 1.6; }
+
+/* MISSION */
+.mission { padding: 120px 5%; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.tag { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--orange); margin-bottom: 16px; display: block; }
+.mission-text h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,4vw,52px); font-weight: 700; letter-spacing: -2px; line-height: 1.1; color: var(--black); margin-bottom: 24px; }
+.mission-text h2 em { font-style: italic; color: var(--orange); }
+.mission-text p { font-size: 16px; color: var(--gray); line-height: 1.8; font-weight: 300; margin-bottom: 16px; }
+.mission-text p strong { color: var(--black); font-weight: 500; }
+.mission-facts { display: flex; flex-direction: column; gap: 16px; }
+.fact-card { background: var(--gray-light); border-radius: 20px; padding: 28px 32px; display: flex; gap: 20px; align-items: flex-start; border: 1px solid var(--border); transition: border-color 0.2s, transform 0.2s; }
+.fact-card:hover { border-color: var(--orange-light); transform: translateX(4px); }
+.fact-num { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; color: var(--orange); letter-spacing: -1px; line-height: 1; white-space: nowrap; }
+.fact-text { font-size: 14px; color: var(--gray); line-height: 1.6; font-weight: 300; padding-top: 4px; }
+.fact-text strong { color: var(--black); font-weight: 500; display: block; margin-bottom: 2px; font-size: 15px; }
+
+/* HOW IT WORKS */
+.how { padding: 100px 5%; background: var(--gray-light); }
+.section-header { text-align: center; margin-bottom: 60px; }
+.section-header h2 { font-family: 'Fraunces', serif; font-size: clamp(30px,4vw,48px); font-weight: 700; letter-spacing: -1.5px; line-height: 1.1; color: var(--black); margin-bottom: 14px; }
+.section-header p { font-size: 16px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 500px; margin: 0 auto; }
+.how-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; background: var(--border); border-radius: 24px; overflow: hidden; }
+.how-card { background: var(--white); padding: 40px 32px; transition: background 0.2s; }
+.how-card:hover { background: var(--orange-pale); }
+.how-step { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 700; color: var(--border); line-height: 1; margin-bottom: 16px; letter-spacing: -2px; }
+.how-icon { font-size: 36px; margin-bottom: 14px; display: block; }
+.how-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--black); margin-bottom: 10px; letter-spacing: -0.5px; }
+.how-desc { font-size: 14px; color: var(--gray); line-height: 1.7; font-weight: 300; }
+
+/* FIND FOOD */
+.find-food { padding: 120px 5%; }
+.find-food-inner { max-width: 700px; margin: 0 auto; text-align: center; }
+.find-food-inner h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,4vw,52px); font-weight: 700; letter-spacing: -2px; line-height: 1.1; margin-bottom: 14px; }
+.find-food-inner h2 em { font-style: italic; color: var(--orange); }
+.find-food-inner > p { font-size: 16px; color: var(--gray); font-weight: 300; line-height: 1.7; margin-bottom: 40px; }
+.pincode-box { display: flex; background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: border-color 0.2s; }
+.pincode-box:focus-within { border-color: var(--orange); }
+.pincode-input { flex: 1; padding: 18px 20px; font-size: 16px; border: none; outline: none; background: transparent; font-family: 'DM Sans', sans-serif; color: var(--black); }
+.pincode-input::placeholder { color: #BBBAB6; }
+.pincode-btn { background: var(--orange); color: white; border: none; padding: 16px 28px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+.pincode-btn:hover { background: var(--orange-dark); }
+.store-results { display: none; text-align: left; }
+.store-results.visible { display: block; }
+.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.results-title { font-size: 15px; font-weight: 500; color: var(--black); }
+.results-count { font-size: 13px; color: var(--gray); }
+.store-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.store-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: all 0.2s; cursor: pointer; }
+.store-card:hover { border-color: var(--orange-light); box-shadow: 0 4px 16px rgba(244,98,31,0.1); transform: translateY(-1px); }
+.store-emoji { width: 52px; height: 52px; border-radius: 12px; background: var(--orange-pale); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.store-info { flex: 1; }
+.store-name { font-size: 15px; font-weight: 500; color: var(--black); margin-bottom: 3px; }
+.store-meta { font-size: 13px; color: var(--gray); font-weight: 300; }
+.store-right { text-align: right; flex-shrink: 0; }
+.store-bags { font-size: 13px; font-weight: 500; color: var(--green); margin-bottom: 2px; }
+.store-pickup { font-size: 12px; color: var(--gray); }
+.app-nudge { background: var(--black); border-radius: 20px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.app-nudge-text .t { font-size: 16px; font-weight: 500; color: white; margin-bottom: 4px; }
+.app-nudge-text .s { font-size: 13px; color: rgba(255,255,255,0.45); font-weight: 300; }
+.app-nudge-btn { background: var(--orange); color: white; border: none; padding: 12px 22px; border-radius: 100px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: background 0.2s; text-decoration: none; display: inline-block; }
+.app-nudge-btn:hover { background: var(--orange-dark); }
+
+/* FOR BUSINESS */
+.business { padding: 120px 5%; background: var(--black); }
+.business-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.business-text h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,4vw,52px); font-weight: 700; letter-spacing: -2px; line-height: 1.1; color: white; margin-bottom: 20px; }
+.business-text h2 em { font-style: italic; color: var(--orange); }
+.business-text p { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.8; font-weight: 300; margin-bottom: 28px; }
+.tag-light { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--orange); margin-bottom: 16px; display: block; }
+.perks { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+.perk { display: flex; gap: 14px; align-items: flex-start; }
+.perk-dot { width: 22px; height: 22px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; flex-shrink: 0; margin-top: 2px; }
+.perk-text { font-size: 15px; color: rgba(255,255,255,0.7); font-weight: 300; line-height: 1.6; }
+.perk-text strong { color: white; font-weight: 500; }
+.btn-signup { display: inline-flex; align-items: center; gap: 10px; background: var(--orange); color: white; padding: 16px 32px; border-radius: 100px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+.btn-signup:hover { background: var(--orange-dark); transform: translateY(-2px); }
+.biz-visual { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 36px; }
+.bv-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: white; margin-bottom: 6px; }
+.bv-sub { font-size: 14px; color: rgba(255,255,255,0.35); font-weight: 300; margin-bottom: 28px; }
+.bv-steps { display: flex; flex-direction: column; gap: 0; }
+.bv-step { display: flex; gap: 16px; align-items: flex-start; padding-bottom: 24px; position: relative; }
+.bv-step:last-child { padding-bottom: 0; }
+.bv-line { position: absolute; left: 15px; top: 32px; bottom: 0; width: 1px; background: rgba(255,255,255,0.08); }
+.bv-step:last-child .bv-line { display: none; }
+.bv-num { width: 32px; height: 32px; border-radius: 50%; background: rgba(244,98,31,0.15); border: 1px solid rgba(244,98,31,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--orange); flex-shrink: 0; }
+.bv-info { flex: 1; padding-top: 5px; }
+.bv-info-t { font-size: 14px; font-weight: 500; color: white; margin-bottom: 3px; }
+.bv-info-d { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 300; line-height: 1.5; }
+
+/* IMPACT */
+.impact { padding: 120px 5%; text-align: center; }
+.impact h2 { font-family: 'Fraunces', serif; font-size: clamp(30px,4vw,48px); font-weight: 700; letter-spacing: -1.5px; color: var(--black); margin-bottom: 14px; }
+.impact > p { font-size: 16px; color: var(--gray); font-weight: 300; line-height: 1.7; max-width: 500px; margin: 0 auto; }
+.impact-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 60px; }
+.impact-card { padding: 40px 28px; border: 1px solid var(--border); border-radius: 24px; transition: border-color 0.2s, transform 0.2s; }
+.impact-card:hover { border-color: var(--orange-light); transform: translateY(-4px); }
+.impact-icon { font-size: 36px; margin-bottom: 16px; }
+.impact-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--black); margin-bottom: 10px; letter-spacing: -0.5px; }
+.impact-desc { font-size: 14px; color: var(--gray); line-height: 1.7; font-weight: 300; }
+
+/* FINAL CTA */
+.final-cta { margin: 0 5% 100px; background: var(--orange); border-radius: 32px; padding: 80px 60px; text-align: center; position: relative; overflow: hidden; }
+.final-cta::before { content:''; position:absolute; left:-60px; top:-60px; width:300px; height:300px; background:rgba(255,255,255,0.07); border-radius:50%; }
+.final-cta::after { content:''; position:absolute; right:40px; bottom:-80px; width:220px; height:220px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.final-cta h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,56px); font-weight: 700; color: white; letter-spacing: -2px; line-height: 1.1; margin-bottom: 14px; position: relative; z-index: 1; }
+.final-cta h2 em { font-style: italic; opacity: 0.8; }
+.final-cta p { font-size: 17px; color: rgba(255,255,255,0.7); font-weight: 300; margin-bottom: 36px; position: relative; z-index: 1; }
+.final-cta-btns { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; position: relative; z-index: 1; }
+.btn-white { display: inline-flex; align-items: center; gap: 10px; background: white; color: var(--orange); padding: 16px 32px; border-radius: 100px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+.btn-white:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+.btn-outline-white { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: white; padding: 15px 30px; border-radius: 100px; border: 1.5px solid rgba(255,255,255,0.4); font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+.btn-outline-white:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+/* FOOTER */
+footer { background: var(--black); padding: 60px 5% 40px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 48px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 32px; }
+.footer-logo { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: white; margin-bottom: 10px; }
+.footer-logo span { color: var(--orange); }
+.footer-tagline { font-size: 14px; color: rgba(255,255,255,0.35); font-weight: 300; line-height: 1.6; max-width: 220px; }
+.footer-col-title { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 10px; }
+.footer-links a { font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; font-weight: 300; transition: color 0.2s; }
+.footer-links a:hover { color: white; }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; }
+.footer-copy { font-size: 13px; color: rgba(255,255,255,0.25); font-weight: 300; }
+.footer-copy span { color: var(--orange); }
+
+/* POPUP */
+.app-popup { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(15,13,11,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 24px; }
+.app-popup.open { display: flex; }
+.popup-card { background: var(--white); border-radius: 28px; padding: 40px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.2); animation: popIn 0.3s ease; }
+@keyframes popIn { from{opacity:0;transform:scale(0.92) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.popup-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--gray-light); border: none; cursor: pointer; font-size: 16px; color: var(--gray); display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.popup-close:hover { background: var(--border); }
+.popup-emoji { font-size: 52px; margin-bottom: 12px; }
+.popup-store { font-size: 13px; font-weight: 500; color: var(--orange); margin-bottom: 8px; }
+.popup-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; letter-spacing: -1px; color: var(--black); margin-bottom: 12px; line-height: 1.2; }
+.popup-desc { font-size: 14px; color: var(--gray); line-height: 1.7; font-weight: 300; margin-bottom: 24px; }
+.popup-info { background: var(--orange-pale); border: 1px solid #F4C9B0; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; display: flex; gap: 12px; align-items: flex-start; text-align: left; }
+.popup-info-icon { font-size: 20px; }
+.popup-info-text { font-size: 13px; color: var(--orange-dark); font-weight: 300; line-height: 1.5; }
+.popup-info-text strong { font-weight: 500; display: block; margin-bottom: 2px; }
+.popup-btn { width: 100%; background: var(--orange); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; margin-bottom: 10px; }
+.popup-btn:hover { background: var(--orange-dark); }
+.popup-note { font-size: 12px; color: var(--gray); font-weight: 300; }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  nav { padding: 0 4%; }
+  .nav-links { display: none; }
+  .waste-strip { grid-template-columns: 1fr; }
+  .waste-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .mission { grid-template-columns: 1fr; gap: 48px; }
+  .how-grid { grid-template-columns: 1fr; }
+  .business-inner { grid-template-columns: 1fr; gap: 48px; }
+  .impact-grid { grid-template-columns: 1fr; }
+  .final-cta { padding: 52px 32px; margin: 0 4% 60px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .app-nudge { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Grab It <span>Good</span></a>
+  <ul class="nav-links">
+    <li><a href="#mission">Our Mission</a></li>
+    <li><a href="#find-food">Find Food</a></li>
+    <li><a href="#business" class="nav-btn-outline">For Business</a></li>
+    <li><a href="#find-food" class="nav-btn">Get the App</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-eyebrow">
+    <span class="hero-eyebrow-dot"></span>
+    Fighting food waste in India — starting now
+  </div>
+  <h1>Good food.<br>Not <em>waste.</em></h1>
+  <p class="hero-sub">Rescue it. Eat it. Save the planet.</p>
+  <p class="hero-desc">Every night, restaurants and stores across India throw away <strong>perfectly good, freshly made food</strong> — simply because the day ended. We connect that food with people who want it, at half the price.</p>
+  <div class="hero-actions">
+    <a href="#find-food" class="btn-orange">🍱 Find Food Near Me</a>
+    <a href="business-signup.html" class="btn-dark">🏪 List Your Store</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- WASTE NUMBERS -->
+<div class="waste-strip">
+  <div class="waste-item fade-up">
+    <div class="waste-num">40%</div>
+    <div class="waste-lbl">of all food produced<br>in India goes to waste</div>
+  </div>
+  <div class="waste-item fade-up">
+    <div class="waste-num">₹92K Cr</div>
+    <div class="waste-lbl">worth of food wasted<br>in India every year</div>
+  </div>
+  <div class="waste-item fade-up">
+    <div class="waste-num">50%</div>
+    <div class="waste-lbl">off every item —<br>always, on our app</div>
+  </div>
+</div>
+
+<!-- MISSION -->
+<section class="mission" id="mission">
+  <div class="mission-text fade-up">
+    <span class="tag">Our Mission</span>
+    <h2>Good food deserves a <em>second chance.</em></h2>
+    <p>India wastes millions of tonnes of food every year. Not because it's bad — but because <strong>restaurants, bakeries and stores couldn't sell it in time.</strong> That food is fresh. Cooked today. Perfectly good.</p>
+    <p>We built Grab It Good because <strong>no good food should ever go to waste</strong> when someone nearby would love to eat it. Every bag you grab is a meal saved, money in your pocket, and a step toward a healthier planet.</p>
+  </div>
+  <div class="mission-facts fade-up">
+    <div class="fact-card">
+      <div class="fact-num">1 in 3</div>
+      <div class="fact-text"><strong>meals produced globally is thrown away</strong> while 800 million people go hungry every day. This is a problem we can actually fix.</div>
+    </div>
+    <div class="fact-card">
+      <div class="fact-num">10%</div>
+      <div class="fact-text"><strong>of all greenhouse gas emissions come from food waste.</strong> Rescuing food is one of the single most impactful climate actions anyone can take.</div>
+    </div>
+    <div class="fact-card">
+      <div class="fact-num">0</div>
+      <div class="fact-text"><strong>expired or old food — ever.</strong> Every item on Grab It Good is surplus from that same day. Made fresh, ready to eat, just unsold.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how fade-up">
+  <div class="section-header">
+    <span class="tag" style="color:var(--orange)">How it works</span>
+    <h2>Three steps to rescue<br>great food tonight.</h2>
+    <p>No complicated process. No delivery wait. Just walk in, grab your food, and feel good about it.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-step">01</div>
+      <span class="how-icon">📍</span>
+      <div class="how-title">Find stores nearby</div>
+      <p class="how-desc">Enter your pincode on the website to browse nearby stores and restaurants with surplus food available today. See what's near you right now.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step">02</div>
+      <span class="how-icon">📱</span>
+      <div class="how-title">Order on the app</div>
+      <p class="how-desc">Download the Grab It Good app to place your order and pay. You'll instantly get a simple 4-digit pickup code — no QR scanner, no hassle.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step">03</div>
+      <span class="how-icon">🎉</span>
+      <div class="how-title">Walk in, say the code</div>
+      <p class="how-desc">Head to the store during the pickup window, tell the staff your 4-digit code, and collect your bag. Fresh food at half price. You just saved a meal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FIND FOOD -->
+<section class="find-food" id="find-food">
+  <div class="find-food-inner">
+    <span class="tag fade-up" style="color:var(--orange)">Find Food Near You</span>
+    <h2 class="fade-up">What's available<br><em>near you tonight?</em></h2>
+    <p class="fade-up">Enter your pincode to see nearby stores with food available. To place an order, download the app — it takes 2 minutes.</p>
+
+    <div class="pincode-box fade-up">
+      <input class="pincode-input" id="pincode-input" type="text" inputmode="numeric" maxlength="6" placeholder="Enter your 6-digit pincode — e.g. 502103">
+      <button class="pincode-btn" onclick="searchPincode()">Search →</button>
+    </div>
+
+    <div class="store-results" id="store-results">
+      <div class="results-header">
+        <span class="results-title" id="results-title"></span>
+        <span class="results-count" id="results-count"></span>
+      </div>
+      <div class="store-cards" id="store-cards"></div>
+      <div class="app-nudge">
+        <div class="app-nudge-text">
+          <div class="t">Ready to order? Download the app</div>
+          <div class="s">Payments, your 4-digit code & order tracking — all on mobile</div>
+        </div>
+        <a href="#" class="app-nudge-btn">📱 Download App</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOR BUSINESS -->
+<section class="business" id="business">
+  <div class="business-inner">
+    <div class="business-text fade-up">
+      <span class="tag-light">For Restaurants & Stores</span>
+      <h2>Turn what's left into <em>something good.</em></h2>
+      <p>You work hard every day to prepare great food. Don't let it go to waste at closing time. List your surplus on Grab It Good and turn today's leftovers into tomorrow's goodwill — and real money back in your pocket.</p>
+      <div class="perks">
+        <div class="perk">
+          <div class="perk-dot">✓</div>
+          <div class="perk-text"><strong>Earn back from unsold food</strong> — money that would have been a complete loss</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot">✓</div>
+          <div class="perk-text"><strong>Reach new customers</strong> who discover your store and return regularly</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot">✓</div>
+          <div class="perk-text"><strong>Simple 4-digit code pickup</strong> — no complicated tech, no QR scanner needed</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot">✓</div>
+          <div class="perk-text"><strong>List in 10 seconds</strong> — open the app, set how many bags, done</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot">✓</div>
+          <div class="perk-text"><strong>Build a reputation</strong> — customers love and respect businesses that care about the planet</div>
+        </div>
+      </div>
+      <a href="business-signup.html" class="btn-signup">Sign Up as a Business →</a>
+    </div>
+
+    <div class="biz-visual fade-up">
+      <div class="bv-title">From signup to first sale</div>
+      <div class="bv-sub">Under 24 hours to get started</div>
+      <div class="bv-steps">
+        <div class="bv-step">
+          <div class="bv-line"></div>
+          <div class="bv-num">1</div>
+          <div class="bv-info">
+            <div class="bv-info-t">Register your business</div>
+            <div class="bv-info-d">Fill in your store name, location, food type and contact details. Takes 3 minutes.</div>
+          </div>
+        </div>
+        <div class="bv-step">
+          <div class="bv-line"></div>
+          <div class="bv-num">2</div>
+          <div class="bv-info">
+            <div class="bv-info-t">We verify and activate your listing</div>
+            <div class="bv-info-d">Our team reviews your application and activates your store profile within 24 hours.</div>
+          </div>
+        </div>
+        <div class="bv-step">
+          <div class="bv-line"></div>
+          <div class="bv-num">3</div>
+          <div class="bv-info">
+            <div class="bv-info-t">List your surplus every day</div>
+            <div class="bv-info-d">Each day, open the partner app and set how many bags you have. Nearby customers see it instantly.</div>
+          </div>
+        </div>
+        <div class="bv-step">
+          <div class="bv-line"></div>
+          <div class="bv-num">4</div>
+          <div class="bv-info">
+            <div class="bv-info-t">Confirm pickups with a 4-digit code</div>
+            <div class="bv-info-d">Customer arrives, says their code, you confirm on the app. Bag handed over. Zero friction.</div>
+          </div>
+        </div>
+        <div class="bv-step">
+          <div class="bv-num">5</div>
+          <div class="bv-info">
+            <div class="bv-info-t">Get paid directly every week</div>
+            <div class="bv-info-d">Your earnings go straight to your bank account every week, automatically.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section class="impact fade-up">
+  <span class="tag" style="color:var(--orange);margin-bottom:14px;">Why it matters</span>
+  <h2>Every bag saved makes<br>a real difference.</h2>
+  <p>This isn't just about saving money. It's about building a healthier planet, one meal at a time.</p>
+  <div class="impact-grid">
+    <div class="impact-card">
+      <div class="impact-icon">🌍</div>
+      <div class="impact-title">Less CO₂ in the air</div>
+      <div class="impact-desc">Food waste causes 10% of global greenhouse gas emissions. Every rescued bag directly reduces that number.</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-icon">💧</div>
+      <div class="impact-title">Billions of litres saved</div>
+      <div class="impact-desc">Producing food takes enormous water. Eating food that's already been made means zero extra water wasted.</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-icon">🤝</div>
+      <div class="impact-title">Community fed</div>
+      <div class="impact-desc">Great food at half the price means more families in your community can access quality meals every day.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="final-cta fade-up">
+  <h2>Start grabbing.<br><em>Stop wasting.</em></h2>
+  <p>Download the app to find and order food near you. Or list your store and start making a difference today.</p>
+  <div class="final-cta-btns">
+    <a href="#" class="btn-white">📱 Download the App</a>
+    <a href="business-signup.html" class="btn-outline-white">🏪 List Your Store</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Grab It <span>Good</span></div>
+      <div class="footer-tagline">Good food. Not waste. Starting in Siddipet, growing across India.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">For Customers</div>
+      <ul class="footer-links">
+        <li><a href="#find-food">Find food near me</a></li>
+        <li><a href="#">Download app</a></li>
+        <li><a href="#mission">Our mission</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">For Business</div>
+      <ul class="footer-links">
+        <li><a href="business-signup.html">Sign up as a store</a></li>
+        <li><a href="#">Partner login</a></li>
+        <li><a href="#">Contact us</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#mission">About us</a></li>
+        <li><a href="#">Privacy policy</a></li>
+        <li><a href="#">Terms of use</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Grab It Good. Made with <span>♥</span> in Siddipet, India.</div>
+    <div class="footer-copy">grabitgood.com</div>
+  </div>
+</footer>
+
+<!-- POPUP -->
+<div class="app-popup" id="app-popup">
+  <div class="popup-card">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <div class="popup-emoji" id="popup-emoji">🍕</div>
+    <div class="popup-store" id="popup-store"></div>
+    <div class="popup-title">Order this on<br>the Grab It Good app</div>
+    <div class="popup-desc">You can browse stores here on the website — but to place your order and get your pickup code, you need the app.</div>
+    <div class="popup-info">
+      <div class="popup-info-icon">🔢</div>
+      <div class="popup-info-text">
+        <strong>Simple 4-digit pickup code</strong>
+        After ordering on the app you get a 4-digit code. Walk to the store, tell the staff your code, collect your food. No QR, no hassle.
+      </div>
+    </div>
+    <button class="popup-btn">📱 Download App to Order</button>
+    <div class="popup-note">Free to download · Android & iOS</div>
+  </div>
+</div>
+
+<script>
+const stores = {
+  "502103": [
+    { e:"🍕", n:"Pizza Junction", t:"Restaurant", d:"0.3 km", b:4, p:"8–9 PM" },
+    { e:"🥐", n:"Sunrise Bakery", t:"Bakery", d:"0.5 km", b:6, p:"7–8 PM" },
+    { e:"🍱", n:"Spice Garden", t:"Restaurant", d:"0.8 km", b:3, p:"9–10 PM" },
+    { e:"🧁", n:"Sweet Corner", t:"Bakery & Sweets", d:"1.1 km", b:8, p:"6–7 PM" },
+  ],
+  "502001": [
+    { e:"🍛", n:"Andhra Bhavan", t:"Restaurant", d:"0.4 km", b:5, p:"9–10 PM" },
+    { e:"☕", n:"Morning Brew", t:"Café & Bakery", d:"0.6 km", b:3, p:"7–8 PM" },
+  ]
+};
+
+function searchPincode() {
+  const pin = document.getElementById('pincode-input').value.trim();
+  if (pin.length !== 6 || isNaN(pin)) {
+    document.getElementById('pincode-input').style.outline = '2px solid var(--orange)';
+    document.getElementById('pincode-input').placeholder = 'Please enter a valid 6-digit pincode';
+    return;
+  }
+  document.getElementById('pincode-input').style.outline = '';
+  const list = stores[pin] || [];
+  const cardsEl = document.getElementById('store-cards');
+  const resultsEl = document.getElementById('store-results');
+  cardsEl.innerHTML = '';
+  if (list.length === 0) {
+    document.getElementById('results-title').textContent = 'Coming soon to ' + pin;
+    document.getElementById('results-count').textContent = '';
+    cardsEl.innerHTML = `<div style="background:var(--orange-pale);border:1px solid #F4C9B0;border-radius:16px;padding:28px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🚀</div>
+      <div style="font-size:15px;font-weight:500;color:var(--orange-dark);margin-bottom:8px;">We're heading your way soon!</div>
+      <div style="font-size:14px;color:var(--gray);font-weight:300;line-height:1.6;">We're onboarding stores in your area. Download the app to get notified the moment we go live near you.</div>
+    </div>`;
+  } else {
+    document.getElementById('results-title').textContent = 'Stores near ' + pin;
+    document.getElementById('results-count').textContent = list.length + ' stores with food available';
+    list.forEach(s => {
+      const c = document.createElement('div');
+      c.className = 'store-card';
+      c.innerHTML = `<div class="store-emoji">${s.e}</div><div class="store-info"><div class="store-name">${s.n}</div><div class="store-meta">${s.t} · ${s.d} away</div></div><div class="store-right"><div class="store-bags">🛍 ${s.b} bags left</div><div class="store-pickup">Pickup ${s.p}</div></div>`;
+      c.onclick = () => openPopup(s);
+      cardsEl.appendChild(c);
+    });
+  }
+  resultsEl.classList.add('visible');
+  setTimeout(() => resultsEl.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+
+function openPopup(s) {
+  document.getElementById('popup-emoji').textContent = s.e;
+  document.getElementById('popup-store').textContent = s.n + ' · ' + s.b + ' bags left · Pickup ' + s.p;
+  document.getElementById('app-popup').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePopup() {
+  document.getElementById('app-popup').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('app-popup').addEventListener('click', function(e) { if(e.target===this) closePopup(); });
+document.getElementById('pincode-input').addEventListener('keydown', e => { if(e.key==='Enter') searchPincode(); });
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'), i*80); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

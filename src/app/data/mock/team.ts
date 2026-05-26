@@ -1,0 +1,50 @@
+import type { TeamMember } from '../../types/team';
+import { currentPartner } from './partners';
+
+export const teamMembers: TeamMember[] = [
+  {
+    id: 'team-asha-menon',
+    partnerId: currentPartner.id,
+    name: 'Asha Menon',
+    role: 'Business owner',
+    emailMasked: 'asha@hearthbakehouse.in',
+    phoneMasked: '+91 98765 44***',
+    outletAccess: currentPartner.outlets.map((outlet) => outlet.name),
+    status: 'active',
+    permissions: ['listings', 'orders', 'payouts', 'settings'],
+  },
+  {
+    id: 'team-ravi-nair',
+    partnerId: currentPartner.id,
+    name: 'Ravi Nair',
+    role: 'Outlet manager',
+    emailMasked: 'ravi.n***@hearthbakehouse.in',
+    phoneMasked: '+91 90523 18***',
+    outletAccess: [currentPartner.outlets[0].name],
+    status: 'active',
+    permissions: ['listings', 'orders'],
+  },
+  {
+    id: 'team-neha-rao',
+    partnerId: currentPartner.id,
+    name: 'Neha Rao',
+    role: 'Finance coordinator',
+    emailMasked: 'finance.***@hearthbakehouse.in',
+    phoneMasked: '+91 98110 54***',
+    outletAccess: currentPartner.outlets.map((outlet) => outlet.name),
+    status: 'invited',
+    permissions: ['payouts'],
+    inviteSentLabel: 'Invite sent yesterday',
+  },
+  {
+    id: 'team-imran-shaikh',
+    partnerId: currentPartner.id,
+    name: 'Imran Shaikh',
+    role: 'Shift supervisor',
+    emailMasked: 'ops.***@hearthbakehouse.in',
+    phoneMasked: '+91 97035 22***',
+    outletAccess: [currentPartner.outlets[1].name],
+    status: 'suspended',
+    permissions: ['orders'],
+  },
+];

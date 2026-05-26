@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Grab It Good</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#00A661;--green-dark:#008A51;--green-pale:#E8F5E9;--green-light:#F8FFF6;--black:#212121;--gray:#5A5A5A;--gray2:#9E9E9E;--border:#E0E0E0;--red:#FF3B30;--white:#fff}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(to bottom,var(--green-light),var(--white));min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 5%;color:var(--black);-webkit-font-smoothing:antialiased}
+.wrap{max-width:480px;width:100%}
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;text-decoration:none}
+.logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:12px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--black)}
+.logo-text span{color:var(--green)}
+.page-header{text-align:center;margin-bottom:32px}
+.page-title{font-family:'Fraunces',serif;font-size:clamp(28px,5vw,38px);font-weight:700;color:var(--black);letter-spacing:-1.5px;margin-bottom:6px}
+.page-sub{font-size:15px;color:var(--gray)}
+/* Tabs */
+.tabs{display:flex;background:#F5F5F5;border-radius:100px;padding:4px;margin-bottom:28px}
+.tab{flex:1;padding:10px;border:none;background:transparent;font-size:15px;font-weight:600;color:var(--gray2);cursor:pointer;border-radius:100px;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab.active{background:var(--white);color:var(--black);box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.card{background:var(--white);border-radius:24px;border:2px solid var(--border);padding:40px;box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+.panel{display:none}
+.panel.show{display:block}
+/* Segmented method */
+.method-tabs{display:flex;gap:8px;margin-bottom:20px}
+.method-tab{flex:1;padding:10px;border:2px solid var(--border);background:var(--white);border-radius:10px;font-size:14px;font-weight:600;color:var(--gray);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px}
+.method-tab.active{border-color:var(--green);color:var(--green);background:var(--green-pale)}
+.field{margin-bottom:16px}
+label{display:block;font-size:14px;font-weight:600;color:var(--black);margin-bottom:8px}
+input{width:100%;padding:15px 20px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--black);outline:none;transition:border-color .2s;background:var(--white)}
+input:focus{border-color:var(--green)}
+input::placeholder{color:var(--gray2)}
+.phone-wrap{display:flex;gap:0;border:2px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.phone-wrap:focus-within{border-color:var(--green)}
+.phone-code{padding:15px 14px;background:#F5F5F5;font-size:15px;font-weight:600;color:var(--black);border-right:2px solid var(--border);white-space:nowrap;flex-shrink:0}
+.phone-wrap input{border:none;border-radius:0;padding:15px 16px}
+.phone-wrap input:focus{border:none}
+.pass-hint{font-size:12px;color:var(--gray);margin-top:6px}
+.btn-green{width:100%;background:var(--green);color:white;border:none;padding:16px;border-radius:100px;font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 4px 12px rgba(0,166,97,0.25);margin-bottom:0}
+.btn-green:hover{background:var(--green-dark)}
+.btn-green:disabled{background:var(--border);color:var(--gray2);box-shadow:none;cursor:not-allowed}
+.divider{position:relative;margin:20px 0;text-align:center}
+.divider::before{content:'';position:absolute;left:0;right:0;top:50%;border-top:2px solid var(--border)}
+.divider span{position:relative;background:var(--white);padding:0 14px;font-size:13px;color:var(--gray2)}
+/* OTP screen */
+.otp-wrap{text-align:center;padding:8px 0}
+.otp-icon{font-size:48px;margin-bottom:16px}
+.otp-title{font-size:20px;font-weight:700;color:var(--black);margin-bottom:6px}
+.otp-sub{font-size:14px;color:var(--gray);line-height:1.6;margin-bottom:24px}
+.otp-sub strong{color:var(--black)}
+.otp-inputs{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.otp-box{width:52px!important;height:52px;text-align:center;font-size:20px;font-weight:700;padding:0!important;border-radius:12px;border:2px solid var(--border)!important}
+.otp-box:focus{border-color:var(--green)!important}
+.resend-row{font-size:13px;color:var(--gray);margin-bottom:20px}
+.resend-btn{background:none;border:none;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;padding:0}
+.back-link{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--gray);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:20px;padding:0;transition:color .2s}
+.back-link:hover{color:var(--green)}
+/* Terms note */
+.terms-note{font-size:12px;color:var(--gray2);text-align:center;margin-top:16px;line-height:1.6}
+.terms-note a{color:var(--green)}
+/* Footer */
+.switch-row{text-align:center;margin-top:24px;font-size:14px;color:var(--gray)}
+.switch-btn{background:none;border:none;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;padding:0}
+.switch-btn:hover{text-decoration:underline}
+.footer-link{text-align:center;margin-top:16px;font-size:13px;color:var(--gray2)}
+.footer-link a{color:var(--green);font-weight:600;text-decoration:none}
+/* Social btns */
+.social-btn{width:100%;background:var(--white);border:2px solid var(--border);border-radius:100px;padding:14px;font-size:15px;font-weight:600;color:var(--black);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;transition:border-color .2s;margin-bottom:10px}
+.social-btn:hover{border-color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="grabitgood.html" class="logo">
+    <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.5 8.5L22 9.5L17 14.5L18 21L12 18L6 21L7 14.5L2 9.5L8.5 8.5L12 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+    <span class="logo-text">Grab It <span>Good</span></span>
+  </a>
+
+  <div class="page-header">
+    <h1 class="page-title" id="auth-title">Welcome back</h1>
+    <p class="page-sub" id="auth-sub">Sign in to find great food near you</p>
+  </div>
+
+  <!-- Login / Signup tabs -->
+  <div class="tabs" id="auth-tabs">
+    <button class="tab active" id="tab-login" onclick="switchAuth('login')">Sign In</button>
+    <button class="tab" id="tab-signup" onclick="switchAuth('signup')">Create Account</button>
+  </div>
+
+  <div class="card">
+
+    <!-- LOGIN PANEL -->
+    <div class="panel show" id="login-panel">
+      <div class="method-tabs">
+        <button class="method-tab active" id="lm-email" onclick="switchLoginMethod('email')">✉️ Email</button>
+        <button class="method-tab" id="lm-phone" onclick="switchLoginMethod('phone')">📱 Phone</button>
+      </div>
+
+      <!-- Email login -->
+      <div id="login-email-form">
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="le-email" placeholder="you@example.com" oninput="checkLoginEmail()">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="le-pass" placeholder="Enter your password" oninput="checkLoginEmail()">
+        </div>
+        <div style="text-align:right;margin-bottom:16px">
+          <button onclick="showForgot()" style="background:none;border:none;font-size:13px;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0">Forgot password?</button>
+        </div>
+        <button class="btn-green" id="le-btn" onclick="doLogin()" disabled>Sign In</button>
+      </div>
+
+      <!-- Phone login -->
+      <div id="login-phone-form" style="display:none">
+        <div class="field">
+          <label>Phone number</label>
+          <div class="phone-wrap"><span class="phone-code">🇮🇳 +91</span><input type="tel" id="lp-phone" placeholder="98765 43210"></div>
+        </div>
+        <button class="btn-green" onclick="sendPhoneOTP('login')">Send OTP</button>
+      </div>
+
+      <div class="divider"><span>OR</span></div>
+      <button class="social-btn"><span style="font-size:18px">G</span> Continue with Google</button>
+    </div>
+
+    <!-- SIGNUP PANEL -->
+    <div class="panel" id="signup-panel">
+      <div class="method-tabs">
+        <button class="method-tab active" id="sm-email" onclick="switchSignupMethod('email')">✉️ Email</button>
+        <button class="method-tab" id="sm-phone" onclick="switchSignupMethod('phone')">📱 Phone</button>
+      </div>
+
+      <!-- Email signup -->
+      <div id="signup-email-form">
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" id="se-name" placeholder="Your full name" oninput="checkSignupEmail()">
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="se-email" placeholder="you@example.com" oninput="checkSignupEmail()">
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <div class="phone-wrap"><span class="phone-code">🇮🇳 +91</span><input type="tel" id="se-phone" placeholder="98765 43210" oninput="checkSignupEmail()"></div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="se-pass" placeholder="At least 8 characters" oninput="checkSignupEmail()">
+          <div class="pass-hint">At least 8 characters with letters and numbers</div>
+        </div>
+        <button class="btn-green" id="se-btn" onclick="sendEmailVerification()" disabled>Create Account</button>
+        <div class="terms-note">By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="privacy-policy.html">Privacy Policy</a>. No cash on delivery — all payments are made in-app.</div>
+      </div>
+
+      <!-- Phone signup -->
+      <div id="signup-phone-form" style="display:none">
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" id="sp-name" placeholder="Your full name">
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <div class="phone-wrap"><span class="phone-code">🇮🇳 +91</span><input type="tel" id="sp-phone" placeholder="98765 43210"></div>
+        </div>
+        <button class="btn-green" onclick="sendPhoneOTP('signup')">Send OTP</button>
+        <div class="terms-note" style="margin-top:16px">By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="privacy-policy.html">Privacy Policy</a>.</div>
+      </div>
+
+      <div class="divider"><span>OR</span></div>
+      <button class="social-btn"><span style="font-size:18px">G</span> Continue with Google</button>
+    </div>
+
+    <!-- OTP VERIFICATION PANEL -->
+    <div class="panel" id="otp-panel">
+      <button class="back-link" onclick="goBackFromOTP()">← Back</button>
+      <div class="otp-wrap">
+        <div class="otp-icon" id="otp-icon">📱</div>
+        <div class="otp-title" id="otp-title">Verify your phone</div>
+        <div class="otp-sub" id="otp-sub">Enter the 6-digit code sent to<br><strong id="otp-dest"></strong></div>
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,0)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,1)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,2)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,3)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,4)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,5)">
+        </div>
+        <div class="resend-row">Didn't receive it? <button class="resend-btn">Resend code</button></div>
+        <button class="btn-green" onclick="verifyOTP()">Verify & Continue</button>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD PANEL -->
+    <div class="panel" id="forgot-panel">
+      <button class="back-link" onclick="showPanel('login-panel')">← Back to sign in</button>
+      <div style="font-size:20px;font-weight:700;color:var(--black);margin-bottom:6px">Reset password</div>
+      <div style="font-size:14px;color:var(--gray);margin-bottom:24px">Enter your email and we'll send you a reset link.</div>
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="forgot-email" placeholder="you@example.com">
+      </div>
+      <button class="btn-green" onclick="sendForgot()">Send reset link</button>
+    </div>
+
+    <!-- FORGOT SENT -->
+    <div class="panel" id="forgot-sent-panel">
+      <div class="otp-wrap">
+        <div class="otp-icon">✉️</div>
+        <div class="otp-title">Check your email</div>
+        <div class="otp-sub">We sent a reset link to<br><strong id="forgot-sent-email"></strong></div>
+        <div class="resend-row">Didn't get it? <button class="resend-btn">Resend link</button></div>
+        <button class="btn-green" onclick="showPanel('login-panel')">Back to Sign In</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="switch-row" id="switch-row">
+    Don't have an account? <button class="switch-btn" id="switch-btn" onclick="switchAuth('signup')">Create one</button>
+  </div>
+  <div class="footer-link">
+    Are you a business? <a href="business-signup.html">Sign up as a partner →</a>
+  </div>
+</div>
+
+<script>
+let currentAuth = 'login';
+let otpContext = '';
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+
+function switchAuth(mode) {
+  currentAuth = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+  if (mode === 'login') {
+    document.getElementById('auth-title').textContent = 'Welcome back';
+    document.getElementById('auth-sub').textContent = 'Sign in to find great food near you';
+    document.getElementById('switch-btn').textContent = 'Create one';
+    document.getElementById('switch-row').innerHTML = "Don't have an account? <button class='switch-btn' onclick='switchAuth(\"signup\")'>Create one</button>";
+    showPanel('login-panel');
+  } else {
+    document.getElementById('auth-title').textContent = 'Create account';
+    document.getElementById('auth-sub').textContent = 'Start rescuing great food near you';
+    document.getElementById('switch-row').innerHTML = "Already have an account? <button class='switch-btn' onclick='switchAuth(\"login\")'>Sign in</button>";
+    showPanel('signup-panel');
+  }
+}
+
+function switchLoginMethod(m) {
+  document.getElementById('lm-email').classList.toggle('active', m === 'email');
+  document.getElementById('lm-phone').classList.toggle('active', m === 'phone');
+  document.getElementById('login-email-form').style.display = m === 'email' ? 'block' : 'none';
+  document.getElementById('login-phone-form').style.display = m === 'phone' ? 'block' : 'none';
+}
+
+function switchSignupMethod(m) {
+  document.getElementById('sm-email').classList.toggle('active', m === 'email');
+  document.getElementById('sm-phone').classList.toggle('active', m === 'phone');
+  document.getElementById('signup-email-form').style.display = m === 'email' ? 'block' : 'none';
+  document.getElementById('signup-phone-form').style.display = m === 'phone' ? 'block' : 'none';
+}
+
+function checkLoginEmail() {
+  const e = document.getElementById('le-email').value.trim();
+  const p = document.getElementById('le-pass').value;
+  document.getElementById('le-btn').disabled = !(e && p);
+}
+
+function checkSignupEmail() {
+  const n = document.getElementById('se-name').value.trim();
+  const e = document.getElementById('se-email').value.trim();
+  const ph = document.getElementById('se-phone').value.trim();
+  const p = document.getElementById('se-pass').value;
+  document.getElementById('se-btn').disabled = !(n && e && ph && p.length >= 8);
+}
+
+function sendEmailVerification() {
+  const email = document.getElementById('se-email').value;
+  otpContext = 'signup-email';
+  document.getElementById('otp-icon').textContent = '✉️';
+  document.getElementById('otp-title').textContent = 'Verify your email';
+  document.getElementById('otp-sub').innerHTML = 'Enter the 6-digit code sent to<br><strong>' + email + '</strong>';
+  document.getElementById('otp-dest').textContent = email;
+  showPanel('otp-panel');
+}
+
+function sendPhoneOTP(ctx) {
+  const phone = ctx === 'login'
+    ? document.getElementById('lp-phone').value
+    : document.getElementById('sp-phone').value;
+  otpContext = ctx + '-phone';
+  document.getElementById('otp-icon').textContent = '📱';
+  document.getElementById('otp-title').textContent = 'Verify your phone';
+  document.getElementById('otp-sub').innerHTML = 'Enter the 6-digit code sent to<br><strong>+91 ' + phone + '</strong>';
+  showPanel('otp-panel');
+}
+
+function goBackFromOTP() {
+  if (currentAuth === 'signup') showPanel('signup-panel');
+  else showPanel('login-panel');
+}
+
+function verifyOTP() {
+  window.location.href = 'customer-profile.html';
+}
+
+function doLogin() {
+  window.location.href = 'customer-profile.html';
+}
+
+function showForgot() { showPanel('forgot-panel'); }
+
+function sendForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return;
+  document.getElementById('forgot-sent-email').textContent = email;
+  showPanel('forgot-sent-panel');
+}
+
+function otpNext(el, idx) {
+  const boxes = document.querySelectorAll('.otp-box');
+  if (el.value && idx < 5) boxes[idx+1].focus();
+}
+</script>
+</body>
+</html>

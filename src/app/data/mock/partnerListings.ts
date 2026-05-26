@@ -1,0 +1,234 @@
+import type { PartnerListing } from '../../types/listing';
+import { getMockPartnerWorkspaceId, getMockPartnerWorkspaceOutlets, isSeedPartnerWorkspaceId } from './partners';
+
+export const MOCK_PARTNER_LISTINGS_KEY = 'gig-partner-listings';
+
+export const partnerListings: PartnerListing[] = [
+  {
+    id: 'listing-evening-bake-bag',
+    outletId: 'outlet-hearth-bakehouse-hitech',
+    title: 'Evening Bake Rescue Bag',
+    listingType: 'Surprise Bag',
+    category: 'Bakery',
+    originalPrice: 540,
+    rescuePrice: 189,
+    quantity: 8,
+    quantityLeft: 3,
+    pickupStart: '7:30 PM',
+    pickupEnd: '8:15 PM',
+    vegType: 'veg',
+    dietaryTags: ['Vegetarian', 'Baked fresh daily'],
+    allergenNote: 'Contains wheat, dairy, and may contain nuts.',
+    collectionInstructions: 'Keep packed bags ready at the takeaway counter and verify the pickup code at handover.',
+    status: 'live',
+    shortDescription: 'A same-day mix of breads, croissants, and pastry slices packed for evening pickup.',
+    createdAtLabel: 'Updated today',
+  },
+  {
+    id: 'listing-brunch-bread-box',
+    outletId: 'outlet-hearth-bakehouse-hitech',
+    title: 'Brunch Bread Box',
+    listingType: 'Fixed Meal Box',
+    category: 'Bakery',
+    originalPrice: 420,
+    rescuePrice: 169,
+    quantity: 6,
+    quantityLeft: 6,
+    pickupStart: '9:00 AM',
+    pickupEnd: '10:00 AM',
+    vegType: 'veg',
+    dietaryTags: ['Vegetarian'],
+    allergenNote: 'Contains wheat and dairy.',
+    collectionInstructions: 'Pre-pack the fixed box and store it behind the breakfast display.',
+    status: 'scheduled',
+    shortDescription: 'A predictable brunch box with focaccia, croissant, and sweet bread.',
+    createdAtLabel: 'Scheduled for tomorrow',
+  },
+  {
+    id: 'listing-cafe-snack-bag',
+    outletId: 'outlet-hearth-bakehouse-madhapur',
+    title: 'Cafe Snack Rescue Bag',
+    listingType: 'Surprise Bag',
+    category: 'Cafe Snacks',
+    originalPrice: 390,
+    rescuePrice: 149,
+    quantity: 10,
+    quantityLeft: 0,
+    pickupStart: '6:45 PM',
+    pickupEnd: '7:30 PM',
+    vegType: 'egg',
+    dietaryTags: ['Cafe snacks', 'Egg bakes possible'],
+    allergenNote: 'Contains wheat, dairy, and some items may contain egg.',
+    collectionInstructions: 'Separate egg items clearly and keep one pickup queue for quick handover.',
+    status: 'sold_out',
+    shortDescription: 'A mixed bag of sandwiches, savoury puffs, and one bakery item from the cafe counter.',
+    createdAtLabel: 'Sold out today',
+  },
+  {
+    id: 'listing-clean-lunch-box',
+    outletId: 'outlet-hearth-bakehouse-madhapur',
+    title: 'Clean Lunch Meal Box',
+    listingType: 'Fixed Meal Box',
+    category: 'Lunch',
+    originalPrice: 360,
+    rescuePrice: 159,
+    quantity: 8,
+    quantityLeft: 8,
+    pickupStart: '1:45 PM',
+    pickupEnd: '2:30 PM',
+    vegType: 'mixed',
+    dietaryTags: ['High-protein', 'Office lunch'],
+    allergenNote: 'May contain dairy, gluten, and sesame.',
+    collectionInstructions: 'Keep boxes chilled and label veg/non-veg clearly for pickup.',
+    status: 'draft',
+    shortDescription: 'A weekday lunch box designed for office pickups with labeled meal components.',
+    createdAtLabel: 'Saved as draft',
+  },
+  {
+    id: 'listing-dessert-pastry-set',
+    outletId: 'outlet-hearth-bakehouse-hitech',
+    title: 'Dessert Pastry Set',
+    listingType: 'Fixed Meal Box',
+    category: 'Desserts',
+    originalPrice: 640,
+    rescuePrice: 249,
+    quantity: 5,
+    quantityLeft: 5,
+    pickupStart: '8:30 PM',
+    pickupEnd: '9:00 PM',
+    vegType: 'egg',
+    dietaryTags: ['Dessert box', 'Evening pickup'],
+    allergenNote: 'Contains wheat, dairy, egg, and may contain nuts.',
+    collectionInstructions: 'Store boxes in chilled display and move to pickup shelf when the slot begins.',
+    status: 'paused',
+    shortDescription: 'A premium pastry set prepared for same-day dessert pickups close to closing.',
+    createdAtLabel: 'Paused this week',
+  },
+];
+
+export interface CreateMockPartnerListingInput {
+  workspaceId: string;
+  outletId: string;
+  title: string;
+  listingType: PartnerListing['listingType'];
+  category: string;
+  originalPrice: number;
+  rescuePrice: number;
+  quantity: number;
+  pickupStart: string;
+  pickupEnd: string;
+  vegType: PartnerListing['vegType'];
+  dietaryTags: string[];
+  allergenNote: string;
+  collectionInstructions: string;
+  status: PartnerListing['status'];
+}
+
+function getCreatedAtLabel(status: PartnerListing['status']) {
+  switch (status) {
+    case 'live':
+      return 'Published just now';
+    case 'scheduled':
+      return 'Scheduled just now';
+    case 'sold_out':
+      return 'Marked sold out just now';
+    case 'paused':
+      return 'Paused just now';
+    case 'archived':
+      return 'Archived just now';
+    case 'draft':
+    default:
+      return 'Saved just now';
+  }
+}
+
+function buildShortDescription(input: CreateMockPartnerListingInput) {
+  const dietaryPreview = input.dietaryTags.slice(0, 2).join(', ');
+  if (dietaryPreview) {
+    return `${input.listingType} for ${input.category.toLowerCase()} pickup with ${dietaryPreview.toLowerCase()}.`;
+  }
+
+  return `${input.listingType} for ${input.category.toLowerCase()} pickup between ${input.pickupStart} and ${input.pickupEnd}.`;
+}
+
+function readStoredPartnerListings() {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const raw = window.localStorage.getItem(MOCK_PARTNER_LISTINGS_KEY);
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as PartnerListing[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredPartnerListings(listings: PartnerListing[]) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(MOCK_PARTNER_LISTINGS_KEY, JSON.stringify(listings));
+}
+
+export function getMockPartnerListings() {
+  return [...partnerListings, ...readStoredPartnerListings()];
+}
+
+export function getMockPartnerWorkspaceListings(workspaceId: string = getMockPartnerWorkspaceId()) {
+  const storedListings = readStoredPartnerListings().filter((listing) => listing.workspaceId === workspaceId);
+
+  if (isSeedPartnerWorkspaceId(workspaceId)) {
+    return [...partnerListings, ...storedListings];
+  }
+
+  const workspaceOutletIds = getMockPartnerWorkspaceOutlets().map((outlet) => outlet.id);
+  return storedListings.filter((listing) => workspaceOutletIds.includes(listing.outletId));
+}
+
+export function createMockPartnerListing(input: CreateMockPartnerListingInput) {
+  const listing: PartnerListing = {
+    id: `listing-${input.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')}-${Date.now()}`,
+    workspaceId: input.workspaceId,
+    outletId: input.outletId,
+    title: input.title.trim(),
+    listingType: input.listingType,
+    category: input.category.trim(),
+    originalPrice: input.originalPrice,
+    rescuePrice: input.rescuePrice,
+    quantity: input.quantity,
+    quantityLeft: input.quantity,
+    pickupStart: input.pickupStart.trim(),
+    pickupEnd: input.pickupEnd.trim(),
+    vegType: input.vegType,
+    dietaryTags: input.dietaryTags,
+    allergenNote: input.allergenNote.trim(),
+    collectionInstructions: input.collectionInstructions.trim(),
+    status: input.status,
+    shortDescription: buildShortDescription(input),
+    createdAtLabel: getCreatedAtLabel(input.status),
+    createdAt: Date.now(),
+  };
+
+  const storedListings = readStoredPartnerListings();
+  const nextListings = [listing, ...storedListings];
+  writeStoredPartnerListings(nextListings);
+  return listing;
+}
+
+export function resetMockPartnerListings() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(MOCK_PARTNER_LISTINGS_KEY);
+}

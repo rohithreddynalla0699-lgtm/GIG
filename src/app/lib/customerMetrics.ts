@@ -1,0 +1,20 @@
+import { bags } from '../data/mock/bags';
+import { orders } from '../data/mock/orders';
+
+export function getCustomerOrderMetrics(customerId: string) {
+  const customerOrders = orders.filter((order) => order.customerId === customerId);
+  const upcoming = customerOrders.filter((order) => ['new_reserved', 'ready_for_pickup'].includes(order.status));
+  const completed = customerOrders.filter((order) => order.status === 'collected');
+  const totalSaved = completed.reduce((sum, order) => {
+    const bag = bags.find((candidate) => candidate.id === order.bagId);
+    return bag ? sum + Math.max(bag.originalPrice - order.amountPaid, 0) : sum;
+  }, 0);
+
+  return {
+    customerOrders,
+    upcoming,
+    completed,
+    completedCount: completed.length,
+    totalSaved,
+  };
+}

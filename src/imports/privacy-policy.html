@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Grab It Good</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#00A661;--green-dark:#008A51;--green-pale:#E8F5E9;--green-light:#F8FFF6;--black:#212121;--gray:#5A5A5A;--gray2:#9E9E9E;--border:#E0E0E0;--white:#fff}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black);-webkit-font-smoothing:antialiased}
+nav{background:var(--white);border-bottom:2px solid var(--border);padding:0 5%;height:68px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:10px;display:flex;align-items:center;justify-content:center}
+.nav-brand{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--black)}
+.nav-brand span{color:var(--green)}
+.nav-back{font-size:14px;color:var(--gray);text-decoration:none;font-weight:500;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+.hero{background:linear-gradient(to bottom,var(--green-light),var(--white));padding:60px 5% 48px;text-align:center;border-bottom:2px solid var(--border)}
+.hero-tag{font-size:12px;font-weight:600;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(32px,5vw,48px);font-weight:700;color:var(--black);letter-spacing:-1.5px;margin-bottom:10px}
+.hero-meta{font-size:14px;color:var(--gray2)}
+.layout{max-width:1100px;margin:0 auto;padding:60px 5% 100px;display:grid;grid-template-columns:240px 1fr;gap:60px;align-items:start}
+/* TOC */
+.toc{position:sticky;top:88px;background:var(--white);border:2px solid var(--border);border-radius:20px;padding:24px;overflow:hidden}
+.toc-title{font-size:13px;font-weight:700;color:var(--black);letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+.toc-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.toc-list a{display:block;font-size:13px;color:var(--gray);text-decoration:none;padding:6px 10px;border-radius:8px;transition:all .2s;line-height:1.4}
+.toc-list a:hover{background:var(--green-pale);color:var(--green)}
+.toc-list a.active{background:var(--green-pale);color:var(--green);font-weight:600}
+/* Content */
+.content{max-width:720px}
+.policy-section{margin-bottom:48px}
+.policy-section h2{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--black);margin-bottom:14px;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
+.policy-section p{font-size:15px;color:var(--gray);line-height:1.85;margin-bottom:14px}
+.policy-section p:last-child{margin-bottom:0}
+.policy-section strong{color:var(--black);font-weight:600}
+.policy-section ul,.policy-section ol{padding-left:20px;margin-bottom:14px}
+.policy-section li{font-size:15px;color:var(--gray);line-height:1.85;margin-bottom:6px}
+.policy-section li strong{color:var(--black)}
+.info-box{background:var(--green-pale);border:2px solid #C8E6C9;border-radius:14px;padding:18px 20px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start}
+.info-box p{margin-bottom:0;font-size:14px;color:#2E7D32;line-height:1.7}
+.warn-box{background:#FFF0EE;border:2px solid #FFCDD2;border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.warn-box p{margin-bottom:0;font-size:14px;color:#D32F2F;line-height:1.7}
+.divider{height:1px;background:var(--border);margin-bottom:48px}
+.contact-card{background:var(--green-pale);border:2px solid #C8E6C9;border-radius:20px;padding:28px}
+.contact-card h3{font-size:18px;font-weight:700;color:var(--black);margin-bottom:6px}
+.contact-card p{font-size:14px;color:var(--gray);line-height:1.7;margin-bottom:12px}
+.contact-card a{color:var(--green);font-weight:600;text-decoration:none}
+.contact-card a:hover{text-decoration:underline}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:white;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;transition:background .2s;margin-top:16px}
+.back-btn:hover{background:var(--green-dark)}
+footer{background:#212121;padding:32px 5%;text-align:center}
+.footer-copy{font-size:13px;color:rgba(255,255,255,.4)}
+.footer-copy span{color:var(--green)}
+@media(max-width:768px){.layout{grid-template-columns:1fr}.toc{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="grabitgood.html" class="nav-logo">
+    <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.5 8.5L22 9.5L17 14.5L18 21L12 18L6 21L7 14.5L2 9.5L8.5 8.5L12 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+    <span class="nav-brand">Grab It <span>Good</span></span>
+  </a>
+  <a href="javascript:history.back()" class="nav-back">← Go back</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Legal</div>
+  <h1>Privacy Policy</h1>
+  <div class="hero-meta">Last updated: April 6, 2026 · Effective immediately · Applies to all users and partners</div>
+</div>
+
+<div class="layout">
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#overview">1. Overview</a></li>
+      <li><a href="#data-collected">2. Data we collect</a></li>
+      <li><a href="#how-we-use">3. How we use your data</a></li>
+      <li><a href="#data-sharing">4. Data sharing</a></li>
+      <li><a href="#food-safety">5. Food safety & liability</a></li>
+      <li><a href="#payments">6. Payments & transactions</a></li>
+      <li><a href="#your-rights">7. Your rights</a></li>
+      <li><a href="#security">8. Data security</a></li>
+      <li><a href="#cookies">9. Cookies</a></li>
+      <li><a href="#children">10. Children's privacy</a></li>
+      <li><a href="#changes">11. Policy changes</a></li>
+      <li><a href="#contact">12. Contact us</a></li>
+    </ul>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <div class="info-box">
+      <div style="font-size:22px">🛡️</div>
+      <p><strong>Your privacy matters to us.</strong> Grab It Good is committed to being transparent about how we collect and use your data. This policy applies to everyone — customers who buy food, and businesses (partners) who list food on our platform. Please read it carefully.</p>
+    </div>
+
+    <!-- 1 -->
+    <div class="policy-section" id="overview">
+      <h2>1. Overview</h2>
+      <p>Grab It Good ("we", "our", "us") is a food rescue marketplace that connects consumers with surplus food from restaurants, bakeries, cafés, and grocery stores. We are operated by Grab It Good Private Limited, registered in Siddipet, Telangana, India.</p>
+      <p>This Privacy Policy explains what personal information we collect, how we use it, who we share it with, and what rights you have over your data — whether you are a <strong>customer</strong> using our app or website, or a <strong>business partner</strong> listed on our platform.</p>
+      <p>By using Grab It Good's website, mobile app, or any related services, you agree to this Privacy Policy. If you disagree with any part, please do not use our services.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 2 -->
+    <div class="policy-section" id="data-collected">
+      <h2>2. Data we collect</h2>
+      <p><strong>For customers:</strong></p>
+      <ul>
+        <li><strong>Account information:</strong> Name, email address, phone number, and password (stored encrypted)</li>
+        <li><strong>Location data:</strong> Pincode or approximate location used to show nearby stores</li>
+        <li><strong>Order history:</strong> Which stores you ordered from, pickup times, and amounts paid</li>
+        <li><strong>Device information:</strong> Device type, operating system, and app version for troubleshooting</li>
+        <li><strong>Usage data:</strong> Pages visited, search terms, and interactions within the app and website</li>
+        <li><strong>Payment information:</strong> We do not store your full card details. Payments are processed by our certified payment partner (Razorpay). We only retain transaction references.</li>
+      </ul>
+      <p><strong>For business partners:</strong></p>
+      <ul>
+        <li><strong>Business details:</strong> Business name, type, address, pincode, and operating hours</li>
+        <li><strong>Owner/contact information:</strong> Owner name, phone number, and email address</li>
+        <li><strong>Legal documents:</strong> FSSAI license number, GST number (where applicable)</li>
+        <li><strong>Bank account information:</strong> For processing weekly payouts to your account</li>
+        <li><strong>Listing data:</strong> Food bags listed, pricing, pickup windows, and allergen information</li>
+        <li><strong>Performance data:</strong> Bags sold, revenue earned, customer ratings and reviews</li>
+      </ul>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 3 -->
+    <div class="policy-section" id="how-we-use">
+      <h2>3. How we use your data</h2>
+      <p>We use your information only for the purposes described below:</p>
+      <ul>
+        <li>To create and manage your account on Grab It Good</li>
+        <li>To show you nearby stores and available surplus food</li>
+        <li>To process your orders and generate secure 4-digit pickup codes</li>
+        <li>To send order confirmations, pickup reminders, and important account notifications</li>
+        <li>To process payments and disburse payouts to business partners</li>
+        <li>To verify business partners' FSSAI and other legal registrations</li>
+        <li>To calculate and display impact metrics (CO₂ saved, meals rescued)</li>
+        <li>To improve our platform through anonymised usage analytics</li>
+        <li>To comply with applicable Indian laws and regulations</li>
+      </ul>
+      <p>We will <strong>never</strong> use your data to send marketing communications without your explicit consent, and we will <strong>never sell your personal data</strong> to third parties.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 4 -->
+    <div class="policy-section" id="data-sharing">
+      <h2>4. Data sharing</h2>
+      <p>We share your data only where necessary to deliver our service:</p>
+      <ul>
+        <li><strong>With business partners:</strong> When you place an order, the store receives your name and 4-digit pickup code. They do not receive your email, phone number, or payment details.</li>
+        <li><strong>With customers:</strong> When a customer orders from your store, you receive only their name and pickup code.</li>
+        <li><strong>With payment processors:</strong> We use Razorpay (PCI-DSS compliant) to handle all payment transactions securely.</li>
+        <li><strong>With cloud service providers:</strong> Our data is stored on secure servers (AWS or Google Cloud) in India where possible, in compliance with Indian data localisation rules.</li>
+        <li><strong>With legal authorities:</strong> We may disclose data if required by law, court order, or government authority, including FSSAI or local food safety regulators.</li>
+      </ul>
+      <p>We do not share your data with advertisers, data brokers, or any third parties for commercial purposes.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 5 -->
+    <div class="policy-section" id="food-safety">
+      <h2>5. Food safety & liability</h2>
+      <div class="warn-box">
+        <p>⚠️ <strong>Important notice for customers:</strong> Grab It Good is a marketplace platform. We connect customers with business partners but do not prepare, handle, or inspect food items ourselves. All food listed on our platform must be surplus food from the same day — fresh, safe, and fit for consumption. However, we cannot physically verify the condition of every bag.</p>
+      </div>
+      <p><strong>Our food safety commitments:</strong></p>
+      <ul>
+        <li>All business partners must hold a valid FSSAI license before being listed</li>
+        <li>All partners agree to our Food Quality Commitment before activation</li>
+        <li>Partners are legally prohibited from listing expired, stale, or unsafe food</li>
+        <li>Customers can report food quality issues directly through the app</li>
+        <li>We investigate all food safety complaints seriously and may suspend partners</li>
+      </ul>
+      <p><strong>Our food safety commitment for partners:</strong></p>
+      <ul>
+        <li>Only list food prepared or packaged on the same day as listing</li>
+        <li>Never list food that smells bad, is discoloured, or is visibly spoiled</li>
+        <li>Disclose all allergen information accurately</li>
+        <li>Maintain FSSAI-compliant hygiene and storage standards at all times</li>
+      </ul>
+      <p>By accepting our Partner Agreement, businesses take full legal responsibility for the safety of food they list. Grab It Good is not liable for illness or injury caused by food provided by business partners. Customers assume risk when consuming food, as they would from any food establishment.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 6 -->
+    <div class="policy-section" id="payments">
+      <h2>6. Payments & transactions</h2>
+      <p>All payments on Grab It Good are made <strong>in-app only</strong>. We do not support cash on delivery or offline payments of any kind. This ensures safety and accountability for all transactions.</p>
+      <ul>
+        <li><strong>Payment methods accepted:</strong> UPI, debit/credit cards, net banking, and digital wallets</li>
+        <li><strong>Payment processing:</strong> All transactions are handled by Razorpay, which is fully PCI-DSS compliant</li>
+        <li><strong>Refunds:</strong> If a store cancels your order, a full refund is automatically initiated within 3–5 business days</li>
+        <li><strong>Partner payouts:</strong> Business partners receive 80% of each transaction. Payouts are processed weekly, directly to the registered bank account</li>
+        <li><strong>Platform fee:</strong> We retain 20% of each transaction as our platform service fee</li>
+        <li><strong>Subscription:</strong> Partners pay ₹199/month for access to the partner dashboard and listing features</li>
+      </ul>
+      <p>We do not store complete card numbers or CVV codes. All sensitive payment data is tokenised by Razorpay and stored on their PCI-compliant servers.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 7 -->
+    <div class="policy-section" id="your-rights">
+      <h2>7. Your rights</h2>
+      <p>Under the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023 (India), you have the following rights:</p>
+      <ul>
+        <li><strong>Right to access:</strong> Request a copy of all personal data we hold about you</li>
+        <li><strong>Right to correction:</strong> Ask us to correct inaccurate or incomplete information</li>
+        <li><strong>Right to erasure:</strong> Request deletion of your account and associated data (subject to legal retention requirements)</li>
+        <li><strong>Right to object:</strong> Object to how we process your data in certain circumstances</li>
+        <li><strong>Right to withdraw consent:</strong> Withdraw consent for marketing communications at any time</li>
+        <li><strong>Right to data portability:</strong> Request your order history or account data in a machine-readable format</li>
+      </ul>
+      <p>To exercise any of these rights, email us at <strong>privacy@grabitgood.com</strong>. We will respond within 30 days.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 8 -->
+    <div class="policy-section" id="security">
+      <h2>8. Data security</h2>
+      <p>We take data security seriously and implement the following measures:</p>
+      <ul>
+        <li><strong>Encryption:</strong> All data is encrypted in transit (TLS 1.3) and at rest (AES-256)</li>
+        <li><strong>Password hashing:</strong> Passwords are never stored in plain text — we use industry-standard bcrypt hashing</li>
+        <li><strong>Access controls:</strong> Only authorised Grab It Good employees can access personal data, on a need-to-know basis</li>
+        <li><strong>Regular audits:</strong> We conduct regular security reviews and vulnerability assessments</li>
+        <li><strong>Incident response:</strong> In the event of a data breach, we will notify affected users within 72 hours</li>
+      </ul>
+      <p>Despite our best efforts, no system is completely secure. We encourage you to use a strong password and never share your account credentials with anyone.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 9 -->
+    <div class="policy-section" id="cookies">
+      <h2>9. Cookies</h2>
+      <p>Our website uses cookies and similar technologies to enhance your experience. We use:</p>
+      <ul>
+        <li><strong>Essential cookies:</strong> Required for the website to function (login sessions, security tokens). Cannot be disabled.</li>
+        <li><strong>Analytics cookies:</strong> Anonymised data about how you use the website (pages visited, time spent). Helps us improve the platform.</li>
+        <li><strong>Preference cookies:</strong> Remember your pincode and other settings across visits.</li>
+      </ul>
+      <p>We do <strong>not</strong> use advertising or tracking cookies. You can disable non-essential cookies through your browser settings, although this may affect some website features.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 10 -->
+    <div class="policy-section" id="children">
+      <h2>10. Children's privacy</h2>
+      <p>Grab It Good is not intended for children under the age of 18. We do not knowingly collect personal data from anyone under 18. If you believe a child has provided us with their information, please contact us immediately at <strong>privacy@grabitgood.com</strong> and we will delete the data promptly.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 11 -->
+    <div class="policy-section" id="changes">
+      <h2>11. Policy changes</h2>
+      <p>We may update this Privacy Policy from time to time as our services evolve or regulations change. When we make significant changes, we will:</p>
+      <ul>
+        <li>Update the "Last updated" date at the top of this page</li>
+        <li>Send an email notification to all registered users</li>
+        <li>Display a notice on the Grab It Good app and website</li>
+      </ul>
+      <p>Continued use of Grab It Good after any changes constitutes your acceptance of the updated policy. If you disagree with a change, you may delete your account at any time.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 12 -->
+    <div class="policy-section" id="contact">
+      <h2>12. Contact us</h2>
+      <div class="contact-card">
+        <h3>Questions about your privacy?</h3>
+        <p>If you have any questions, concerns, or requests related to this Privacy Policy or your personal data, please contact our Privacy Officer:</p>
+        <p>
+          📧 <a href="mailto:privacy@grabitgood.com">privacy@grabitgood.com</a><br>
+          📍 Grab It Good Private Limited, Siddipet, Telangana 502103, India<br>
+          ⏰ We respond within 30 business days
+        </p>
+        <p>For urgent food safety concerns: <a href="mailto:safety@grabitgood.com">safety@grabitgood.com</a></p>
+        <a href="grabitgood.html" class="back-btn">← Back to Grab It Good</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Grab It Good. Made with <span>♥</span> in Siddipet, India · <a href="privacy-policy.html" style="color:rgba(255,255,255,.4);text-decoration:none">Privacy Policy</a> · <a href="#" style="color:rgba(255,255,255,.4);text-decoration:none">Terms of Service</a></div>
+</footer>
+
+<script>
+// Highlight active TOC item on scroll
+const sections = document.querySelectorAll('.policy-section[id]');
+const tocLinks = document.querySelectorAll('.toc-list a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  tocLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+:focus-visible {
+  outline: 2px solid rgba(0, 166, 97, 0.85);
+  outline-offset: 3px;
+}

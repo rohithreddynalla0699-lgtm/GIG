@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner Login — Grab It Good</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#00A661;--green-dark:#008A51;--green-pale:#E8F5E9;--green-light:#F8FFF6;--black:#212121;--gray:#5A5A5A;--gray2:#9E9E9E;--border:#E0E0E0;--white:#fff}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(to bottom,var(--green-light),var(--white));min-height:100vh;display:flex;align-items:center;justify-content:center;padding:80px 5%;color:var(--black);-webkit-font-smoothing:antialiased}
+.wrap{max-width:480px;width:100%}
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;text-decoration:none}
+.logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:12px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--black)}
+.logo-text span{color:var(--green)}
+.page-header{text-align:center;margin-bottom:32px}
+.page-title{font-family:'Fraunces',serif;font-size:clamp(32px,5vw,40px);font-weight:700;color:var(--black);letter-spacing:-1.5px;margin-bottom:6px}
+.page-sub{font-size:15px;color:var(--gray)}
+.card{background:var(--white);border-radius:24px;border:2px solid var(--border);padding:40px;box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+.panel{display:none}
+.panel.show{display:block}
+.field{margin-bottom:20px}
+label{display:block;font-size:14px;font-weight:600;color:var(--black);margin-bottom:8px}
+input{width:100%;padding:16px 20px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--black);outline:none;transition:border-color .2s;background:var(--white)}
+input:focus{border-color:var(--green)}
+input::placeholder{color:var(--gray2)}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.remember{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--gray)}
+.remember input{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.forgot-btn{background:none;border:none;font-size:13px;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
+.forgot-btn:hover{text-decoration:underline}
+.btn-green{width:100%;background:var(--green);color:white;border:none;padding:16px;border-radius:100px;font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 4px 12px rgba(0,166,97,0.25);margin-bottom:0}
+.btn-green:hover{background:var(--green-dark)}
+.btn-green:disabled{background:var(--border);color:var(--gray2);box-shadow:none;cursor:not-allowed}
+.divider{position:relative;margin:24px 0}
+.divider::before{content:'';position:absolute;inset:0;display:flex;align-items:center;border-top:2px solid var(--border);top:50%}
+.divider span{position:relative;background:var(--white);padding:0 16px;font-size:13px;color:var(--gray2);display:flex;justify-content:center}
+.btn-otp{width:100%;background:transparent;color:var(--black);border:2px solid var(--border);padding:16px;border-radius:100px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-otp:hover{border-color:var(--green);color:var(--green)}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;font-size:14px;color:var(--gray);cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:24px;transition:color .2s;padding:0}
+.back-btn:hover{color:var(--green)}
+.reset-success{text-align:center;padding:24px 0}
+.rs-icon{width:64px;height:64px;background:var(--green-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.rs-title{font-size:22px;font-weight:700;color:var(--black);margin-bottom:8px}
+.rs-sub{font-size:14px;color:var(--gray);line-height:1.7;margin-bottom:16px}
+.rs-resend{font-size:13px;color:var(--gray);margin-bottom:24px}
+.rs-resend button{background:none;border:none;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
+.rs-resend button:hover{text-decoration:underline}
+.link-btn{background:none;border:none;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;padding:0}
+.link-btn:hover{text-decoration:underline}
+.footer-link{text-align:center;margin-top:24px;font-size:14px;color:var(--gray)}
+.footer-link a{color:var(--green);font-weight:600;text-decoration:none}
+.footer-link a:hover{text-decoration:underline}
+/* OTP panel */
+.otp-note{background:var(--green-pale);border:2px solid #C8E6C9;border-radius:12px;padding:16px;font-size:13px;color:#2E7D32;line-height:1.6;margin-bottom:20px}
+.otp-inputs{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
+.otp-inputs input{width:56px;height:56px;text-align:center;font-size:22px;font-weight:700;padding:0;border-radius:12px}
+.resend-row{text-align:center;font-size:13px;color:var(--gray);margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="grabitgood.html" class="logo">
+    <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.5 8.5L22 9.5L17 14.5L18 21L12 18L6 21L7 14.5L2 9.5L8.5 8.5L12 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+    <span class="logo-text">Grab It <span>Good</span></span>
+  </a>
+  <div class="page-header">
+    <h1 class="page-title">Partner Login</h1>
+    <p class="page-sub">Access your business dashboard</p>
+  </div>
+
+  <div class="card">
+    <!-- Login panel -->
+    <div class="panel show" id="login-panel">
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="login-email" placeholder="business@example.com" oninput="checkLogin()">
+      </div>
+      <div class="field">
+        <div class="row">
+          <label style="margin-bottom:0">Password</label>
+          <button class="forgot-btn" onclick="showPanel('reset-panel')">Forgot password?</button>
+        </div>
+        <input type="password" id="login-pass" placeholder="Enter your password" oninput="checkLogin()" style="margin-top:8px">
+      </div>
+      <label class="remember" style="margin-bottom:20px">
+        <input type="checkbox"> Remember me
+      </label>
+      <button class="btn-green" id="login-btn" onclick="doLogin()" disabled>Log in</button>
+      <div class="divider"><span>OR</span></div>
+      <button class="btn-otp" onclick="showPanel('otp-panel')"><span style="font-size:20px">📱</span> Login with OTP</button>
+    </div>
+
+    <!-- OTP panel -->
+    <div class="panel" id="otp-panel">
+      <button class="back-btn" onclick="showPanel('login-panel')">← Back to login</button>
+      <div style="font-size:22px;font-weight:700;color:var(--black);margin-bottom:6px">Login with OTP</div>
+      <div style="font-size:15px;color:var(--gray);margin-bottom:20px">We'll send a 6-digit code to your registered phone number.</div>
+      <div class="field">
+        <label>Phone number</label>
+        <input type="tel" id="otp-phone" placeholder="+91 98765 43210">
+      </div>
+      <button class="btn-green" style="margin-bottom:20px" onclick="showOTPInputs()">Send OTP</button>
+      <div id="otp-inputs-wrap" style="display:none">
+        <div class="otp-note">📲 OTP sent to your phone. Enter the 6-digit code below.</div>
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,0)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,1)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,2)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,3)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,4)">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,5)">
+        </div>
+        <div class="resend-row">Didn't get it? <button onclick="" style="background:none;border:none;color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;padding:0">Resend OTP</button></div>
+        <button class="btn-green" onclick="doLogin()">Verify & Login</button>
+      </div>
+    </div>
+
+    <!-- Reset password panel -->
+    <div class="panel" id="reset-panel">
+      <div id="reset-form">
+        <button class="back-btn" onclick="showPanel('login-panel')">← Back to login</button>
+        <div style="font-size:22px;font-weight:700;color:var(--black);margin-bottom:6px">Reset your password</div>
+        <div style="font-size:14px;color:var(--gray);margin-bottom:24px">Enter your email and we'll send you a link to reset your password.</div>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="reset-email" placeholder="business@example.com">
+        </div>
+        <button class="btn-green" onclick="sendReset()">Send reset link</button>
+      </div>
+      <div id="reset-success" class="reset-success" style="display:none">
+        <div class="rs-icon">✉️</div>
+        <div class="rs-title">Check your email</div>
+        <div class="rs-sub">We've sent a password reset link to<br><strong id="reset-email-show"></strong></div>
+        <div class="rs-resend">Didn't receive it? <button onclick="">Resend link</button></div>
+        <button class="link-btn" onclick="showPanel('login-panel');document.getElementById('reset-form').style.display='block';document.getElementById('reset-success').style.display='none'">← Back to login</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-link">
+    Don't have an account? <a href="business-signup.html">Sign up as a partner</a>
+  </div>
+</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+function checkLogin() {
+  const e = document.getElementById('login-email').value.trim();
+  const p = document.getElementById('login-pass').value;
+  document.getElementById('login-btn').disabled = !(e && p);
+}
+function doLogin() {
+  window.location.href = 'partner-dashboard.html';
+}
+function showOTPInputs() {
+  const phone = document.getElementById('otp-phone').value.trim();
+  if (!phone) return;
+  document.getElementById('otp-inputs-wrap').style.display = 'block';
+}
+function otpNext(el, idx) {
+  const boxes = document.querySelectorAll('.otp-box');
+  if (el.value && idx < 5) boxes[idx+1].focus();
+}
+function sendReset() {
+  const email = document.getElementById('reset-email').value.trim();
+  if (!email) return;
+  document.getElementById('reset-email-show').textContent = email;
+  document.getElementById('reset-form').style.display = 'none';
+  document.getElementById('reset-success').style.display = 'block';
+}
+</script>
+</body>
+</html>
