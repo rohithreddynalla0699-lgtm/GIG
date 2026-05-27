@@ -7,6 +7,8 @@ export type OrderStatus =
   | 'issue_reported'
   | 'refunded';
 
+export type SupportFollowUpStatus = 'needs_follow_up' | 'reviewed';
+
 export type PaymentStatus = 'paid' | 'refunded' | 'issue_hold';
 
 export interface OrderTimelineEvent {
@@ -38,5 +40,7 @@ export interface Order {
   supportNote: string;
   timeline: OrderTimelineEvent[];
   issueNote?: string;
+  supportFollowUpStatus?: SupportFollowUpStatus;
+  supportFollowUpNote?: string;
   relatedPartnerListingId?: string;
 }

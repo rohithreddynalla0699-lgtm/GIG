@@ -16,6 +16,10 @@ const VALID_ORDER_STATUSES = new Set<Order['status']>([
   'refunded',
 ]);
 const VALID_PAYMENT_STATUSES = new Set<Order['paymentStatus']>(['paid', 'refunded', 'issue_hold']);
+const VALID_SUPPORT_FOLLOW_UP_STATUSES = new Set<NonNullable<Order['supportFollowUpStatus']>>([
+  'needs_follow_up',
+  'reviewed',
+]);
 
 export const orders: Order[] = [
   {
@@ -163,6 +167,8 @@ type MockOrderOverride = {
   supportNote?: string;
   timeline?: Order['timeline'];
   issueNote?: string;
+  supportFollowUpStatus?: Order['supportFollowUpStatus'];
+  supportFollowUpNote?: string;
 };
 
 export class MockReservationError extends Error {
@@ -232,6 +238,10 @@ function isValidStoredOrder(value: unknown): value is Order {
     typeof candidate.collectionInstructions === 'string' &&
     typeof candidate.supportNote === 'string' &&
     (typeof candidate.issueNote === 'undefined' || typeof candidate.issueNote === 'string') &&
+    (typeof candidate.supportFollowUpStatus === 'undefined' ||
+      (typeof candidate.supportFollowUpStatus === 'string' &&
+        VALID_SUPPORT_FOLLOW_UP_STATUSES.has(candidate.supportFollowUpStatus))) &&
+    (typeof candidate.supportFollowUpNote === 'undefined' || typeof candidate.supportFollowUpNote === 'string') &&
     Array.isArray(candidate.timeline) &&
     candidate.timeline.every((event) => isValidOrderTimelineEvent(event))
   );
@@ -301,6 +311,17 @@ function readStoredOrderOverrides() {
 
         if (typeof override.issueNote === 'string' && override.issueNote.trim().length > 0) {
           nextOverride.issueNote = override.issueNote;
+        }
+
+        if (
+          typeof override.supportFollowUpStatus === 'string' &&
+          VALID_SUPPORT_FOLLOW_UP_STATUSES.has(override.supportFollowUpStatus)
+        ) {
+          nextOverride.supportFollowUpStatus = override.supportFollowUpStatus;
+        }
+
+        if (typeof override.supportFollowUpNote === 'string' && override.supportFollowUpNote.trim().length > 0) {
+          nextOverride.supportFollowUpNote = override.supportFollowUpNote;
         }
 
         if (Array.isArray(override.timeline)) {
@@ -441,6 +462,11 @@ function mergeLifecycleTimeline(order: Order, status: Order['status']) {
   return [...preservedEvents, nextEvent];
 }
 
+function mergeCustomTimelineEvent(order: Order, nextEvent: Order['timeline'][number]) {
+  const preservedEvents = order.timeline.filter((event) => event.title !== nextEvent.title);
+  return [...preservedEvents, nextEvent];
+}
+
 function getAllMockOrders() {
   return [...readStoredCreatedOrders(), ...orders];
 }
@@ -503,6 +529,14 @@ export function updateMockOrderStatus(
     status === 'issue_reported'
       ? options?.issueNote?.trim() || overrides[orderId]?.issueNote || existingOrder.issueNote
       : overrides[orderId]?.issueNote || existingOrder.issueNote;
+  const nextSupportFollowUpStatus =
+    status === 'issue_reported'
+      ? 'needs_follow_up'
+      : overrides[orderId]?.supportFollowUpStatus || existingOrder.supportFollowUpStatus;
+  const nextSupportFollowUpNote =
+    status === 'issue_reported'
+      ? undefined
+      : overrides[orderId]?.supportFollowUpNote || existingOrder.supportFollowUpNote;
   const nextOverrides = {
     ...overrides,
     [orderId]: {
@@ -511,6 +545,49 @@ export function updateMockOrderStatus(
       supportNote: getLifecycleSupportNote(status),
       timeline: nextTimeline,
       ...(nextIssueNote ? { issueNote: nextIssueNote } : {}),
+      ...(nextSupportFollowUpStatus ? { supportFollowUpStatus: nextSupportFollowUpStatus } : {}),
+      ...(nextSupportFollowUpNote ? { supportFollowUpNote: nextSupportFollowUpNote } : {}),
+    },
+  };
+
+  writeStoredOrderOverrides(nextOverrides);
+  return applyOrderOverride(existingOrder, nextOverrides);
+}
+
+export function updateMockOrderSupportFollowUp(
+  orderId: string,
+  supportFollowUpStatus: NonNullable<Order['supportFollowUpStatus']>,
+) {
+  const existingOrder = getAllMockOrders().find((order) => order.id === orderId);
+
+  if (!existingOrder || existingOrder.status !== 'issue_reported') {
+    return undefined;
+  }
+
+  if (!VALID_SUPPORT_FOLLOW_UP_STATUSES.has(supportFollowUpStatus)) {
+    return undefined;
+  }
+
+  const mergedOrder = applyOrderOverride(existingOrder, readStoredOrderOverrides());
+
+  if (mergedOrder.supportFollowUpStatus === supportFollowUpStatus) {
+    return mergedOrder;
+  }
+
+  const overrides = readStoredOrderOverrides();
+  const nextEvent = {
+    id: `${existingOrder.id}-support-reviewed`,
+    timeLabel: getOrderedAtTimeLabel(new Date().toISOString()),
+    title: 'Support reviewed',
+    description: 'Support reviewed the reported issue and recorded a follow-up update.',
+  };
+  const nextOverrides = {
+    ...overrides,
+    [orderId]: {
+      ...overrides[orderId],
+      supportFollowUpStatus,
+      supportFollowUpNote: 'Support reviewed this issue.',
+      timeline: mergeCustomTimelineEvent(mergedOrder, nextEvent),
     },
   };
 

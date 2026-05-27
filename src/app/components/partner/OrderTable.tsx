@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import type { Order } from '../../types/order';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getOrderStatusLabel, getOrderSupportHint } from '../../lib/status';
+import { getOrderListSupportHint, getOrderStatusLabel } from '../../lib/status';
 import OrderStatusBadge from './OrderStatusBadge';
 
 interface OrderTableProps {
@@ -28,7 +28,12 @@ export default function OrderTable({ orders }: OrderTableProps) {
           </thead>
           <tbody>
             {orders.map((order) => {
-              const supportHint = getOrderSupportHint(order.status, order.supportNote);
+              const supportHint = getOrderListSupportHint(
+                order.status,
+                order.supportNote,
+                order.supportFollowUpStatus,
+                order.supportFollowUpNote,
+              );
 
               return (
                 <tr key={order.id} className="border-b border-[color:var(--gig-border)] last:border-b-0">
@@ -79,7 +84,14 @@ export default function OrderTable({ orders }: OrderTableProps) {
               <OrderStatusBadge status={order.status} />
             </div>
             <div className="mb-3 text-[14px] font-semibold text-[color:var(--gig-text)]">{order.listingTitle}</div>
-            <div className="meta-text mb-3">{getOrderSupportHint(order.status, order.supportNote)}</div>
+            <div className="meta-text mb-3">
+              {getOrderListSupportHint(
+                order.status,
+                order.supportNote,
+                order.supportFollowUpStatus,
+                order.supportFollowUpNote,
+              )}
+            </div>
             <div className="mb-3 grid gap-2 sm:grid-cols-2">
               <div>
                 <div className="meta-text mb-1">Pickup</div>

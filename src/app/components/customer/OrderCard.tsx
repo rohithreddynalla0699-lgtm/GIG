@@ -4,7 +4,7 @@ import type { Order } from '../../types/order';
 import type { Store } from '../../types/store';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getCustomerOrderStatusLabel, getOrderStatusClasses, getOrderSupportHint } from '../../lib/status';
+import { getCustomerOrderStatusLabel, getOrderStatusClasses, getOrderListSupportHint } from '../../lib/status';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import MotionReveal from '../shared/MotionReveal';
 
@@ -19,7 +19,12 @@ interface OrderCardProps {
 export default function OrderCard({ order, bag, store, variant, delay = 0 }: OrderCardProps) {
   const amountSaved = Math.max(bag.originalPrice - order.amountPaid, 0);
   const isUpcoming = variant === 'upcoming';
-  const supportHint = getOrderSupportHint(order.status, order.supportNote);
+  const supportHint = getOrderListSupportHint(
+    order.status,
+    order.supportNote,
+    order.supportFollowUpStatus,
+    order.supportFollowUpNote,
+  );
 
   return (
     <MotionReveal delay={delay} y={20} className="h-full">

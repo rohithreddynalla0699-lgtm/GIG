@@ -1,4 +1,4 @@
-import type { OrderStatus } from '../types/order';
+import type { Order, OrderStatus } from '../types/order';
 import type { ListingStatus } from '../types/listing';
 import type { PayoutStatus } from '../types/payout';
 import type { VegType } from '../types/store';
@@ -74,6 +74,29 @@ export function getOrderSupportHint(status: OrderStatus, supportNote: string) {
     default:
       return supportNote;
   }
+}
+
+export function getSupportFollowUpStatusLabel(status: NonNullable<Order['supportFollowUpStatus']>) {
+  switch (status) {
+    case 'reviewed':
+      return 'Reviewed';
+    case 'needs_follow_up':
+    default:
+      return 'Needs follow-up';
+  }
+}
+
+export function getOrderListSupportHint(
+  status: OrderStatus,
+  supportNote: string,
+  supportFollowUpStatus?: Order['supportFollowUpStatus'],
+  supportFollowUpNote?: string,
+) {
+  if (status === 'issue_reported' && supportFollowUpStatus === 'reviewed') {
+    return supportFollowUpNote || 'Support reviewed this issue.';
+  }
+
+  return getOrderSupportHint(status, supportNote);
 }
 
 export function getVegTypeLabel(vegType: VegType) {

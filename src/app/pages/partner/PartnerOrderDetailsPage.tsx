@@ -5,11 +5,11 @@ import OrderStatusBadge from '../../components/partner/OrderStatusBadge';
 import OrderTimeline from '../../components/partner/OrderTimeline';
 import SectionCard from '../../components/shared/SectionCard';
 import { getBagById } from '../../data/mock/bags';
-import { MockOrderLifecycleError, updateMockOrderStatus } from '../../data/mock/orders';
+import { MockOrderLifecycleError, updateMockOrderStatus, updateMockOrderSupportFollowUp } from '../../data/mock/orders';
 import { getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getPaymentStatusClasses, getPaymentStatusLabel, getVegTypeLabel } from '../../lib/status';
+import { getPaymentStatusClasses, getPaymentStatusLabel, getSupportFollowUpStatusLabel, getVegTypeLabel } from '../../lib/status';
 import type { OrderStatus } from '../../types/order';
 
 export default function PartnerOrderDetailsPage() {
@@ -93,6 +93,17 @@ export default function PartnerOrderDetailsPage() {
           setActionError('We could not update this order right now.');
         }
       },
+      markSupportReviewed: () => {
+        try {
+          setActionError('');
+          const nextOrder = updateMockOrderSupportFollowUp(order?.id ?? '', 'reviewed');
+          if (nextOrder) {
+            setCurrentOrder(nextOrder);
+          }
+        } catch {
+          setActionError('We could not save this support follow-up right now.');
+        }
+      },
     }),
     [issueNoteDraft, order?.id]
   );
@@ -111,6 +122,7 @@ export default function PartnerOrderDetailsPage() {
   const canVerifyPickup = status === 'ready_for_pickup';
   const canMarkNoShow = status === 'ready_for_pickup';
   const canReportIssue = ['new_reserved', 'ready_for_pickup', 'collected', 'no_show'].includes(status);
+  const canMarkSupportReviewed = status === 'issue_reported' && order.supportFollowUpStatus !== 'reviewed';
 
   return (
     <div className="space-y-4">
@@ -193,6 +205,17 @@ export default function PartnerOrderDetailsPage() {
                   <div className="mt-3 rounded-[16px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.42)] px-4 py-3">
                     <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#A66B00]">Issue note</div>
                     <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.issueNote}</div>
+                  </div>
+                ) : null}
+                {order.status === 'issue_reported' ? (
+                  <div className="mt-3 rounded-[16px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,248,230,0.56)] px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#A66B00]">Support follow-up</div>
+                    <div className="text-[13px] font-semibold text-[#8A5600]">
+                      {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
+                    </div>
+                    {order.supportFollowUpNote ? (
+                      <div className="mt-1 text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.supportFollowUpNote}</div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -278,6 +301,27 @@ export default function PartnerOrderDetailsPage() {
                 >
                   Report issue
                 </button>
+                {status === 'issue_reported' ? (
+                  <div className="mt-3 rounded-[16px] border border-[rgba(166,107,0,0.12)] bg-white/74 px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">Follow-up status</div>
+                    <div className="mb-3 text-[13px] font-semibold text-[#8A5600]">
+                      {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
+                    </div>
+                    {order.supportFollowUpNote ? (
+                      <div className="mb-3 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+                        {order.supportFollowUpNote}
+                      </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={actions.markSupportReviewed}
+                      disabled={!canMarkSupportReviewed}
+                      className="inline-flex min-h-[38px] w-full items-center justify-center rounded-full border border-[rgba(11,122,77,0.16)] bg-[rgba(232,245,233,0.88)] px-4 py-2 text-[12px] font-semibold text-[color:var(--gig-green-deep)] transition hover:bg-[rgba(232,245,233,1)] disabled:cursor-not-allowed disabled:opacity-45"
+                    >
+                      Mark reviewed
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
           </section>

@@ -7,7 +7,7 @@ import { getOrderById } from '../../data/mock/orders';
 import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getCustomerOrderStatusLabel, getOrderStatusClasses } from '../../lib/status';
+import { getCustomerOrderStatusLabel, getOrderStatusClasses, getSupportFollowUpStatusLabel } from '../../lib/status';
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
@@ -90,6 +90,18 @@ export default function OrderDetailsPage() {
               <div className="mt-5 rounded-[24px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.34)] p-5">
                 <div className="operational-label mb-2 text-[#A66B00]">Issue note</div>
                 <p className="body-regular">{order.issueNote}</p>
+              </div>
+            ) : null}
+
+            {order.status === 'issue_reported' ? (
+              <div className="mt-5 rounded-[24px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,248,230,0.4)] p-5">
+                <div className="operational-label mb-2 text-[#A66B00]">Support follow-up</div>
+                <div className="text-[15px] font-semibold text-[#8A5600]">
+                  {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
+                </div>
+                {order.supportFollowUpStatus === 'reviewed' ? (
+                  <p className="mt-2 body-regular">{order.supportFollowUpNote || 'Support reviewed this issue.'}</p>
+                ) : null}
               </div>
             ) : null}
 
