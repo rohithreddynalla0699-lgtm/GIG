@@ -159,6 +159,8 @@ export const orders: Order[] = [
 
 type MockOrderOverride = {
   status?: Order['status'];
+  supportNote?: string;
+  timeline?: Order['timeline'];
 };
 
 export class MockReservationError extends Error {
@@ -229,6 +231,42 @@ function readStoredOrderOverrides() {
           nextOverride.status = override.status as Order['status'];
         }
 
+        if (typeof override.supportNote === 'string' && override.supportNote.trim().length > 0) {
+          nextOverride.supportNote = override.supportNote;
+        }
+
+        if (Array.isArray(override.timeline)) {
+          const nextTimeline = override.timeline.flatMap((event) => {
+            if (!event || typeof event !== 'object') {
+              return [];
+            }
+
+            const candidate = event as Partial<Order['timeline'][number]>;
+
+            if (
+              typeof candidate.id !== 'string' ||
+              typeof candidate.timeLabel !== 'string' ||
+              typeof candidate.title !== 'string' ||
+              typeof candidate.description !== 'string'
+            ) {
+              return [];
+            }
+
+            return [
+              {
+                id: candidate.id,
+                timeLabel: candidate.timeLabel,
+                title: candidate.title,
+                description: candidate.description,
+              },
+            ];
+          });
+
+          if (nextTimeline.length > 0) {
+            nextOverride.timeline = nextTimeline;
+          }
+        }
+
         return Object.keys(nextOverride).length > 0 ? [[orderId, nextOverride]] : [];
       }),
     );
@@ -243,6 +281,57 @@ function writeStoredOrderOverrides(overrides: Record<string, MockOrderOverride>)
   }
 
   window.localStorage.setItem(MOCK_ORDER_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+function getLifecycleSupportNote(status: Order['status']) {
+  switch (status) {
+    case 'ready_for_pickup':
+      return 'Your order is packed and ready during the listed pickup window.';
+    case 'collected':
+      return 'Pickup completed successfully.';
+    case 'new_reserved':
+    default:
+      return 'Your reservation is confirmed for the listed pickup window.';
+  }
+}
+
+function getLifecycleTimelineEvent(order: Order, status: Order['status']): Order['timeline'][number] | null {
+  const timeLabel = getOrderedAtTimeLabel(new Date().toISOString());
+
+  switch (status) {
+    case 'ready_for_pickup':
+      return {
+        id: `${order.id}-ready`,
+        timeLabel,
+        title: 'Ready for pickup',
+        description: 'The rescue bag has been packed and is ready at the pickup point.',
+      };
+    case 'collected':
+      return {
+        id: `${order.id}-collected`,
+        timeLabel,
+        title: 'Collected',
+        description: 'The pickup code was verified and the rescue bag was handed over successfully.',
+      };
+    case 'new_reserved':
+    default:
+      return null;
+  }
+}
+
+function mergeLifecycleTimeline(order: Order, status: Order['status']) {
+  if (status === 'new_reserved') {
+    return order.timeline;
+  }
+
+  const nextEvent = getLifecycleTimelineEvent(order, status);
+
+  if (!nextEvent) {
+    return order.timeline;
+  }
+
+  const preservedEvents = order.timeline.filter((event) => event.title !== nextEvent.title);
+  return [...preservedEvents, nextEvent];
 }
 
 function getAllMockOrders() {
@@ -287,11 +376,14 @@ export function updateMockOrderStatus(orderId: string, status: Order['status']) 
   }
 
   const overrides = readStoredOrderOverrides();
+  const nextTimeline = mergeLifecycleTimeline(existingOrder, status);
   const nextOverrides = {
     ...overrides,
     [orderId]: {
       ...overrides[orderId],
       status,
+      supportNote: getLifecycleSupportNote(status),
+      timeline: nextTimeline,
     },
   };
 

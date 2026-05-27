@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import OtpVerificationCard from '../../components/partner/OtpVerificationCard';
 import OrderStatusBadge from '../../components/partner/OrderStatusBadge';
+import OrderTimeline from '../../components/partner/OrderTimeline';
 import SectionCard from '../../components/shared/SectionCard';
 import { getBagById } from '../../data/mock/bags';
 import { updateMockOrderStatus } from '../../data/mock/orders';
@@ -15,7 +16,9 @@ export default function PartnerOrderDetailsPage() {
   const { id } = useParams();
   const workspaceOrders = getMockPartnerWorkspaceOrders();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
-  const order = id ? workspaceOrders.find((entry) => entry.id === id) : undefined;
+  const initialOrder = id ? workspaceOrders.find((entry) => entry.id === id) : undefined;
+  const [currentOrder, setCurrentOrder] = useState(initialOrder);
+  const order = currentOrder;
   const bag = order ? getBagById(order.bagId) : undefined;
   const outlet = order ? workspaceOutlets.find((item) => item.id === order.outletId) : undefined;
 
@@ -25,10 +28,16 @@ export default function PartnerOrderDetailsPage() {
     () => ({
       markReady: () => {
         const nextOrder = updateMockOrderStatus(order?.id ?? '', 'ready_for_pickup');
+        if (nextOrder) {
+          setCurrentOrder(nextOrder);
+        }
         setStatus(nextOrder?.status ?? 'ready_for_pickup');
       },
       markCollected: () => {
         const nextOrder = updateMockOrderStatus(order?.id ?? '', 'collected');
+        if (nextOrder) {
+          setCurrentOrder(nextOrder);
+        }
         setStatus(nextOrder?.status ?? 'collected');
       },
     }),
@@ -123,8 +132,21 @@ export default function PartnerOrderDetailsPage() {
                 <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{bag.shortDescription}</p>
               </div>
               <div>
+                <div className="operational-label mb-2">Order update</div>
+                <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.supportNote}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
                 <div className="operational-label mb-2">Pickup instructions</div>
                 <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.collectionInstructions}</p>
+              </div>
+              <div>
+                <div className="operational-label mb-2">Order timeline</div>
+                <OrderTimeline events={order.timeline} />
               </div>
             </div>
           </section>

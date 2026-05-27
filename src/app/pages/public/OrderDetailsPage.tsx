@@ -82,8 +82,38 @@ export default function OrderDetailsPage() {
             </div>
 
             <div className="mt-5">
-              <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Collection instructions</div>
-              <p className="body-regular">{order.collectionInstructions}</p>
+              <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Order update</div>
+              <p className="body-regular">{order.supportNote}</p>
+            </div>
+
+            <div className="mt-5 grid gap-5 lg:grid-cols-[0.94fr_1.06fr]">
+              <div className="rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5">
+                <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Collection instructions</div>
+                <p className="body-regular">{order.collectionInstructions}</p>
+              </div>
+
+              <div className="rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5">
+                <div className="operational-label mb-3 text-[color:var(--gig-green-deep)]">Order timeline</div>
+                <div className="space-y-4">
+                  {order.timeline.map((event, index) => (
+                    <div key={event.id} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="mt-[6px] h-3 w-3 rounded-full bg-[color:var(--gig-green)]" />
+                        {index < order.timeline.length - 1 ? (
+                          <div className="mt-2 w-[2px] flex-1 bg-[rgba(11,122,77,0.18)]" />
+                        ) : null}
+                      </div>
+                      <div className="pb-4">
+                        <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-[color:var(--gig-text-soft)]">
+                          {event.timeLabel}
+                        </div>
+                        <div className="mb-1 text-[16px] font-semibold text-[color:var(--gig-text)]">{event.title}</div>
+                        <div className="text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">{event.description}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         </div>

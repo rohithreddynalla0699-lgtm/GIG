@@ -53,7 +53,7 @@ export function getOrderStatusClasses(status: OrderStatus) {
 
 const customerOrderStatusLabels: Record<OrderStatus, string> = {
   new_reserved: 'Reserved',
-  ready_for_pickup: 'Reserved',
+  ready_for_pickup: 'Ready for pickup',
   collected: 'Collected',
   no_show: 'Missed pickup',
   cancelled: 'Cancelled',
