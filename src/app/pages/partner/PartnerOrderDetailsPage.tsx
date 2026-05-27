@@ -5,7 +5,7 @@ import OrderStatusBadge from '../../components/partner/OrderStatusBadge';
 import OrderTimeline from '../../components/partner/OrderTimeline';
 import SectionCard from '../../components/shared/SectionCard';
 import { getBagById } from '../../data/mock/bags';
-import { updateMockOrderStatus } from '../../data/mock/orders';
+import { MockOrderLifecycleError, updateMockOrderStatus } from '../../data/mock/orders';
 import { getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
@@ -23,22 +23,41 @@ export default function PartnerOrderDetailsPage() {
   const outlet = order ? workspaceOutlets.find((item) => item.id === order.outletId) : undefined;
 
   const [status, setStatus] = useState<OrderStatus | null>(order?.status ?? null);
+  const [actionError, setActionError] = useState('');
 
   const actions = useMemo(
     () => ({
       markReady: () => {
-        const nextOrder = updateMockOrderStatus(order?.id ?? '', 'ready_for_pickup');
-        if (nextOrder) {
-          setCurrentOrder(nextOrder);
+        try {
+          setActionError('');
+          const nextOrder = updateMockOrderStatus(order?.id ?? '', 'ready_for_pickup');
+          if (nextOrder) {
+            setCurrentOrder(nextOrder);
+          }
+          setStatus(nextOrder?.status ?? 'ready_for_pickup');
+        } catch (error) {
+          if (error instanceof MockOrderLifecycleError) {
+            setActionError('This order cannot move to ready right now.');
+            return;
+          }
+          setActionError('We could not update this order right now.');
         }
-        setStatus(nextOrder?.status ?? 'ready_for_pickup');
       },
       markCollected: () => {
-        const nextOrder = updateMockOrderStatus(order?.id ?? '', 'collected');
-        if (nextOrder) {
-          setCurrentOrder(nextOrder);
+        try {
+          setActionError('');
+          const nextOrder = updateMockOrderStatus(order?.id ?? '', 'collected');
+          if (nextOrder) {
+            setCurrentOrder(nextOrder);
+          }
+          setStatus(nextOrder?.status ?? 'collected');
+        } catch (error) {
+          if (error instanceof MockOrderLifecycleError) {
+            setActionError('This order cannot move to collected yet.');
+            return;
+          }
+          setActionError('We could not update this order right now.');
         }
-        setStatus(nextOrder?.status ?? 'collected');
       },
     }),
     [order?.id]
@@ -166,6 +185,12 @@ export default function PartnerOrderDetailsPage() {
             </div>
 
             <div className="space-y-3">
+              {actionError ? (
+                <div className="rounded-[16px] border border-[rgba(192,90,43,0.16)] bg-[rgba(192,90,43,0.08)] px-4 py-3 text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                  {actionError}
+                </div>
+              ) : null}
+
               <button
                 type="button"
                 onClick={actions.markReady}

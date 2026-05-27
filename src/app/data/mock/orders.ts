@@ -15,6 +15,7 @@ const VALID_ORDER_STATUSES = new Set<Order['status']>([
   'issue_reported',
   'refunded',
 ]);
+const VALID_PAYMENT_STATUSES = new Set<Order['paymentStatus']>(['paid', 'refunded', 'issue_hold']);
 
 export const orders: Order[] = [
   {
@@ -173,6 +174,67 @@ export class MockReservationError extends Error {
   }
 }
 
+export class MockOrderLifecycleError extends Error {
+  code: 'invalid_transition';
+
+  constructor(code: 'invalid_transition', message: string) {
+    super(message);
+    this.name = 'MockOrderLifecycleError';
+    this.code = code;
+  }
+}
+
+function isValidOrderTimelineEvent(value: unknown): value is Order['timeline'][number] {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<Order['timeline'][number]>;
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.timeLabel === 'string' &&
+    typeof candidate.title === 'string' &&
+    typeof candidate.description === 'string'
+  );
+}
+
+function isValidStoredOrder(value: unknown): value is Order {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<Order>;
+
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.customerId === 'string' &&
+    typeof candidate.customerName === 'string' &&
+    typeof candidate.customerPhoneMasked === 'string' &&
+    typeof candidate.storeId === 'string' &&
+    typeof candidate.outletId === 'string' &&
+    typeof candidate.bagId === 'string' &&
+    typeof candidate.listingTitle === 'string' &&
+    typeof candidate.quantity === 'number' &&
+    Number.isFinite(candidate.quantity) &&
+    candidate.quantity > 0 &&
+    typeof candidate.status === 'string' &&
+    VALID_ORDER_STATUSES.has(candidate.status as Order['status']) &&
+    typeof candidate.paymentStatus === 'string' &&
+    VALID_PAYMENT_STATUSES.has(candidate.paymentStatus as Order['paymentStatus']) &&
+    typeof candidate.orderedAt === 'string' &&
+    typeof candidate.pickupDateLabel === 'string' &&
+    typeof candidate.pickupWindow === 'string' &&
+    typeof candidate.pickupCode === 'string' &&
+    typeof candidate.amountPaid === 'number' &&
+    Number.isFinite(candidate.amountPaid) &&
+    typeof candidate.paymentSummary === 'string' &&
+    typeof candidate.collectionInstructions === 'string' &&
+    typeof candidate.supportNote === 'string' &&
+    Array.isArray(candidate.timeline) &&
+    candidate.timeline.every((event) => isValidOrderTimelineEvent(event))
+  );
+}
+
 function readStoredCreatedOrders() {
   if (typeof window === 'undefined') {
     return [];
@@ -185,7 +247,7 @@ function readStoredCreatedOrders() {
 
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as Order[]) : [];
+    return Array.isArray(parsed) ? parsed.filter((order): order is Order => isValidStoredOrder(order)) : [];
   } catch {
     return [];
   }
@@ -295,6 +357,23 @@ function getLifecycleSupportNote(status: Order['status']) {
   }
 }
 
+function canTransitionOrderStatus(currentStatus: Order['status'], nextStatus: Order['status']) {
+  if (currentStatus === nextStatus) {
+    return true;
+  }
+
+  switch (currentStatus) {
+    case 'new_reserved':
+      return nextStatus === 'ready_for_pickup';
+    case 'ready_for_pickup':
+      return nextStatus === 'collected';
+    case 'collected':
+      return false;
+    default:
+      return false;
+  }
+}
+
 function getLifecycleTimelineEvent(order: Order, status: Order['status']): Order['timeline'][number] | null {
   const timeLabel = getOrderedAtTimeLabel(new Date().toISOString());
 
@@ -373,6 +452,17 @@ export function updateMockOrderStatus(orderId: string, status: Order['status']) 
 
   if (!existingOrder) {
     return undefined;
+  }
+
+  if (existingOrder.status === status) {
+    return applyOrderOverride(existingOrder, readStoredOrderOverrides());
+  }
+
+  if (!canTransitionOrderStatus(existingOrder.status, status)) {
+    throw new MockOrderLifecycleError(
+      'invalid_transition',
+      `Cannot move order from ${existingOrder.status} to ${status}.`,
+    );
   }
 
   const overrides = readStoredOrderOverrides();

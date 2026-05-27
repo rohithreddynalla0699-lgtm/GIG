@@ -114,6 +114,10 @@ export default function OrderCard({ order, bag, store, variant, delay = 0 }: Ord
               </div>
             </div>
 
+            <div className={`${isUpcoming ? 'mb-5' : 'mb-4.5'} text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]`}>
+              {order.supportNote}
+            </div>
+
             <div className="mt-auto flex justify-end">
               <Link to={`/orders/${order.id}`} className={`${isUpcoming ? 'btn-primary' : 'btn-secondary'} justify-center whitespace-nowrap`}>
                 View details

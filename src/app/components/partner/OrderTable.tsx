@@ -38,6 +38,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
                 </td>
                 <td className="px-4 py-3 align-top">
                   <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{order.listingTitle}</div>
+                  <div className="meta-text mt-1 max-w-[26ch]">{order.supportNote}</div>
                 </td>
                 <td className="px-4 py-3 align-top">
                   <div className="text-[13px] font-medium text-[color:var(--gig-text)]">{formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}</div>
@@ -73,6 +74,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
               <OrderStatusBadge status={order.status} />
             </div>
             <div className="mb-3 text-[14px] font-semibold text-[color:var(--gig-text)]">{order.listingTitle}</div>
+            <div className="meta-text mb-3">{order.supportNote}</div>
             <div className="mb-3 grid gap-2 sm:grid-cols-2">
               <div>
                 <div className="meta-text mb-1">Pickup</div>
