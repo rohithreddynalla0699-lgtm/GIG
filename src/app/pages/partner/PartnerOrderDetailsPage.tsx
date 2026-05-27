@@ -24,6 +24,7 @@ export default function PartnerOrderDetailsPage() {
 
   const [status, setStatus] = useState<OrderStatus | null>(order?.status ?? null);
   const [actionError, setActionError] = useState('');
+  const [issueNoteDraft, setIssueNoteDraft] = useState(order?.issueNote ?? '');
 
   const actions = useMemo(
     () => ({
@@ -78,9 +79,10 @@ export default function PartnerOrderDetailsPage() {
       reportIssue: () => {
         try {
           setActionError('');
-          const nextOrder = updateMockOrderStatus(order?.id ?? '', 'issue_reported');
+          const nextOrder = updateMockOrderStatus(order?.id ?? '', 'issue_reported', { issueNote: issueNoteDraft });
           if (nextOrder) {
             setCurrentOrder(nextOrder);
+            setIssueNoteDraft(nextOrder.issueNote ?? issueNoteDraft);
           }
           setStatus(nextOrder?.status ?? 'issue_reported');
         } catch (error) {
@@ -92,7 +94,7 @@ export default function PartnerOrderDetailsPage() {
         }
       },
     }),
-    [order?.id]
+    [issueNoteDraft, order?.id]
   );
 
   if (!order || !bag || !outlet || !status) {
@@ -187,6 +189,12 @@ export default function PartnerOrderDetailsPage() {
               <div>
                 <div className="operational-label mb-2">Order update</div>
                 <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.supportNote}</p>
+                {order.issueNote ? (
+                  <div className="mt-3 rounded-[16px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.42)] px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#A66B00]">Issue note</div>
+                    <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.issueNote}</div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </section>
@@ -208,8 +216,8 @@ export default function PartnerOrderDetailsPage() {
         <div className="space-y-4">
           <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
             <div className="mb-3">
-              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Pickup actions</h2>
-              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Use the pickup code and move the order forward.</p>
+              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Order actions</h2>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Handle fulfillment first, then flag support issues if needed.</p>
             </div>
 
             <div className="mb-3 rounded-[16px] bg-[#1E2F24] px-4 py-4 text-white">
@@ -225,34 +233,52 @@ export default function PartnerOrderDetailsPage() {
                 </div>
               ) : null}
 
-              <button
-                type="button"
-                onClick={actions.markReady}
-                disabled={!canMarkReady}
-                className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c] disabled:bg-[#D6D9D4] disabled:text-[#8A8F8A] disabled:hover:bg-[#D6D9D4]"
-              >
-                Mark ready
-              </button>
+              <div>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--gig-text-soft)]">Fulfillment actions</div>
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={actions.markReady}
+                    disabled={!canMarkReady}
+                    className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c] disabled:bg-[#D6D9D4] disabled:text-[#8A8F8A] disabled:hover:bg-[#D6D9D4]"
+                  >
+                    Mark ready
+                  </button>
 
-              <OtpVerificationCard expectedCode={order.pickupCode} canCollect={canVerifyPickup} onCollected={actions.markCollected} />
+                  <OtpVerificationCard expectedCode={order.pickupCode} canCollect={canVerifyPickup} onCollected={actions.markCollected} />
 
-              <button
-                type="button"
-                onClick={actions.markNoShow}
-                disabled={!canMarkNoShow}
-                className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full border border-[rgba(192,90,43,0.22)] bg-[rgba(255,240,238,0.88)] px-4 py-2 text-[13px] font-semibold text-[#A6572E] transition hover:bg-[rgba(255,240,238,1)] disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                Mark no-show
-              </button>
+                  <button
+                    type="button"
+                    onClick={actions.markNoShow}
+                    disabled={!canMarkNoShow}
+                    className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full border border-[rgba(192,90,43,0.22)] bg-[rgba(255,240,238,0.88)] px-4 py-2 text-[13px] font-semibold text-[#A6572E] transition hover:bg-[rgba(255,240,238,1)] disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    Mark no-show
+                  </button>
+                </div>
+              </div>
 
-              <button
-                type="button"
-                onClick={actions.reportIssue}
-                disabled={!canReportIssue}
-                className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full border border-[rgba(166,107,0,0.18)] bg-[rgba(255,244,214,0.88)] px-4 py-2 text-[13px] font-semibold text-[#A66B00] transition hover:bg-[rgba(255,244,214,1)] disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                Report issue
-              </button>
+              <div className="rounded-[18px] border border-[rgba(166,107,0,0.12)] bg-[rgba(255,252,244,0.86)] p-4">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--gig-text-soft)]">Support actions</div>
+                <div className="mb-3 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+                  Add a short note if something went wrong with this pickup.
+                </div>
+                <textarea
+                  value={issueNoteDraft}
+                  onChange={(event) => setIssueNoteDraft(event.target.value)}
+                  rows={3}
+                  placeholder="Optional issue note"
+                  className="mb-3 w-full rounded-[16px] border border-[color:var(--gig-border)] bg-white px-4 py-3 text-[13px] leading-6 text-[color:var(--gig-text)] outline-none transition-colors placeholder:text-[color:var(--gig-text-soft)] focus:border-[color:var(--gig-green)]"
+                />
+                <button
+                  type="button"
+                  onClick={actions.reportIssue}
+                  disabled={!canReportIssue}
+                  className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full border border-[rgba(166,107,0,0.18)] bg-[rgba(255,244,214,0.88)] px-4 py-2 text-[13px] font-semibold text-[#A66B00] transition hover:bg-[rgba(255,244,214,1)] disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  Report issue
+                </button>
+              </div>
             </div>
           </section>
         </div>

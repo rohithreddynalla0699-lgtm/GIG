@@ -162,6 +162,7 @@ type MockOrderOverride = {
   status?: Order['status'];
   supportNote?: string;
   timeline?: Order['timeline'];
+  issueNote?: string;
 };
 
 export class MockReservationError extends Error {
@@ -230,6 +231,7 @@ function isValidStoredOrder(value: unknown): value is Order {
     typeof candidate.paymentSummary === 'string' &&
     typeof candidate.collectionInstructions === 'string' &&
     typeof candidate.supportNote === 'string' &&
+    (typeof candidate.issueNote === 'undefined' || typeof candidate.issueNote === 'string') &&
     Array.isArray(candidate.timeline) &&
     candidate.timeline.every((event) => isValidOrderTimelineEvent(event))
   );
@@ -295,6 +297,10 @@ function readStoredOrderOverrides() {
 
         if (typeof override.supportNote === 'string' && override.supportNote.trim().length > 0) {
           nextOverride.supportNote = override.supportNote;
+        }
+
+        if (typeof override.issueNote === 'string' && override.issueNote.trim().length > 0) {
+          nextOverride.issueNote = override.issueNote;
         }
 
         if (Array.isArray(override.timeline)) {
@@ -469,7 +475,11 @@ export function getOrdersByBagId(bagId: string) {
   return getMockOrders().filter((order) => order.bagId === bagId);
 }
 
-export function updateMockOrderStatus(orderId: string, status: Order['status']) {
+export function updateMockOrderStatus(
+  orderId: string,
+  status: Order['status'],
+  options?: { issueNote?: string },
+) {
   const existingOrder = getAllMockOrders().find((order) => order.id === orderId);
 
   if (!existingOrder) {
@@ -489,6 +499,10 @@ export function updateMockOrderStatus(orderId: string, status: Order['status']) 
 
   const overrides = readStoredOrderOverrides();
   const nextTimeline = mergeLifecycleTimeline(existingOrder, status);
+  const nextIssueNote =
+    status === 'issue_reported'
+      ? options?.issueNote?.trim() || overrides[orderId]?.issueNote || existingOrder.issueNote
+      : overrides[orderId]?.issueNote || existingOrder.issueNote;
   const nextOverrides = {
     ...overrides,
     [orderId]: {
@@ -496,6 +510,7 @@ export function updateMockOrderStatus(orderId: string, status: Order['status']) 
       status,
       supportNote: getLifecycleSupportNote(status),
       timeline: nextTimeline,
+      ...(nextIssueNote ? { issueNote: nextIssueNote } : {}),
     },
   };
 

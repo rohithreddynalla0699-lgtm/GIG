@@ -86,6 +86,13 @@ export default function OrderDetailsPage() {
               <p className="body-regular">{order.supportNote}</p>
             </div>
 
+            {order.issueNote ? (
+              <div className="mt-5 rounded-[24px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.34)] p-5">
+                <div className="operational-label mb-2 text-[#A66B00]">Issue note</div>
+                <p className="body-regular">{order.issueNote}</p>
+              </div>
+            ) : null}
+
             <div className="mt-5 grid gap-5 lg:grid-cols-[0.94fr_1.06fr]">
               <div className="rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5">
                 <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Collection instructions</div>
