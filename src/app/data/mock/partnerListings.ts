@@ -2,6 +2,7 @@ import type { PartnerListing } from '../../types/listing';
 import { getMockPartnerWorkspaceId, getMockPartnerWorkspaceOutlets, isSeedPartnerWorkspaceId } from './partners';
 
 export const MOCK_PARTNER_LISTINGS_KEY = 'gig-partner-listings';
+export const MOCK_PARTNER_LISTING_QUANTITY_OVERRIDES_KEY = 'gig-partner-listing-quantity-overrides';
 export const MAX_RESCUE_BAG_TYPES_PER_PARTNER = 3;
 
 export const partnerListings: PartnerListing[] = [
@@ -180,6 +181,57 @@ function readStoredPartnerListings() {
   }
 }
 
+function readStoredPartnerListingQuantityOverrides() {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const raw = window.localStorage.getItem(MOCK_PARTNER_LISTING_QUANTITY_OVERRIDES_KEY);
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, number>;
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).flatMap(([listingId, quantityLeft]) =>
+        typeof quantityLeft === 'number' && Number.isFinite(quantityLeft) && quantityLeft >= 0
+          ? [[listingId, quantityLeft]]
+          : [],
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredPartnerListingQuantityOverrides(overrides: Record<string, number>) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(MOCK_PARTNER_LISTING_QUANTITY_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+function applyPartnerListingQuantityOverride(listing: PartnerListing, overrides: Record<string, number>) {
+  const quantityLeft = overrides[listing.id];
+
+  if (typeof quantityLeft !== 'number') {
+    return listing;
+  }
+
+  return {
+    ...listing,
+    quantityLeft,
+    status: quantityLeft <= 0 ? 'sold_out' : listing.status,
+  };
+}
+
 function writeStoredPartnerListings(listings: PartnerListing[]) {
   if (typeof window === 'undefined') {
     return;
@@ -189,18 +241,26 @@ function writeStoredPartnerListings(listings: PartnerListing[]) {
 }
 
 export function getMockPartnerListings() {
-  return [...partnerListings, ...readStoredPartnerListings()];
+  const quantityOverrides = readStoredPartnerListingQuantityOverrides();
+  return [...partnerListings, ...readStoredPartnerListings()].map((listing) =>
+    applyPartnerListingQuantityOverride(listing, quantityOverrides),
+  );
 }
 
 export function getMockPartnerWorkspaceListings(workspaceId: string = getMockPartnerWorkspaceId()) {
+  const quantityOverrides = readStoredPartnerListingQuantityOverrides();
   const storedListings = readStoredPartnerListings().filter((listing) => listing.workspaceId === workspaceId);
 
   if (isSeedPartnerWorkspaceId(workspaceId)) {
-    return [...partnerListings, ...storedListings];
+    return [...partnerListings, ...storedListings].map((listing) =>
+      applyPartnerListingQuantityOverride(listing, quantityOverrides),
+    );
   }
 
   const workspaceOutletIds = getMockPartnerWorkspaceOutlets().map((outlet) => outlet.id);
-  return storedListings.filter((listing) => workspaceOutletIds.includes(listing.outletId));
+  return storedListings
+    .filter((listing) => workspaceOutletIds.includes(listing.outletId))
+    .map((listing) => applyPartnerListingQuantityOverride(listing, quantityOverrides));
 }
 
 export function normalizeMockListingTitle(title: string) {
@@ -284,4 +344,23 @@ export function resetMockPartnerListings() {
   }
 
   window.localStorage.removeItem(MOCK_PARTNER_LISTINGS_KEY);
+  window.localStorage.removeItem(MOCK_PARTNER_LISTING_QUANTITY_OVERRIDES_KEY);
+}
+
+export function updateMockPartnerListingQuantityLeft(listingId: string, quantityLeft: number) {
+  const existingListing = getMockPartnerListings().find((listing) => listing.id === listingId);
+
+  if (!existingListing) {
+    return undefined;
+  }
+
+  const nextQuantityLeft = Math.max(0, Math.min(existingListing.quantity, quantityLeft));
+  const overrides = readStoredPartnerListingQuantityOverrides();
+  const nextOverrides = {
+    ...overrides,
+    [listingId]: nextQuantityLeft,
+  };
+
+  writeStoredPartnerListingQuantityOverrides(nextOverrides);
+  return applyPartnerListingQuantityOverride(existingListing, nextOverrides);
 }

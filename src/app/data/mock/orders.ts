@@ -1,6 +1,11 @@
 import type { Order } from '../../types/order';
+import { getBagById, updateMockBagQuantityLeft } from './bags';
+import { currentCustomer, isMockCustomerSignedIn } from './customers';
+import { getMockPartnerProfile, getMockPartnerWorkspaceOutlets } from './partners';
+import { getCustomerStoreByIdWithPartnerImageOverride } from './stores';
 
 export const MOCK_ORDER_OVERRIDES_KEY = 'gig-order-overrides';
+export const MOCK_CREATED_ORDERS_KEY = 'gig-created-orders';
 const VALID_ORDER_STATUSES = new Set<Order['status']>([
   'new_reserved',
   'ready_for_pickup',
@@ -156,6 +161,42 @@ type MockOrderOverride = {
   status?: Order['status'];
 };
 
+export class MockReservationError extends Error {
+  code: 'not_signed_in' | 'bag_not_found' | 'sold_out';
+
+  constructor(code: 'not_signed_in' | 'bag_not_found' | 'sold_out', message: string) {
+    super(message);
+    this.name = 'MockReservationError';
+    this.code = code;
+  }
+}
+
+function readStoredCreatedOrders() {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const raw = window.localStorage.getItem(MOCK_CREATED_ORDERS_KEY);
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as Order[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredCreatedOrders(nextOrders: Order[]) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(MOCK_CREATED_ORDERS_KEY, JSON.stringify(nextOrders));
+}
+
 function readStoredOrderOverrides() {
   if (typeof window === 'undefined') {
     return {};
@@ -204,6 +245,10 @@ function writeStoredOrderOverrides(overrides: Record<string, MockOrderOverride>)
   window.localStorage.setItem(MOCK_ORDER_OVERRIDES_KEY, JSON.stringify(overrides));
 }
 
+function getAllMockOrders() {
+  return [...readStoredCreatedOrders(), ...orders];
+}
+
 function applyOrderOverride(order: Order, overrides: Record<string, MockOrderOverride>) {
   const override = overrides[order.id];
 
@@ -219,7 +264,7 @@ function applyOrderOverride(order: Order, overrides: Record<string, MockOrderOve
 
 export function getMockOrders() {
   const overrides = readStoredOrderOverrides();
-  return orders.map((order) => applyOrderOverride(order, overrides));
+  return getAllMockOrders().map((order) => applyOrderOverride(order, overrides));
 }
 
 export function getOrderById(orderId: string) {
@@ -235,7 +280,7 @@ export function getOrdersByBagId(bagId: string) {
 }
 
 export function updateMockOrderStatus(orderId: string, status: Order['status']) {
-  const existingOrder = orders.find((order) => order.id === orderId);
+  const existingOrder = getAllMockOrders().find((order) => order.id === orderId);
 
   if (!existingOrder) {
     return undefined;
@@ -254,10 +299,102 @@ export function updateMockOrderStatus(orderId: string, status: Order['status']) 
   return applyOrderOverride(existingOrder, nextOverrides);
 }
 
+function createPickupCode() {
+  return `${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+function getOrderedAtTimeLabel(orderedAt: string) {
+  return new Intl.DateTimeFormat('en-IN', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date(orderedAt));
+}
+
+function getReservationOutletId(storeId: string, relatedPartnerListingId?: string) {
+  const outlets = getMockPartnerWorkspaceOutlets();
+  const partnerProfile = getMockPartnerProfile();
+
+  if (partnerProfile.customerStoreId === storeId) {
+    if (relatedPartnerListingId) {
+      return outlets[0]?.id ?? `outlet-${storeId}`;
+    }
+
+    return outlets[0]?.id ?? `outlet-${storeId}`;
+  }
+
+  return `outlet-${storeId.replace(/^store-/, '')}`;
+}
+
+export function createMockReservationFromBag(bagId: string) {
+  if (!isMockCustomerSignedIn()) {
+    throw new MockReservationError('not_signed_in', 'Please sign in to reserve this rescue bag.');
+  }
+
+  const bag = getBagById(bagId);
+
+  if (!bag) {
+    throw new MockReservationError('bag_not_found', 'This rescue bag is not available right now.');
+  }
+
+  if (bag.quantityLeft <= 0 || bag.status === 'sold_out') {
+    throw new MockReservationError('sold_out', 'This rescue bag is sold out.');
+  }
+
+  const store = getCustomerStoreByIdWithPartnerImageOverride(bag.storeId);
+  const orderedAt = new Date().toISOString();
+  const pickupCode = createPickupCode();
+  const orderId = `order-${Date.now()}`;
+  const nextQuantityLeft = bag.quantityLeft - 1;
+
+  const nextBag = updateMockBagQuantityLeft(bag.id, nextQuantityLeft);
+
+  if (!nextBag) {
+    throw new MockReservationError('bag_not_found', 'This rescue bag is not available right now.');
+  }
+
+  const nextOrder: Order = {
+    id: orderId,
+    customerId: currentCustomer.id,
+    customerName: currentCustomer.name,
+    customerPhoneMasked: `${currentCustomer.phone.slice(0, 9)}••`,
+    storeId: bag.storeId,
+    outletId: getReservationOutletId(bag.storeId, bag.relatedPartnerListingId),
+    bagId: bag.id,
+    listingTitle: bag.title,
+    quantity: 1,
+    status: 'new_reserved',
+    paymentStatus: 'paid',
+    orderedAt,
+    pickupDateLabel: bag.pickupDateLabel,
+    pickupWindow: bag.pickupWindow,
+    pickupCode,
+    amountPaid: bag.rescuePrice,
+    paymentSummary: 'Reserved in app · payment mocked for demo',
+    collectionInstructions: bag.collectionNote || store?.pickupInstructions || 'Show the pickup code at collection.',
+    supportNote: 'Your reservation is confirmed for the listed pickup window.',
+    relatedPartnerListingId: bag.relatedPartnerListingId,
+    timeline: [
+      {
+        id: `${orderId}-reserved`,
+        timeLabel: getOrderedAtTimeLabel(orderedAt),
+        title: 'Reserved',
+        description: 'Your rescue bag was reserved successfully.',
+      },
+    ],
+  };
+
+  const createdOrders = readStoredCreatedOrders();
+  writeStoredCreatedOrders([nextOrder, ...createdOrders]);
+  return nextOrder;
+}
+
 export function resetMockOrderOverrides() {
   if (typeof window === 'undefined') {
     return;
   }
 
   window.localStorage.removeItem(MOCK_ORDER_OVERRIDES_KEY);
+  window.localStorage.removeItem(MOCK_CREATED_ORDERS_KEY);
 }

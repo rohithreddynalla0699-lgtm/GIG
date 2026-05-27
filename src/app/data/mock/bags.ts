@@ -1,8 +1,10 @@
 import type { Bag } from '../../types/bag';
 import type { PartnerListing } from '../../types/listing';
-import { getMockPartnerWorkspaceLiveListings } from './partnerListings';
+import { getMockPartnerWorkspaceLiveListings, updateMockPartnerListingQuantityLeft } from './partnerListings';
 import { getMockPartnerProfile } from './partners';
 import { getCustomerStoreByIdWithPartnerImageOverride } from './stores';
+
+export const MOCK_BAG_QUANTITY_OVERRIDES_KEY = 'gig-bag-quantity-overrides';
 
 export const bags: Bag[] = [
   {
@@ -232,6 +234,57 @@ export const bags: Bag[] = [
   },
 ];
 
+function readStoredBagQuantityOverrides() {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const raw = window.localStorage.getItem(MOCK_BAG_QUANTITY_OVERRIDES_KEY);
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, number>;
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).flatMap(([bagId, quantityLeft]) =>
+        typeof quantityLeft === 'number' && Number.isFinite(quantityLeft) && quantityLeft >= 0
+          ? [[bagId, quantityLeft]]
+          : [],
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredBagQuantityOverrides(overrides: Record<string, number>) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(MOCK_BAG_QUANTITY_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+function applyStaticBagQuantityOverride(bag: Bag, overrides: Record<string, number>) {
+  const quantityLeft = overrides[bag.id];
+
+  if (typeof quantityLeft !== 'number') {
+    return bag;
+  }
+
+  return {
+    ...bag,
+    quantityLeft,
+    status: quantityLeft <= 0 ? 'sold_out' : quantityLeft <= 2 ? 'limited' : bag.status,
+  };
+}
+
 function slugifyMarketplaceBagValue(value: string) {
   return value
     .toLowerCase()
@@ -339,6 +392,7 @@ function createMarketplaceBagFromPartnerListing(listing: PartnerListing, storeId
     collectionNote: listing.collectionInstructions,
     status: getMarketplaceBagStatus(listing),
     imageUrl: store.cardImage,
+    relatedPartnerListingId: listing.id,
   };
 }
 
@@ -356,7 +410,8 @@ function getDerivedMarketplaceBagsFromPartnerListings() {
 }
 
 export function getCustomerMarketplaceBags() {
-  return [...getDerivedMarketplaceBagsFromPartnerListings(), ...bags];
+  const quantityOverrides = readStoredBagQuantityOverrides();
+  return [...getDerivedMarketplaceBagsFromPartnerListings(), ...bags.map((bag) => applyStaticBagQuantityOverride(bag, quantityOverrides))];
 }
 
 export function getBagById(bagId: string) {
@@ -365,4 +420,32 @@ export function getBagById(bagId: string) {
 
 export function getBagsByStoreId(storeId: string) {
   return getCustomerMarketplaceBags().filter((bag) => bag.storeId === storeId);
+}
+
+export function updateMockBagQuantityLeft(bagId: string, quantityLeft: number) {
+  const existingBag = getBagById(bagId);
+
+  if (!existingBag) {
+    return undefined;
+  }
+
+  if (existingBag.relatedPartnerListingId) {
+    const updatedListing = updateMockPartnerListingQuantityLeft(existingBag.relatedPartnerListingId, quantityLeft);
+
+    if (!updatedListing) {
+      return undefined;
+    }
+
+    return getBagById(bagId);
+  }
+
+  const nextQuantityLeft = Math.max(0, Math.min(existingBag.quantityTotal, quantityLeft));
+  const overrides = readStoredBagQuantityOverrides();
+  const nextOverrides = {
+    ...overrides,
+    [bagId]: nextQuantityLeft,
+  };
+
+  writeStoredBagQuantityOverrides(nextOverrides);
+  return applyStaticBagQuantityOverride(existingBag, nextOverrides);
 }

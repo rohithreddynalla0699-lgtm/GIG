@@ -1,9 +1,11 @@
-import { Link, useParams } from 'react-router';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { getBagById } from '../../data/mock/bags';
-import { getStoreById } from '../../data/mock/stores';
+import { MockReservationError, createMockReservationFromBag } from '../../data/mock/orders';
+import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { isMockCustomerSignedIn } from '../../data/mock/customers';
 import { formatINR } from '../../lib/currency';
 import { getDiscountPercentage } from '../../lib/pricing';
@@ -11,9 +13,12 @@ import { getVegTypeLabel } from '../../lib/status';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 
 export default function BagPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const bag = id ? getBagById(id) : undefined;
-  const store = bag ? getStoreById(bag.storeId) : undefined;
+  const store = bag ? getCustomerStoreByIdWithPartnerImageOverride(bag.storeId) : undefined;
+  const [reservationError, setReservationError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!bag || !store) {
     return (
@@ -36,6 +41,37 @@ export default function BagPage() {
 
   const discount = getDiscountPercentage(bag.originalPrice, bag.rescuePrice);
   const signedIn = isMockCustomerSignedIn();
+  const isSoldOut = bag.quantityLeft <= 0 || bag.status === 'sold_out';
+
+  async function handleReserveBag() {
+    if (!bag) {
+      return;
+    }
+
+    if (!signedIn) {
+      navigate('/customer-auth', { state: { from: `/bag/${bag.id}` } });
+      return;
+    }
+
+    if (isSoldOut || isSubmitting) {
+      return;
+    }
+
+    setReservationError('');
+    setIsSubmitting(true);
+
+    try {
+      const order = createMockReservationFromBag(bag.id);
+      navigate(`/orders/${order.id}`, { state: { notice: 'Reserved successfully' } });
+    } catch (error) {
+      if (error instanceof MockReservationError) {
+        setReservationError(error.message);
+      } else {
+        setReservationError('We could not reserve this rescue bag right now.');
+      }
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -128,14 +164,27 @@ export default function BagPage() {
                 {bag.allergenNote}
               </div>
 
+              {reservationError ? (
+                <div className="mb-5 rounded-[18px] border border-[rgba(194,93,70,0.18)] bg-[rgba(194,93,70,0.08)] px-4 py-3 text-[13px] font-medium text-[#9a3f2d]">
+                  {reservationError}
+                </div>
+              ) : null}
+
+              {isSoldOut ? (
+                <div className="mb-5 rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-[rgba(32,38,28,0.04)] px-4 py-3 text-[13px] font-medium text-[color:var(--gig-text-muted)]">
+                  This rescue bag is sold out.
+                </div>
+              ) : null}
+
               <div className="hidden gap-3 sm:flex">
-                <Link
-                  to={signedIn ? '/orders' : '/customer-auth'}
-                  state={signedIn ? undefined : { from: `/bag/${bag.id}` }}
-                  className="btn-primary flex-1 justify-center"
+                <button
+                  type="button"
+                  onClick={handleReserveBag}
+                  disabled={isSoldOut || isSubmitting}
+                  className="btn-primary flex-1 justify-center disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Reserve bag
-                </Link>
+                  {isSoldOut ? 'Sold out' : isSubmitting ? 'Reserving...' : 'Reserve bag'}
+                </button>
                 <Link to={`/store/${store.id}`} className="btn-secondary flex-1 justify-center">
                   View store
                 </Link>
@@ -194,13 +243,14 @@ export default function BagPage() {
             <div className="text-[13px] font-medium text-[color:var(--gig-text-muted)]">{bag.pickupDateLabel} · {bag.pickupWindow}</div>
             <div className="text-[22px] font-semibold tracking-[-0.04em] text-[color:var(--gig-green-deep)]">{formatINR(bag.rescuePrice)}</div>
           </div>
-          <Link
-            to={signedIn ? '/orders' : '/customer-auth'}
-            state={signedIn ? undefined : { from: `/bag/${bag.id}` }}
-            className="btn-primary justify-center whitespace-nowrap"
+          <button
+            type="button"
+            onClick={handleReserveBag}
+            disabled={isSoldOut || isSubmitting}
+            className="btn-primary justify-center whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Reserve bag
-          </Link>
+            {isSoldOut ? 'Sold out' : isSubmitting ? 'Reserving...' : 'Reserve bag'}
+          </button>
         </div>
       </div>
 

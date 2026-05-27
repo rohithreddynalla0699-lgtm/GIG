@@ -7,6 +7,7 @@ export interface Bag {
   id: string;
   slug: string;
   storeId: string;
+  relatedPartnerListingId?: string;
   title: string;
   concept: BagConcept;
   category: string;
