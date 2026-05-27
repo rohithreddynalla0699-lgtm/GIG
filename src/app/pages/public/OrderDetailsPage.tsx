@@ -7,7 +7,12 @@ import { getOrderById } from '../../data/mock/orders';
 import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getCustomerOrderStatusLabel, getOrderStatusClasses, getSupportFollowUpStatusLabel } from '../../lib/status';
+import {
+  getCustomerOrderStatusLabel,
+  getOrderDetailSupportSummary,
+  getOrderStatusClasses,
+  getSupportFollowUpStatusLabel,
+} from '../../lib/status';
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
@@ -31,6 +36,12 @@ export default function OrderDetailsPage() {
 
   const isUpcoming = ['new_reserved', 'ready_for_pickup'].includes(order.status);
   const amountSaved = Math.max(bag.originalPrice - order.amountPaid, 0);
+  const orderUpdateSummary = getOrderDetailSupportSummary(
+    order.status,
+    order.supportNote,
+    order.supportFollowUpStatus,
+    order.supportFollowUpNote,
+  );
 
   return (
     <div className="min-h-screen">
@@ -83,7 +94,7 @@ export default function OrderDetailsPage() {
 
             <div className="mt-5">
               <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Order update</div>
-              <p className="body-regular">{order.supportNote}</p>
+              <p className="body-regular">{orderUpdateSummary}</p>
             </div>
 
             {order.issueNote ? (
@@ -99,9 +110,6 @@ export default function OrderDetailsPage() {
                 <div className="text-[15px] font-semibold text-[#8A5600]">
                   {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
                 </div>
-                {order.supportFollowUpStatus === 'reviewed' ? (
-                  <p className="mt-2 body-regular">{order.supportFollowUpNote || 'Support reviewed this issue.'}</p>
-                ) : null}
               </div>
             ) : null}
 

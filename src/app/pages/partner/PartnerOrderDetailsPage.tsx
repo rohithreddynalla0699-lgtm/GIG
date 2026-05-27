@@ -9,7 +9,13 @@ import { MockOrderLifecycleError, updateMockOrderStatus, updateMockOrderSupportF
 import { getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getPaymentStatusClasses, getPaymentStatusLabel, getSupportFollowUpStatusLabel, getVegTypeLabel } from '../../lib/status';
+import {
+  getOrderDetailSupportSummary,
+  getPaymentStatusClasses,
+  getPaymentStatusLabel,
+  getSupportFollowUpStatusLabel,
+  getVegTypeLabel,
+} from '../../lib/status';
 import type { OrderStatus } from '../../types/order';
 
 export default function PartnerOrderDetailsPage() {
@@ -123,6 +129,12 @@ export default function PartnerOrderDetailsPage() {
   const canMarkNoShow = status === 'ready_for_pickup';
   const canReportIssue = ['new_reserved', 'ready_for_pickup', 'collected', 'no_show'].includes(status);
   const canMarkSupportReviewed = status === 'issue_reported' && order.supportFollowUpStatus !== 'reviewed';
+  const orderUpdateSummary = getOrderDetailSupportSummary(
+    order.status,
+    order.supportNote,
+    order.supportFollowUpStatus,
+    order.supportFollowUpNote,
+  );
 
   return (
     <div className="space-y-4">
@@ -200,22 +212,11 @@ export default function PartnerOrderDetailsPage() {
               </div>
               <div>
                 <div className="operational-label mb-2">Order update</div>
-                <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.supportNote}</p>
+                <p className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{orderUpdateSummary}</p>
                 {order.issueNote ? (
                   <div className="mt-3 rounded-[16px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.42)] px-4 py-3">
                     <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#A66B00]">Issue note</div>
                     <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.issueNote}</div>
-                  </div>
-                ) : null}
-                {order.status === 'issue_reported' ? (
-                  <div className="mt-3 rounded-[16px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,248,230,0.56)] px-4 py-3">
-                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#A66B00]">Support follow-up</div>
-                    <div className="text-[13px] font-semibold text-[#8A5600]">
-                      {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
-                    </div>
-                    {order.supportFollowUpNote ? (
-                      <div className="mt-1 text-[13px] leading-6 text-[color:var(--gig-text-muted)]">{order.supportFollowUpNote}</div>
-                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -307,11 +308,6 @@ export default function PartnerOrderDetailsPage() {
                     <div className="mb-3 text-[13px] font-semibold text-[#8A5600]">
                       {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
                     </div>
-                    {order.supportFollowUpNote ? (
-                      <div className="mb-3 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
-                        {order.supportFollowUpNote}
-                      </div>
-                    ) : null}
                     <button
                       type="button"
                       onClick={actions.markSupportReviewed}

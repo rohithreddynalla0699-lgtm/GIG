@@ -99,6 +99,19 @@ export function getOrderListSupportHint(
   return getOrderSupportHint(status, supportNote);
 }
 
+export function getOrderDetailSupportSummary(
+  status: OrderStatus,
+  supportNote: string,
+  supportFollowUpStatus?: Order['supportFollowUpStatus'],
+  supportFollowUpNote?: string,
+) {
+  if (status === 'issue_reported' && supportFollowUpStatus === 'reviewed') {
+    return supportFollowUpNote || 'Support reviewed this issue.';
+  }
+
+  return supportNote;
+}
+
 export function getVegTypeLabel(vegType: VegType) {
   return vegTypeLabels[vegType];
 }
