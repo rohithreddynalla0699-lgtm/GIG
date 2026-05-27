@@ -360,7 +360,7 @@ function getLifecycleSupportNote(status: Order['status']) {
     case 'no_show':
       return 'Pickup window passed without collection.';
     case 'issue_reported':
-      return 'An issue was reported for this order.';
+      return "Issue noted. We'll follow up from support.";
     case 'new_reserved':
     default:
       return 'Your reservation is confirmed for the listed pickup window.';

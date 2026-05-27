@@ -261,12 +261,12 @@ export default function PartnerOrderDetailsPage() {
               <div className="rounded-[18px] border border-[rgba(166,107,0,0.12)] bg-[rgba(255,252,244,0.86)] p-4">
                 <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--gig-text-soft)]">Support actions</div>
                 <div className="mb-3 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
-                  Add a short note if something went wrong with this pickup.
+                  Add a short note only if this order needs follow-up.
                 </div>
                 <textarea
                   value={issueNoteDraft}
                   onChange={(event) => setIssueNoteDraft(event.target.value)}
-                  rows={3}
+                  rows={2}
                   placeholder="Optional issue note"
                   className="mb-3 w-full rounded-[16px] border border-[color:var(--gig-border)] bg-white px-4 py-3 text-[13px] leading-6 text-[color:var(--gig-text)] outline-none transition-colors placeholder:text-[color:var(--gig-text-soft)] focus:border-[color:var(--gig-green)]"
                 />

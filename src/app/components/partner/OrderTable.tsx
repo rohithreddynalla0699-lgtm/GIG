@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import type { Order } from '../../types/order';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
+import { getOrderStatusLabel, getOrderSupportHint } from '../../lib/status';
 import OrderStatusBadge from './OrderStatusBadge';
 
 interface OrderTableProps {
@@ -26,39 +27,43 @@ export default function OrderTable({ orders }: OrderTableProps) {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} className="border-b border-[color:var(--gig-border)] last:border-b-0">
-                <td className="px-4 py-3 align-top">
-                  <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">#{order.id}</div>
-                  <div className="meta-text mt-1">Qty {order.quantity}</div>
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{order.customerName}</div>
-                  <div className="meta-text mt-1">{order.customerPhoneMasked}</div>
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{order.listingTitle}</div>
-                  <div className="meta-text mt-1 max-w-[26ch]">{order.supportNote}</div>
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="text-[13px] font-medium text-[color:var(--gig-text)]">{formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}</div>
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="text-[13px] font-semibold tracking-[0.12em] text-[color:var(--gig-text)]">{order.pickupCode}</div>
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{formatINR(order.amountPaid)}</div>
-                </td>
-                <td className="px-4 py-3 align-top">
-                  <OrderStatusBadge status={order.status} />
-                </td>
-                <td className="px-4 py-3 text-right align-top">
-                  <Link to={`/partner/orders/${order.id}`} className="inline-flex min-h-[34px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-3 py-1.5 text-[12px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]">
-                    View details
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {orders.map((order) => {
+              const supportHint = getOrderSupportHint(order.status, order.supportNote);
+
+              return (
+                <tr key={order.id} className="border-b border-[color:var(--gig-border)] last:border-b-0">
+                  <td className="px-4 py-3 align-top">
+                    <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">#{order.id}</div>
+                    <div className="meta-text mt-1">Qty {order.quantity}</div>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{order.customerName}</div>
+                    <div className="meta-text mt-1">{order.customerPhoneMasked}</div>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{order.listingTitle}</div>
+                    <div className="meta-text mt-1 max-w-[26ch]">{supportHint}</div>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="text-[13px] font-medium text-[color:var(--gig-text)]">{formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}</div>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="text-[13px] font-semibold tracking-[0.12em] text-[color:var(--gig-text)]">{order.pickupCode}</div>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{formatINR(order.amountPaid)}</div>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <OrderStatusBadge status={order.status} />
+                  </td>
+                  <td className="px-4 py-3 text-right align-top">
+                    <Link to={`/partner/orders/${order.id}`} className="inline-flex min-h-[34px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-3 py-1.5 text-[12px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]">
+                      View details
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -74,7 +79,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
               <OrderStatusBadge status={order.status} />
             </div>
             <div className="mb-3 text-[14px] font-semibold text-[color:var(--gig-text)]">{order.listingTitle}</div>
-            <div className="meta-text mb-3">{order.supportNote}</div>
+            <div className="meta-text mb-3">{getOrderSupportHint(order.status, order.supportNote)}</div>
             <div className="mb-3 grid gap-2 sm:grid-cols-2">
               <div>
                 <div className="meta-text mb-1">Pickup</div>
@@ -90,7 +95,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
               </div>
               <div>
                 <div className="meta-text mb-1">Status</div>
-                <div className="text-[13px] font-medium text-[color:var(--gig-text)]">{order.status.replaceAll('_', ' ')}</div>
+                <div className="text-[13px] font-medium text-[color:var(--gig-text)]">{getOrderStatusLabel(order.status)}</div>
               </div>
             </div>
             <Link to={`/partner/orders/${order.id}`} className="inline-flex min-h-[34px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-3 py-1.5 text-[12px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]">

@@ -65,6 +65,17 @@ export function getCustomerOrderStatusLabel(status: OrderStatus) {
   return customerOrderStatusLabels[status];
 }
 
+export function getOrderSupportHint(status: OrderStatus, supportNote: string) {
+  switch (status) {
+    case 'issue_reported':
+      return "Issue noted. We'll follow up from support.";
+    case 'no_show':
+      return 'Pickup window passed without collection.';
+    default:
+      return supportNote;
+  }
+}
+
 export function getVegTypeLabel(vegType: VegType) {
   return vegTypeLabels[vegType];
 }

@@ -4,7 +4,7 @@ import type { Order } from '../../types/order';
 import type { Store } from '../../types/store';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
-import { getCustomerOrderStatusLabel, getOrderStatusClasses } from '../../lib/status';
+import { getCustomerOrderStatusLabel, getOrderStatusClasses, getOrderSupportHint } from '../../lib/status';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import MotionReveal from '../shared/MotionReveal';
 
@@ -19,6 +19,7 @@ interface OrderCardProps {
 export default function OrderCard({ order, bag, store, variant, delay = 0 }: OrderCardProps) {
   const amountSaved = Math.max(bag.originalPrice - order.amountPaid, 0);
   const isUpcoming = variant === 'upcoming';
+  const supportHint = getOrderSupportHint(order.status, order.supportNote);
 
   return (
     <MotionReveal delay={delay} y={20} className="h-full">
@@ -115,7 +116,7 @@ export default function OrderCard({ order, bag, store, variant, delay = 0 }: Ord
             </div>
 
             <div className={`${isUpcoming ? 'mb-5' : 'mb-4.5'} text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]`}>
-              {order.supportNote}
+              {supportHint}
             </div>
 
             <div className="mt-auto flex justify-end">
