@@ -279,6 +279,17 @@ export function getCustomerStoreBySlugWithPartnerImageOverride(slug: string) {
   return store ? applyPartnerStoreImageOverride(store) : undefined;
 }
 
+export function getCustomerStoreImageOverrideForStoreId(storeId: string) {
+  const store = stores.find((candidate) => candidate.id === storeId);
+
+  if (!store) {
+    return undefined;
+  }
+
+  const overriddenStore = applyPartnerStoreImageOverride(store);
+  return overriddenStore.cardImage !== store.cardImage ? overriddenStore.cardImage : undefined;
+}
+
 export function getStoreById(storeId: string) {
   return stores.find((store) => store.id === storeId);
 }

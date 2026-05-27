@@ -5,7 +5,10 @@ import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { bags } from '../../data/mock/bags';
-import { getCustomerStoresWithPartnerImageOverrides } from '../../data/mock/stores';
+import {
+  getCustomerStoreImageOverrideForStoreId,
+  getCustomerStoresWithPartnerImageOverrides,
+} from '../../data/mock/stores';
 
 type LocationReference = {
   label: string;
@@ -149,7 +152,11 @@ export default function FindFoodPage() {
         const matchesRadius = distanceKm <= radiusKm;
         const matchesCategory = selectedCategory === 'All' || store.category === selectedCategory;
 
-        return matchesQuery && matchesCity && matchesRadius && matchesCategory ? { bag, store, distanceKm } : null;
+        const imageUrlOverride = getCustomerStoreImageOverrideForStoreId(store.id);
+
+        return matchesQuery && matchesCity && matchesRadius && matchesCategory
+          ? { bag, store, distanceKm, imageUrlOverride }
+          : null;
       })
       .filter((listing): listing is NonNullable<typeof listing> => Boolean(listing))
       .sort((first, second) => first.distanceKm - second.distanceKm);
@@ -533,11 +540,12 @@ export default function FindFoodPage() {
                 </div>
 
                 <div className={`grid auto-rows-fr gap-5 ${visibleListings.length === 1 ? 'max-w-[560px]' : 'md:grid-cols-2 xl:grid-cols-3'}`}>
-                  {visibleListings.map(({ bag, store, distanceKm }, index) => (
+                  {visibleListings.map(({ bag, store, distanceKm, imageUrlOverride }, index) => (
                     <BagCard
                       key={bag.id}
                       bag={bag}
                       store={store}
+                      imageUrlOverride={imageUrlOverride}
                       distanceKm={distanceKm}
                       delay={index * 0.06}
                     />

@@ -12,12 +12,13 @@ import MotionReveal from '../shared/MotionReveal';
 interface BagCardProps {
   bag: Bag;
   store: Store;
+  imageUrlOverride?: string;
   distanceKm?: number;
   delay?: number;
   featured?: boolean;
 }
 
-export default function BagCard({ bag, store, distanceKm, delay = 0, featured = false }: BagCardProps) {
+export default function BagCard({ bag, store, imageUrlOverride, distanceKm, delay = 0, featured = false }: BagCardProps) {
   const discount = getDiscountPercentage(bag.originalPrice, bag.rescuePrice);
   const [signedIn, setSignedIn] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -40,7 +41,7 @@ export default function BagCard({ bag, store, distanceKm, delay = 0, featured = 
       <article className="surface-card lift-hover flex h-full flex-col overflow-hidden rounded-[28px] border border-[color:var(--gig-border)] bg-[rgba(255,252,247,0.9)]">
         <Link to={`/bag/${bag.id}`} className="block">
           <div className={`image-hover relative overflow-hidden ${featured ? 'h-[236px] md:h-[286px]' : 'h-[220px]'}`}>
-            <ImageWithFallback src={bag.imageUrl} alt={bag.title} className="h-full w-full object-cover" />
+            <ImageWithFallback src={imageUrlOverride || bag.imageUrl} alt={bag.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-[rgba(20,24,20,0.55)] via-[rgba(20,24,20,0.12)] to-transparent" />
             <div className="absolute left-4 top-4 flex flex-wrap gap-2">
               <span className="rounded-full bg-[rgba(255,253,248,0.92)] px-3 py-[7px] text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text)]">

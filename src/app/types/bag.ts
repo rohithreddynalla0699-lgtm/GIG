@@ -28,3 +28,7 @@ export interface Bag {
   status: BagStatus;
   imageUrl: string;
 }
+
+export interface DisplayBag extends Bag {
+  imageUrlOverride?: string;
+}
