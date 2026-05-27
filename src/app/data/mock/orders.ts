@@ -628,7 +628,7 @@ function getSupportReviewedAtLabel(reviewedAt: Date) {
     timeZone: 'Asia/Kolkata',
   }).format(reviewedAt);
 
-  return `Today, ${timeLabel}`;
+  return `Reviewed today at ${timeLabel}`;
 }
 
 function getReservationOutletId(storeId: string, relatedPartnerListingId?: string) {

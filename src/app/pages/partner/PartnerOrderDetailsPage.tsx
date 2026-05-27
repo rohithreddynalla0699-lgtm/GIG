@@ -309,7 +309,7 @@ export default function PartnerOrderDetailsPage() {
                       {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
                     </div>
                     {order.supportReviewedAt ? (
-                      <div className="mb-3 text-[12px] font-medium uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">
+                      <div className="mb-3 text-[12px] font-medium text-[color:var(--gig-text-soft)]">
                         {order.supportReviewedAt}
                       </div>
                     ) : null}

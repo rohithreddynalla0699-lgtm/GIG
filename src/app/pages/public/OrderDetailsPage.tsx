@@ -114,7 +114,7 @@ export default function OrderDetailsPage() {
                   <>
                     <p className="mt-2 body-regular">{order.supportFollowUpNote || 'Support reviewed this issue.'}</p>
                     {order.supportReviewedAt ? (
-                      <div className="mt-2 text-[12px] font-medium uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">
+                      <div className="mt-2 text-[12px] font-medium text-[color:var(--gig-text-soft)]">
                         {order.supportReviewedAt}
                       </div>
                     ) : null}
