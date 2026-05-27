@@ -2,6 +2,7 @@ import type { PartnerListing } from '../../types/listing';
 import { getMockPartnerWorkspaceId, getMockPartnerWorkspaceOutlets, isSeedPartnerWorkspaceId } from './partners';
 
 export const MOCK_PARTNER_LISTINGS_KEY = 'gig-partner-listings';
+export const MAX_RESCUE_BAG_TYPES_PER_PARTNER = 3;
 
 export const partnerListings: PartnerListing[] = [
   {
@@ -124,6 +125,16 @@ export interface CreateMockPartnerListingInput {
   status: PartnerListing['status'];
 }
 
+export class MockPartnerListingValidationError extends Error {
+  code: 'duplicate_title' | 'max_live_types_reached';
+
+  constructor(code: 'duplicate_title' | 'max_live_types_reached', message: string) {
+    super(message);
+    this.name = 'MockPartnerListingValidationError';
+    this.code = code;
+  }
+}
+
 function getCreatedAtLabel(status: PartnerListing['status']) {
   switch (status) {
     case 'live':
@@ -192,13 +203,55 @@ export function getMockPartnerWorkspaceListings(workspaceId: string = getMockPar
   return storedListings.filter((listing) => workspaceOutletIds.includes(listing.outletId));
 }
 
+export function normalizeMockListingTitle(title: string) {
+  return title.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+export function getMockPartnerWorkspaceLiveListings(workspaceId: string = getMockPartnerWorkspaceId()) {
+  return getMockPartnerWorkspaceListings(workspaceId).filter((listing) => listing.status === 'live');
+}
+
+export function getMockPartnerWorkspaceLiveListingCount(workspaceId: string = getMockPartnerWorkspaceId()) {
+  return new Set(
+    getMockPartnerWorkspaceLiveListings(workspaceId)
+      .map((listing) => normalizeMockListingTitle(listing.title))
+      .filter(Boolean),
+  ).size;
+}
+
+export function canCreateMockPartnerLiveListing(workspaceId: string = getMockPartnerWorkspaceId()) {
+  return getMockPartnerWorkspaceLiveListingCount(workspaceId) < MAX_RESCUE_BAG_TYPES_PER_PARTNER;
+}
+
+export function isMockPartnerListingTitleAvailable(title: string, workspaceId: string = getMockPartnerWorkspaceId()) {
+  const normalizedTitle = normalizeMockListingTitle(title);
+
+  if (!normalizedTitle) {
+    return false;
+  }
+
+  return !getMockPartnerWorkspaceListings(workspaceId).some(
+    (listing) => normalizeMockListingTitle(listing.title) === normalizedTitle,
+  );
+}
+
 export function createMockPartnerListing(input: CreateMockPartnerListingInput) {
+  const workspaceId = input.workspaceId || getMockPartnerWorkspaceId();
+
+  if (!isMockPartnerListingTitleAvailable(input.title, workspaceId)) {
+    throw new MockPartnerListingValidationError('duplicate_title', 'This rescue bag name already exists.');
+  }
+
+  if (input.status === 'live' && !canCreateMockPartnerLiveListing(workspaceId)) {
+    throw new MockPartnerListingValidationError('max_live_types_reached', 'You can create up to 3 rescue bag types.');
+  }
+
   const listing: PartnerListing = {
     id: `listing-${input.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')}-${Date.now()}`,
-    workspaceId: input.workspaceId,
+    workspaceId,
     outletId: input.outletId,
     title: input.title.trim(),
     listingType: input.listingType,

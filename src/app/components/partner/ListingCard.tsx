@@ -17,12 +17,12 @@ export default function ListingCard({ listing, outlet }: ListingCardProps) {
             <span className="font-medium text-[color:var(--gig-green-deep)]">{outlet.name}</span>
             <span>•</span>
             <span>{listing.category}</span>
-            <span>•</span>
-            <span>{getVegTypeLabel(listing.vegType)}</span>
           </div>
           <h3 className="truncate text-[17px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">{listing.title}</h3>
-          <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">
-            {listing.listingType} · {listing.createdAtLabel}
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--gig-text-muted)]">
+            <span>{getVegTypeLabel(listing.vegType)}</span>
+            <span>•</span>
+            <span>{listing.createdAtLabel}</span>
           </div>
         </div>
         <span className={`inline-flex self-start rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${getListingStatusClasses(listing.status)}`}>
@@ -32,20 +32,20 @@ export default function ListingCard({ listing, outlet }: ListingCardProps) {
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
         <div>
-          <div className="meta-text mb-1">Price</div>
+          <div className="meta-text mb-1">Daily quantity</div>
+          <div className="text-[15px] font-semibold text-[color:var(--gig-text)]">{listing.quantity}</div>
+        </div>
+        <div>
+          <div className="meta-text mb-1">Rescue price</div>
           <div className="text-[15px] font-semibold text-[color:var(--gig-text)]">{formatINR(listing.rescuePrice)}</div>
         </div>
         <div>
-          <div className="meta-text mb-1">Left</div>
-          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.quantityLeft} / {listing.quantity}</div>
+          <div className="meta-text mb-1">Available today</div>
+          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.quantityLeft} left</div>
         </div>
         <div>
           <div className="meta-text mb-1">Pickup</div>
           <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.pickupStart} - {listing.pickupEnd}</div>
-        </div>
-        <div>
-          <div className="meta-text mb-1">Status</div>
-          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{getListingStatusLabel(listing.status)}</div>
         </div>
         <div>
           <div className="meta-text mb-1">Updated</div>
@@ -55,7 +55,7 @@ export default function ListingCard({ listing, outlet }: ListingCardProps) {
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-[color:var(--gig-text-muted)]">
         <span className="line-through">{formatINR(listing.originalPrice)}</span>
-        <span>{listing.quantityLeft === 0 ? 'Sold through' : `${listing.quantityLeft} left`}</span>
+        <span>{listing.quantityLeft === 0 ? 'Sold through today' : `${listing.quantityLeft} units available today`}</span>
       </div>
 
       {listing.dietaryTags.length > 0 ? (

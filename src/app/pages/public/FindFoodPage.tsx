@@ -5,7 +5,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { bags } from '../../data/mock/bags';
-import { stores } from '../../data/mock/stores';
+import { getCustomerStoresWithPartnerImageOverrides } from '../../data/mock/stores';
 
 type LocationReference = {
   label: string;
@@ -54,9 +54,10 @@ export default function FindFoodPage() {
   const [radiusKm, setRadiusKm] = useState(3);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const customerStores = useMemo(() => getCustomerStoresWithPartnerImageOverrides(), []);
 
-  const cityOptions = ['All', ...new Set(stores.map((store) => store.city))];
-  const categoryOptions = ['All', ...new Set(stores.map((store) => store.category))];
+  const cityOptions = ['All', ...new Set(customerStores.map((store) => store.city))];
+  const categoryOptions = ['All', ...new Set(customerStores.map((store) => store.category))];
   const normalizedQuery = query.trim().toLowerCase();
   const normalizedLocationQuery = locationQuery.trim().toLowerCase();
 
@@ -64,7 +65,7 @@ export default function FindFoodPage() {
     () =>
       Array.from(
         new Set(
-          stores.flatMap((store) => [
+          customerStores.flatMap((store) => [
             store.pincode,
             store.area,
             `${store.area}, ${store.city}`,
@@ -72,13 +73,13 @@ export default function FindFoodPage() {
           ])
         )
       ),
-    []
+    [customerStores]
   );
 
   const selectedReference = useMemo(() => {
     // Later: replace this mock current location with browser geolocation or a saved pickup location.
     const fallback = MOCK_CURRENT_LOCATION;
-    const candidates = stores.filter((store) => city === 'All' || store.city === city);
+    const candidates = customerStores.filter((store) => city === 'All' || store.city === city);
 
     if (normalizedLocationQuery.length === 0) {
       return fallback;
@@ -123,13 +124,13 @@ export default function FindFoodPage() {
           latitude: candidates[0]?.latitude ?? fallback.latitude,
           longitude: candidates[0]?.longitude ?? fallback.longitude,
         };
-  }, [city, normalizedLocationQuery]);
+  }, [city, customerStores, normalizedLocationQuery]);
 
   const visibleListings = useMemo(() => {
     // Later: move radius filtering server-side when Supabase geo queries are available.
     return bags
       .map((bag) => {
-        const store = stores.find((candidate) => candidate.id === bag.storeId);
+        const store = customerStores.find((candidate) => candidate.id === bag.storeId);
         if (!store || bag.quantityLeft < 1 || bag.status === 'sold_out') return null;
 
         const distanceKm = getDistanceKm(selectedReference, {
@@ -152,7 +153,7 @@ export default function FindFoodPage() {
       })
       .filter((listing): listing is NonNullable<typeof listing> => Boolean(listing))
       .sort((first, second) => first.distanceKm - second.distanceKm);
-  }, [city, normalizedQuery, radiusKm, selectedCategory, selectedReference]);
+  }, [city, customerStores, normalizedQuery, radiusKm, selectedCategory, selectedReference]);
 
   const totalBags = visibleListings.reduce((sum, listing) => sum + listing.bag.quantityLeft, 0);
   const liveStatus = `${totalBags} bags within ${radiusKm.toFixed(radiusKm % 1 === 0 ? 0 : 1)} km`;

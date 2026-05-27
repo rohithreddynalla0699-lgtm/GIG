@@ -1,24 +1,20 @@
-import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import ListingCard from '../../components/partner/ListingCard';
-import { getMockPartnerWorkspaceListings } from '../../data/mock/partnerListings';
+import ListingForm from '../../components/partner/ListingForm';
 import {
-  getMockPartnerActivationState,
-  getMockPartnerCreateBagRoute,
+  MAX_RESCUE_BAG_TYPES_PER_PARTNER,
+  canCreateMockPartnerLiveListing,
+  getMockPartnerWorkspaceLiveListingCount,
+  getMockPartnerWorkspaceLiveListings,
+} from '../../data/mock/partnerListings';
+import {
   getMockPartnerWorkspaceAccessState,
   getMockPartnerWorkspaceOutlets,
   isMockPartnerVerified,
 } from '../../data/mock/partners';
-import type { ListingStatus } from '../../types/listing';
-
-type ListingFilter = 'all' | 'live' | 'draft' | 'inactive';
-
-const filterConfig: { key: ListingFilter; label: string; matches: ListingStatus[] }[] = [
-  { key: 'all', label: 'All', matches: ['live', 'draft', 'scheduled', 'sold_out', 'paused', 'archived'] },
-  { key: 'live', label: 'Live', matches: ['live'] },
-  { key: 'draft', label: 'Draft', matches: ['draft', 'scheduled'] },
-  { key: 'inactive', label: 'Paused / inactive', matches: ['paused', 'sold_out', 'archived'] },
-];
+import type { PartnerListing } from '../../types/listing';
 
 function CompactStat({ label, value }: { label: string; value: number }) {
   return (
@@ -29,48 +25,81 @@ function CompactStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function CompactEmptyState({
-  title,
-  description,
-  actionLabel,
-  actionTo,
+function Modal({
+  children,
+  onClose,
 }: {
-  title: string;
-  description: string;
-  actionLabel?: string;
-  actionTo?: string;
+  children: ReactNode;
+  onClose: () => void;
 }) {
+  useEffect(() => {
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyPaddingRight = body.style.paddingRight;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      body.style.overflow = previousBodyOverflow;
+      body.style.paddingRight = previousBodyPaddingRight;
+      documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
+
   return (
-    <div className="rounded-[16px] border border-dashed border-[rgba(32,38,28,0.12)] px-4 py-6 text-center">
-      <div className="text-[14px] font-medium text-[#1E1E1E]">{title}</div>
-      <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">{description}</div>
-      {actionLabel && actionTo ? (
-        <Link
-          to={actionTo}
-          className="mt-4 inline-flex min-h-[38px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[12px] font-semibold text-[#1E2F24] transition hover:bg-white"
-        >
-          {actionLabel}
-        </Link>
-      ) : null}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(31,34,29,0.32)] px-4 py-6 backdrop-blur-[6px]">
+      <div className="max-h-[90vh] w-full max-w-[940px] overflow-y-auto rounded-[28px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,252,246,0.98)] shadow-[0_24px_70px_rgba(31,34,29,0.18)]">
+        <div className="flex items-start justify-between gap-4 px-5 pb-2 pt-5 md:px-6 md:pt-6">
+          <div className="min-w-0">
+            <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[color:var(--gig-text-soft)]">Rescue bags</div>
+            <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.04em] text-[#1E1E1E] md:text-[28px]">
+              Create rescue bag
+            </h2>
+            <p className="mt-1 max-w-[42ch] text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+              Set up a live rescue bag type for today&apos;s surplus food.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] bg-white/72 text-[18px] leading-none text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        <div className="px-5 pb-5 md:px-6 md:pb-6">{children}</div>
+      </div>
     </div>
   );
 }
 
 export default function PartnerListingsPage() {
-  const [activeFilter, setActiveFilter] = useState<ListingFilter>('all');
-  const listings = getMockPartnerWorkspaceListings();
-  const createBagRoute = getMockPartnerCreateBagRoute();
-  const activationState = getMockPartnerActivationState();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [liveListings, setLiveListings] = useState<PartnerListing[]>(() => getMockPartnerWorkspaceLiveListings());
+
   const canPostBags = isMockPartnerVerified();
   const workspaceAccessState = getMockPartnerWorkspaceAccessState();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
-  const liveCount = listings.filter((listing) => listing.status === 'live').length;
-  const draftCount = listings.filter((listing) => ['draft', 'scheduled'].includes(listing.status)).length;
-  const inactiveCount = listings.filter((listing) => ['paused', 'sold_out', 'archived'].includes(listing.status)).length;
-  const visibleListings = useMemo(() => {
-    const selected = filterConfig.find((item) => item.key === activeFilter) ?? filterConfig[0];
-    return listings.filter((listing) => selected.matches.includes(listing.status));
-  }, [activeFilter, listings]);
+  const liveTypeCount = useMemo(() => getMockPartnerWorkspaceLiveListingCount(), [liveListings]);
+  const remainingSlots = Math.max(0, MAX_RESCUE_BAG_TYPES_PER_PARTNER - liveTypeCount);
+  const canCreate = canCreateMockPartnerLiveListing();
+
+  const refreshLiveListings = () => {
+    setLiveListings(getMockPartnerWorkspaceLiveListings());
+  };
+
+  const handleCreated = () => {
+    refreshLiveListings();
+    setIsCreateModalOpen(false);
+  };
 
   if (workspaceAccessState === 'restricted') {
     return (
@@ -116,10 +145,10 @@ export default function PartnerListingsPage() {
         <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Inventory</h2>
-              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Rescue bags will appear here after setup is complete.</p>
+              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Rescue bag types</h2>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">Rescue bag types will appear here after setup is complete.</p>
             </div>
-            <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">0 bags</div>
+            <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">0 live types</div>
           </div>
         </section>
       </div>
@@ -131,81 +160,86 @@ export default function PartnerListingsPage() {
       <section className="flex flex-col gap-4 rounded-[22px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.88)] p-4 md:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <div className="editorial-eyebrow mb-2">Rescue bags</div>
+            <div className="editorial-eyebrow mb-2">Rescue bag types</div>
             <h1 className="font-['Fraunces',serif] text-[28px] leading-[1.02] tracking-[-0.04em] text-[color:var(--gig-text)] md:text-[32px]">
-              Rescue bags
+              Rescue bag types
             </h1>
             <p className="mt-1 text-[13px] text-[color:var(--gig-text-muted)]">
-              {liveCount} live · {draftCount} draft · {inactiveCount} paused / inactive
+              Create up to 3 live rescue bag types. Each type can have its own daily quantity.
             </p>
           </div>
 
-          <Link to={createBagRoute} className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]">
-            Create rescue bag
-          </Link>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              disabled={!canCreate}
+              className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c] disabled:bg-[#D6D9D4] disabled:text-[#8A8F8A] disabled:hover:bg-[#D6D9D4]"
+            >
+              Create rescue bag
+            </button>
+            {!canCreate ? (
+              <div className="max-w-[28ch] text-[12px] leading-5 font-medium text-[#8A5C2B]">
+                You can create up to 3 rescue bag types. Increase quantity inside a type to sell more units.
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <CompactStat label="Live" value={liveCount} />
-          <CompactStat label="Draft" value={draftCount} />
-          <CompactStat label="Paused / inactive" value={inactiveCount} />
+          <CompactStat label="Live types" value={liveTypeCount} />
+          <CompactStat label="Slots left" value={remainingSlots} />
+          <CompactStat label="Max types" value={MAX_RESCUE_BAG_TYPES_PER_PARTNER} />
         </div>
       </section>
 
       <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Inventory</h2>
-            <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{visibleListings.length} bags in this view</p>
+            <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Live rescue bag types</h2>
+            <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{liveListings.length} live types in this workspace</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {filterConfig.map((filter) => {
-              const active = filter.key === activeFilter;
-              return (
-                <button
-                  key={filter.key}
-                  type="button"
-                  onClick={() => setActiveFilter(filter.key)}
-                  className={`min-h-[34px] rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
-                    active
-                      ? 'bg-[#1E2F24] text-white'
-                      : 'border border-[rgba(32,38,28,0.08)] bg-white/78 text-[#4D5E53] hover:bg-white'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              );
-            })}
-          </div>
+          <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">{workspaceOutlets.length} outlet{workspaceOutlets.length === 1 ? '' : 's'}</div>
         </div>
 
-        {listings.length === 0 ? (
-          <CompactEmptyState
-            title="No rescue bags yet."
-            description="Create your first rescue bag when setup is complete."
-            actionLabel={
-              canPostBags
-                ? 'Create rescue bag'
-                : activationState === 'billing_required'
-                  ? 'Complete billing setup'
-                  : 'Complete verification details'
-            }
-            actionTo={createBagRoute}
-          />
-        ) : visibleListings.length === 0 ? (
+        {liveListings.length === 0 ? (
           <div className="rounded-[16px] border border-dashed border-[rgba(32,38,28,0.12)] px-4 py-6 text-center">
-            <div className="text-[14px] font-medium text-[#1E1E1E]">No rescue bags yet.</div>
-            <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">Try another filter to see more rescue bags.</div>
+            <div className="text-[14px] font-medium text-[#1E1E1E]">No rescue bag types yet.</div>
+            <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+              Start with Daily Surprise Bag or create your own.
+            </div>
+            {canPostBags && canCreate ? (
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="mt-4 inline-flex min-h-[38px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[12px] font-semibold text-[#1E2F24] transition hover:bg-white"
+              >
+                Create rescue bag
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleListings.map((listing) => {
+            {liveListings.map((listing) => {
               const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
               return outlet ? <ListingCard key={listing.id} listing={listing} outlet={outlet} /> : null;
             })}
           </div>
         )}
       </section>
+
+      {isCreateModalOpen ? (
+        <Modal onClose={() => setIsCreateModalOpen(false)}>
+          <ListingForm
+            variant="modal"
+            initialTitle="Daily Surprise Bag"
+            defaultStatus="live"
+            redirectOnSuccess={false}
+            onCancel={() => setIsCreateModalOpen(false)}
+            onCreated={handleCreated}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 }

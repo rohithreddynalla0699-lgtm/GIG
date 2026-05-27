@@ -66,6 +66,8 @@ export interface MockPartnerProfile {
   ownerContactName: string;
   contactPhone: string;
   businessEmail: string;
+  storeImageUrl?: string;
+  customerStoreId?: string;
   addressLine1: string;
   addressLine2: string;
   city: string;

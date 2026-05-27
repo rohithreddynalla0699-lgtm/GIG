@@ -4,13 +4,13 @@ import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { bags } from '../../data/mock/bags';
-import { getStoreById } from '../../data/mock/stores';
+import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { getVegTypeLabel } from '../../lib/status';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 
 export default function StorePage() {
   const { id } = useParams();
-  const store = id ? getStoreById(id) : undefined;
+  const store = id ? getCustomerStoreByIdWithPartnerImageOverride(id) : undefined;
 
   if (!store) {
     return (

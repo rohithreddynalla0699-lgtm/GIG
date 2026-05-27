@@ -1,6 +1,31 @@
 import type { Store } from '../../types/store';
+import { getMockPartnerProfile } from './partners';
 
 export const stores: Store[] = [
+  {
+    id: 'store-hearth-bakehouse',
+    slug: 'hearth-bakehouse',
+    name: 'Hearth Bakehouse',
+    category: 'Bakery',
+    cuisines: ['Bakery', 'Cafe Snacks'],
+    city: 'Hyderabad',
+    area: 'Hitech City',
+    pincode: '500081',
+    addressLine: 'Mindspace Road, opposite Inorbit Mall, Hitech City, Hyderabad 500081',
+    distanceKm: 1.1,
+    latitude: 17.4486,
+    longitude: 78.3813,
+    rating: 4.6,
+    reviewCount: 189,
+    description: 'Neighbourhood bakehouse with same-day breads, pastries, savouries, and easy pickup windows for rescue bags.',
+    pickupInstructions: 'Collect from the takeaway counter and show the pickup code before handover.',
+    openingNote: 'during the last fresh-bake run before close',
+    vegType: 'veg',
+    dietaryTags: ['Vegetarian', 'Bakery items'],
+    trustBadges: ['Pickup-ready packing', 'Same-day bakery pickup'],
+    cardImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80',
+    heroImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400&q=80',
+  },
   {
     id: 'store-iyengar-bakery',
     slug: 'iyengar-bakery-indiranagar',
@@ -194,6 +219,65 @@ export const stores: Store[] = [
     heroImage: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=80',
   },
 ];
+
+function normalizeStoreMatchValue(value: string) {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function doesStoreMatchActivePartnerStore(store: Store, profile = getMockPartnerProfile()) {
+  const normalizedStoreName = normalizeStoreMatchValue(store.name);
+  const normalizedTradingName = normalizeStoreMatchValue(profile.tradingName || '');
+  const normalizedBusinessName = normalizeStoreMatchValue(profile.legalBusinessName || '');
+  const sameCity = normalizeStoreMatchValue(store.city) === normalizeStoreMatchValue(profile.city || '');
+
+  if (!sameCity) {
+    return false;
+  }
+
+  // There is no explicit persisted customer-store id on the partner profile yet.
+  // Keep the demo mapping conservative: only override when the active partner
+  // profile clearly matches a customer-facing store by name and city.
+  return (
+    (normalizedTradingName.length > 0 && normalizedTradingName === normalizedStoreName) ||
+    (normalizedBusinessName.length > 0 && normalizedBusinessName === normalizedStoreName)
+  );
+}
+
+export function applyPartnerStoreImageOverride(store: Store): Store {
+  const profile = getMockPartnerProfile();
+  const storeImageUrl = profile.storeImageUrl?.trim();
+
+  if (!storeImageUrl) {
+    return store;
+  }
+
+  const matchesExplicitStoreId = profile.customerStoreId?.trim() ? profile.customerStoreId === store.id : false;
+  const matchesFallbackStore = !matchesExplicitStoreId && doesStoreMatchActivePartnerStore(store, profile);
+
+  if (!matchesExplicitStoreId && !matchesFallbackStore) {
+    return store;
+  }
+
+  return {
+    ...store,
+    cardImage: storeImageUrl,
+    heroImage: storeImageUrl,
+  };
+}
+
+export function getCustomerStoresWithPartnerImageOverrides(): Store[] {
+  return stores.map(applyPartnerStoreImageOverride);
+}
+
+export function getCustomerStoreByIdWithPartnerImageOverride(storeId: string) {
+  const store = stores.find((candidate) => candidate.id === storeId);
+  return store ? applyPartnerStoreImageOverride(store) : undefined;
+}
+
+export function getCustomerStoreBySlugWithPartnerImageOverride(slug: string) {
+  const store = stores.find((candidate) => candidate.slug === slug);
+  return store ? applyPartnerStoreImageOverride(store) : undefined;
+}
 
 export function getStoreById(storeId: string) {
   return stores.find((store) => store.id === storeId);

@@ -145,11 +145,40 @@ function ChecklistChip({ label, done }: { label: string; done: boolean }) {
 export default function PartnerProfilePage() {
   const [profile, setProfile] = useState(() => getMockPartnerProfile());
   const [savedNotice, setSavedNotice] = useState('');
+  const [storeImageError, setStoreImageError] = useState('');
   const [step, setStep] = useState<ProfileStep>('business');
 
   const updateField = <K extends keyof typeof profile>(field: K, value: (typeof profile)[K]) => {
     setProfile((current) => ({ ...current, [field]: value }));
     setSavedNotice('');
+  };
+
+  const handleStoreImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setStoreImageError('Please choose an image under 2MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateField('storeImageUrl', reader.result);
+        setStoreImageError('');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveStoreImage = () => {
+    updateField('storeImageUrl', '');
+    setStoreImageError('');
   };
 
   const completion = useMemo(() => getProfileCompletion(profile), [profile]);
@@ -316,6 +345,59 @@ export default function PartnerProfilePage() {
                     className={inputClass}
                   />
                 </label>
+                <div className="md:col-span-2 rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-[rgba(250,245,236,0.78)] p-4">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="text-[15px] font-semibold text-[#1E1E1E]">Store image</h3>
+                      <p className="mt-0.5 text-[12px] leading-5 text-[color:var(--gig-text-muted)]">
+                        Add one photo customers will see for this store.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <label className="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] bg-white px-4 py-2 text-[12px] font-semibold text-[#1E2F24] transition hover:bg-[rgba(255,255,255,0.92)]">
+                        {profile.storeImageUrl ? 'Change image' : 'Upload image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleStoreImageChange}
+                          className="sr-only"
+                        />
+                      </label>
+                      {profile.storeImageUrl ? (
+                        <button
+                          type="button"
+                          onClick={handleRemoveStoreImage}
+                          className="inline-flex min-h-[38px] items-center justify-center rounded-full border border-[rgba(32,38,28,0.08)] px-4 py-2 text-[12px] font-semibold text-[#4D5E53] transition hover:bg-white hover:text-[#1f221d]"
+                        >
+                          Remove
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {storeImageError ? (
+                    <div className="mt-3 rounded-[14px] border border-[rgba(166,94,94,0.18)] bg-[rgba(166,94,94,0.08)] px-3 py-2 text-[12px] text-[#7f4444]">
+                      {storeImageError}
+                    </div>
+                  ) : null}
+
+                  {profile.storeImageUrl ? (
+                    <div className="mt-4 overflow-hidden rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white">
+                      <img
+                        src={profile.storeImageUrl}
+                        alt={profile.tradingName || profile.legalBusinessName || 'Store preview'}
+                        className="h-[200px] w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-[18px] border border-dashed border-[rgba(32,38,28,0.12)] bg-white/72 px-4 py-6 text-center">
+                      <div className="text-[13px] font-medium text-[#1E1E1E]">No store image yet.</div>
+                      <div className="mt-1 text-[12px] leading-5 text-[color:var(--gig-text-muted)]">
+                        Upload one photo to use later on customer-facing store cards.
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <label className="block">
                   <span className="operational-label mb-2 block">Business type</span>
                   <select
