@@ -110,6 +110,16 @@ export default function OrderDetailsPage() {
                 <div className="text-[15px] font-semibold text-[#8A5600]">
                   {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
                 </div>
+                {order.supportFollowUpStatus === 'reviewed' ? (
+                  <>
+                    <p className="mt-2 body-regular">{order.supportFollowUpNote || 'Support reviewed this issue.'}</p>
+                    {order.supportReviewedAt ? (
+                      <div className="mt-2 text-[12px] font-medium uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">
+                        {order.supportReviewedAt}
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
               </div>
             ) : null}
 

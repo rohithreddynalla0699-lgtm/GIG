@@ -42,5 +42,6 @@ export interface Order {
   issueNote?: string;
   supportFollowUpStatus?: SupportFollowUpStatus;
   supportFollowUpNote?: string;
+  supportReviewedAt?: string;
   relatedPartnerListingId?: string;
 }

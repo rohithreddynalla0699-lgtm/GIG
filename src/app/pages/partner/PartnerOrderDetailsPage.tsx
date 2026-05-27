@@ -308,6 +308,11 @@ export default function PartnerOrderDetailsPage() {
                     <div className="mb-3 text-[13px] font-semibold text-[#8A5600]">
                       {getSupportFollowUpStatusLabel(order.supportFollowUpStatus ?? 'needs_follow_up')}
                     </div>
+                    {order.supportReviewedAt ? (
+                      <div className="mb-3 text-[12px] font-medium uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">
+                        {order.supportReviewedAt}
+                      </div>
+                    ) : null}
                     <button
                       type="button"
                       onClick={actions.markSupportReviewed}

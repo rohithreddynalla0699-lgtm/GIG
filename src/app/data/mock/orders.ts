@@ -169,6 +169,7 @@ type MockOrderOverride = {
   issueNote?: string;
   supportFollowUpStatus?: Order['supportFollowUpStatus'];
   supportFollowUpNote?: string;
+  supportReviewedAt?: string;
 };
 
 export class MockReservationError extends Error {
@@ -242,6 +243,7 @@ function isValidStoredOrder(value: unknown): value is Order {
       (typeof candidate.supportFollowUpStatus === 'string' &&
         VALID_SUPPORT_FOLLOW_UP_STATUSES.has(candidate.supportFollowUpStatus))) &&
     (typeof candidate.supportFollowUpNote === 'undefined' || typeof candidate.supportFollowUpNote === 'string') &&
+    (typeof candidate.supportReviewedAt === 'undefined' || typeof candidate.supportReviewedAt === 'string') &&
     Array.isArray(candidate.timeline) &&
     candidate.timeline.every((event) => isValidOrderTimelineEvent(event))
   );
@@ -322,6 +324,10 @@ function readStoredOrderOverrides() {
 
         if (typeof override.supportFollowUpNote === 'string' && override.supportFollowUpNote.trim().length > 0) {
           nextOverride.supportFollowUpNote = override.supportFollowUpNote;
+        }
+
+        if (typeof override.supportReviewedAt === 'string' && override.supportReviewedAt.trim().length > 0) {
+          nextOverride.supportReviewedAt = override.supportReviewedAt;
         }
 
         if (Array.isArray(override.timeline)) {
@@ -537,6 +543,10 @@ export function updateMockOrderStatus(
     status === 'issue_reported'
       ? undefined
       : overrides[orderId]?.supportFollowUpNote || existingOrder.supportFollowUpNote;
+  const nextSupportReviewedAt =
+    status === 'issue_reported'
+      ? undefined
+      : overrides[orderId]?.supportReviewedAt || existingOrder.supportReviewedAt;
   const nextOverrides = {
     ...overrides,
     [orderId]: {
@@ -547,6 +557,7 @@ export function updateMockOrderStatus(
       ...(nextIssueNote ? { issueNote: nextIssueNote } : {}),
       ...(nextSupportFollowUpStatus ? { supportFollowUpStatus: nextSupportFollowUpStatus } : {}),
       ...(nextSupportFollowUpNote ? { supportFollowUpNote: nextSupportFollowUpNote } : {}),
+      ...(nextSupportReviewedAt ? { supportReviewedAt: nextSupportReviewedAt } : {}),
     },
   };
 
@@ -587,6 +598,7 @@ export function updateMockOrderSupportFollowUp(
       ...overrides[orderId],
       supportFollowUpStatus,
       supportFollowUpNote: 'Support reviewed this issue.',
+      supportReviewedAt: getSupportReviewedAtLabel(new Date()),
       timeline: mergeCustomTimelineEvent(mergedOrder, nextEvent),
     },
   };
@@ -606,6 +618,17 @@ function getOrderedAtTimeLabel(orderedAt: string) {
     hour12: true,
     timeZone: 'Asia/Kolkata',
   }).format(new Date(orderedAt));
+}
+
+function getSupportReviewedAtLabel(reviewedAt: Date) {
+  const timeLabel = new Intl.DateTimeFormat('en-IN', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Asia/Kolkata',
+  }).format(reviewedAt);
+
+  return `Today, ${timeLabel}`;
 }
 
 function getReservationOutletId(storeId: string, relatedPartnerListingId?: string) {
