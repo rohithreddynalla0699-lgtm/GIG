@@ -4,6 +4,7 @@ import OtpVerificationCard from '../../components/partner/OtpVerificationCard';
 import OrderStatusBadge from '../../components/partner/OrderStatusBadge';
 import SectionCard from '../../components/shared/SectionCard';
 import { getBagById } from '../../data/mock/bags';
+import { updateMockOrderStatus } from '../../data/mock/orders';
 import { getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
@@ -23,13 +24,15 @@ export default function PartnerOrderDetailsPage() {
   const actions = useMemo(
     () => ({
       markReady: () => {
-        setStatus('ready_for_pickup');
+        const nextOrder = updateMockOrderStatus(order?.id ?? '', 'ready_for_pickup');
+        setStatus(nextOrder?.status ?? 'ready_for_pickup');
       },
       markCollected: () => {
-        setStatus('collected');
+        const nextOrder = updateMockOrderStatus(order?.id ?? '', 'collected');
+        setStatus(nextOrder?.status ?? 'collected');
       },
     }),
-    []
+    [order?.id]
   );
 
   if (!order || !bag || !outlet || !status) {

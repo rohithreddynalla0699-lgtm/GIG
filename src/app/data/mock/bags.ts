@@ -1,4 +1,8 @@
 import type { Bag } from '../../types/bag';
+import type { PartnerListing } from '../../types/listing';
+import { getMockPartnerWorkspaceLiveListings } from './partnerListings';
+import { getMockPartnerProfile } from './partners';
+import { getCustomerStoreByIdWithPartnerImageOverride } from './stores';
 
 export const bags: Bag[] = [
   {
@@ -228,10 +232,137 @@ export const bags: Bag[] = [
   },
 ];
 
+function slugifyMarketplaceBagValue(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function parseClockHour(time: string) {
+  const match = time.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+
+  if (!match) {
+    return null;
+  }
+
+  const hour = Number.parseInt(match[1], 10);
+  const period = match[3].toUpperCase();
+  const normalizedHour = hour % 12;
+
+  return period === 'PM' ? normalizedHour + 12 : normalizedHour;
+}
+
+function getMarketplacePickupSlot(listing: Pick<PartnerListing, 'pickupStart'>): Bag['pickupSlot'] {
+  const startHour = parseClockHour(listing.pickupStart);
+
+  if (startHour === null) {
+    return 'Evening';
+  }
+
+  if (startHour < 12) {
+    return 'Breakfast';
+  }
+
+  if (startHour < 16) {
+    return 'Lunch';
+  }
+
+  if (startHour < 21) {
+    return 'Evening';
+  }
+
+  return 'Late Night';
+}
+
+function getMarketplaceBagStatus(listing: Pick<PartnerListing, 'quantityLeft'>): Bag['status'] {
+  if (listing.quantityLeft <= 0) {
+    return 'sold_out';
+  }
+
+  if (listing.quantityLeft <= 2) {
+    return 'limited';
+  }
+
+  return 'active';
+}
+
+function buildMarketplaceBagDescription(listing: PartnerListing) {
+  const dietaryPreview = listing.dietaryTags.slice(0, 2).join(' · ');
+
+  if (dietaryPreview) {
+    return `${listing.shortDescription} Pickup runs from ${listing.pickupStart} to ${listing.pickupEnd}. ${dietaryPreview}.`;
+  }
+
+  return `${listing.shortDescription} Pickup runs from ${listing.pickupStart} to ${listing.pickupEnd}.`;
+}
+
+function buildMarketplaceIncludedItems(listing: PartnerListing) {
+  const includedItems = [
+    listing.category,
+    listing.listingType === 'Surprise Bag' ? 'Same-day surprise mix' : 'Prepared set items',
+    listing.dietaryTags[0],
+    listing.vegType === 'veg' ? 'Vegetarian selection' : undefined,
+  ].filter(Boolean);
+
+  return Array.from(new Set(includedItems)).slice(0, 4) as string[];
+}
+
+function createMarketplaceBagFromPartnerListing(listing: PartnerListing, storeId: string): Bag | null {
+  const store = getCustomerStoreByIdWithPartnerImageOverride(storeId);
+
+  if (!store || listing.quantityLeft < 1) {
+    return null;
+  }
+
+  return {
+    id: `bag-from-${listing.id}`,
+    slug: slugifyMarketplaceBagValue(`${store.slug}-${listing.title}`),
+    storeId,
+    title: listing.title,
+    concept: 'Rescue Bag',
+    category: listing.category,
+    cuisine: listing.category,
+    shortDescription: listing.shortDescription,
+    fullDescription: buildMarketplaceBagDescription(listing),
+    originalPrice: listing.originalPrice,
+    rescuePrice: listing.rescuePrice,
+    quantityTotal: listing.quantity,
+    quantityLeft: listing.quantityLeft,
+    pickupDateLabel: 'Today',
+    pickupWindow: `${listing.pickupStart} - ${listing.pickupEnd}`,
+    pickupSlot: getMarketplacePickupSlot(listing),
+    vegType: listing.vegType,
+    dietaryTags: listing.dietaryTags,
+    allergenNote: listing.allergenNote,
+    includedItems: buildMarketplaceIncludedItems(listing),
+    collectionNote: listing.collectionInstructions,
+    status: getMarketplaceBagStatus(listing),
+    imageUrl: store.cardImage,
+  };
+}
+
+function getDerivedMarketplaceBagsFromPartnerListings() {
+  const profile = getMockPartnerProfile();
+  const customerStoreId = profile.customerStoreId?.trim();
+
+  if (!customerStoreId) {
+    return [];
+  }
+
+  return getMockPartnerWorkspaceLiveListings(profile.workspaceId)
+    .map((listing) => createMarketplaceBagFromPartnerListing(listing, customerStoreId))
+    .filter((bag): bag is Bag => Boolean(bag));
+}
+
+export function getCustomerMarketplaceBags() {
+  return [...getDerivedMarketplaceBagsFromPartnerListings(), ...bags];
+}
+
 export function getBagById(bagId: string) {
-  return bags.find((bag) => bag.id === bagId);
+  return getCustomerMarketplaceBags().find((bag) => bag.id === bagId);
 }
 
 export function getBagsByStoreId(storeId: string) {
-  return bags.filter((bag) => bag.storeId === storeId);
+  return getCustomerMarketplaceBags().filter((bag) => bag.storeId === storeId);
 }

@@ -5,7 +5,7 @@ import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import MotionReveal from '../../components/shared/MotionReveal';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import { clearMockCustomerSession, currentCustomer, getMockCustomerLikedStoreIds } from '../../data/mock/customers';
-import { stores } from '../../data/mock/stores';
+import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
 import { getCustomerOrderMetrics } from '../../lib/customerMetrics';
 
@@ -24,7 +24,7 @@ export default function CustomerProfilePage() {
   const likedStores = useMemo(
     () =>
       getMockCustomerLikedStoreIds()
-        .map((id) => stores.find((store) => store.id === id))
+        .map((id) => getCustomerStoreByIdWithPartnerImageOverride(id))
         .filter(Boolean),
     [],
   );
@@ -121,7 +121,7 @@ export default function CustomerProfilePage() {
                 {likedStores.map((store) => (
                   <Link
                     key={store.id}
-                    to={`/store/${store.slug}`}
+                    to={`/store/${store.id}`}
                     className="surface-card lift-hover group overflow-hidden rounded-[28px]"
                   >
                     <div className="relative h-[180px] overflow-hidden">

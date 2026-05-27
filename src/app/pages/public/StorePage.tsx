@@ -3,14 +3,18 @@ import BagCard from '../../components/customer/BagCard';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
-import { bags } from '../../data/mock/bags';
-import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
+import { getBagsByStoreId } from '../../data/mock/bags';
+import {
+  getCustomerStoreByIdWithPartnerImageOverride,
+  getCustomerStoreImageOverrideForStoreId,
+} from '../../data/mock/stores';
 import { getVegTypeLabel } from '../../lib/status';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 
 export default function StorePage() {
   const { id } = useParams();
   const store = id ? getCustomerStoreByIdWithPartnerImageOverride(id) : undefined;
+  const imageUrlOverride = store ? getCustomerStoreImageOverrideForStoreId(store.id) : undefined;
 
   if (!store) {
     return (
@@ -31,7 +35,7 @@ export default function StorePage() {
     );
   }
 
-  const storeBags = bags.filter((bag) => bag.storeId === store.id);
+  const storeBags = getBagsByStoreId(store.id).filter((bag) => bag.quantityLeft > 0 && bag.status !== 'sold_out');
 
   return (
     <div className="min-h-screen">
@@ -117,7 +121,7 @@ export default function StorePage() {
             <div className="grid gap-6 lg:grid-cols-[1.34fr_0.66fr]">
               <div className="grid gap-6 md:grid-cols-2">
                 {storeBags.map((bag) => (
-                  <BagCard key={bag.id} bag={bag} store={store} />
+                  <BagCard key={bag.id} bag={bag} store={store} imageUrlOverride={imageUrlOverride} />
                 ))}
               </div>
 

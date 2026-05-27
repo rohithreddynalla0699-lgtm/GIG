@@ -6,10 +6,14 @@ import PublicPageIntro from '../../components/shared/PublicPageIntro';
 import Footer from '../../components/Footer';
 import { bags } from '../../data/mock/bags';
 import { currentCustomer } from '../../data/mock/customers';
-import { stores } from '../../data/mock/stores';
+import {
+  getCustomerStoreImageOverrideForStoreId,
+  getCustomerStoresWithPartnerImageOverrides,
+} from '../../data/mock/stores';
 
 export default function SavedPage() {
-  const savedStores = stores.filter((store) => currentCustomer.savedStoreIds.includes(store.id));
+  const customerStores = getCustomerStoresWithPartnerImageOverrides();
+  const savedStores = customerStores.filter((store) => currentCustomer.savedStoreIds.includes(store.id));
   const savedBags = bags.filter((bag) => currentCustomer.savedBagIds.includes(bag.id));
 
   return (
@@ -43,8 +47,9 @@ export default function SavedPage() {
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                   {savedBags.map((bag) => {
-                    const store = stores.find((candidate) => candidate.id === bag.storeId);
-                    return store ? <BagCard key={bag.id} bag={bag} store={store} /> : null;
+                    const store = customerStores.find((candidate) => candidate.id === bag.storeId);
+                    const imageUrlOverride = store ? getCustomerStoreImageOverrideForStoreId(store.id) : undefined;
+                    return store ? <BagCard key={bag.id} bag={bag} store={store} imageUrlOverride={imageUrlOverride} /> : null;
                   })}
                 </div>
               </section>

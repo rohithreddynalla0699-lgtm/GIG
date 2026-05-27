@@ -4,7 +4,7 @@ import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { getBagById } from '../../data/mock/bags';
 import { getOrderById } from '../../data/mock/orders';
-import { getStoreById } from '../../data/mock/stores';
+import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
 import { getCustomerOrderStatusLabel, getOrderStatusClasses } from '../../lib/status';
@@ -13,7 +13,7 @@ export default function OrderDetailsPage() {
   const { id } = useParams();
   const order = id ? getOrderById(id) : undefined;
   const bag = order ? getBagById(order.bagId) : undefined;
-  const store = order ? getStoreById(order.storeId) : undefined;
+  const store = order ? getCustomerStoreByIdWithPartnerImageOverride(order.storeId) : undefined;
 
   if (!order || !bag || !store) {
     return (

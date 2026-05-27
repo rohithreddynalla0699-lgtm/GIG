@@ -8,7 +8,7 @@ import type {
   PartnerSignupAcknowledgements,
   PartnerVerificationStatus,
 } from '../../types/partner';
-import { orders } from './orders';
+import { getMockOrders } from './orders';
 
 export const MOCK_PARTNER_SESSION_KEY = 'gig-partner-session';
 export const MOCK_PARTNER_PROFILE_KEY = 'gig-partner-profile';
@@ -511,7 +511,7 @@ export function getMockPartnerWorkspaceOrders() {
     return [];
   }
 
-  return orders.filter((order) => outletIds.includes(order.outletId));
+  return getMockOrders().filter((order) => outletIds.includes(order.outletId));
 }
 
 export function getMockPartnerCreateBagRoute() {

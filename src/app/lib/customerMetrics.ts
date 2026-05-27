@@ -1,7 +1,8 @@
 import { bags } from '../data/mock/bags';
-import { orders } from '../data/mock/orders';
+import { getMockOrders } from '../data/mock/orders';
 
 export function getCustomerOrderMetrics(customerId: string) {
+  const orders = getMockOrders();
   const customerOrders = orders.filter((order) => order.customerId === customerId);
   const upcoming = customerOrders.filter((order) => ['new_reserved', 'ready_for_pickup'].includes(order.status));
   const completed = customerOrders.filter((order) => order.status === 'collected');

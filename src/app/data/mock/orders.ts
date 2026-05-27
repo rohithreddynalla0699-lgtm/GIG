@@ -1,5 +1,16 @@
 import type { Order } from '../../types/order';
 
+export const MOCK_ORDER_OVERRIDES_KEY = 'gig-order-overrides';
+const VALID_ORDER_STATUSES = new Set<Order['status']>([
+  'new_reserved',
+  'ready_for_pickup',
+  'collected',
+  'no_show',
+  'cancelled',
+  'issue_reported',
+  'refunded',
+]);
+
 export const orders: Order[] = [
   {
     id: 'order-7418',
@@ -141,14 +152,112 @@ export const orders: Order[] = [
   },
 ];
 
+type MockOrderOverride = {
+  status?: Order['status'];
+};
+
+function readStoredOrderOverrides() {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const raw = window.localStorage.getItem(MOCK_ORDER_OVERRIDES_KEY);
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, MockOrderOverride>;
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).flatMap(([orderId, override]) => {
+        if (!override || typeof override !== 'object') {
+          return [];
+        }
+
+        const nextOverride: MockOrderOverride = {};
+
+        if (
+          typeof override.status === 'string' &&
+          VALID_ORDER_STATUSES.has(override.status as Order['status'])
+        ) {
+          nextOverride.status = override.status as Order['status'];
+        }
+
+        return Object.keys(nextOverride).length > 0 ? [[orderId, nextOverride]] : [];
+      }),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredOrderOverrides(overrides: Record<string, MockOrderOverride>) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(MOCK_ORDER_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+function applyOrderOverride(order: Order, overrides: Record<string, MockOrderOverride>) {
+  const override = overrides[order.id];
+
+  if (!override) {
+    return order;
+  }
+
+  return {
+    ...order,
+    ...override,
+  };
+}
+
+export function getMockOrders() {
+  const overrides = readStoredOrderOverrides();
+  return orders.map((order) => applyOrderOverride(order, overrides));
+}
+
 export function getOrderById(orderId: string) {
-  return orders.find((order) => order.id === orderId);
+  return getMockOrders().find((order) => order.id === orderId);
 }
 
 export function getOrdersByStoreId(storeId: string) {
-  return orders.filter((order) => order.storeId === storeId);
+  return getMockOrders().filter((order) => order.storeId === storeId);
 }
 
 export function getOrdersByBagId(bagId: string) {
-  return orders.filter((order) => order.bagId === bagId);
+  return getMockOrders().filter((order) => order.bagId === bagId);
+}
+
+export function updateMockOrderStatus(orderId: string, status: Order['status']) {
+  const existingOrder = orders.find((order) => order.id === orderId);
+
+  if (!existingOrder) {
+    return undefined;
+  }
+
+  const overrides = readStoredOrderOverrides();
+  const nextOverrides = {
+    ...overrides,
+    [orderId]: {
+      ...overrides[orderId],
+      status,
+    },
+  };
+
+  writeStoredOrderOverrides(nextOverrides);
+  return applyOrderOverride(existingOrder, nextOverrides);
+}
+
+export function resetMockOrderOverrides() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(MOCK_ORDER_OVERRIDES_KEY);
 }

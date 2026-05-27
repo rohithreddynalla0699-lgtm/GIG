@@ -8,7 +8,7 @@ import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { bags } from '../../data/mock/bags';
 import { currentCustomer } from '../../data/mock/customers';
-import { stores } from '../../data/mock/stores';
+import { getCustomerStoresWithPartnerImageOverrides } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
 import { getCustomerOrderMetrics } from '../../lib/customerMetrics';
 
@@ -23,6 +23,7 @@ function getUpcomingBucket(dateLabel: string) {
 export default function OrdersPage() {
   const reduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState<OrdersTab>('upcoming');
+  const customerStores = useMemo(() => getCustomerStoresWithPartnerImageOverrides(), []);
 
   const { upcoming, completed, totalSaved } = useMemo(() => getCustomerOrderMetrics(currentCustomer.id), []);
 
@@ -146,7 +147,7 @@ export default function OrdersPage() {
                         <div className="space-y-4">
                           {group.orders.map((order, index) => {
                             const bag = bags.find((candidate) => candidate.id === order.bagId);
-                            const store = stores.find((candidate) => candidate.id === order.storeId);
+                            const store = customerStores.find((candidate) => candidate.id === order.storeId);
                             return bag && store ? (
                               <OrderCard
                                 key={order.id}
@@ -187,7 +188,7 @@ export default function OrdersPage() {
                   <div className="space-y-4">
                     {completed.map((order, index) => {
                       const bag = bags.find((candidate) => candidate.id === order.bagId);
-                      const store = stores.find((candidate) => candidate.id === order.storeId);
+                      const store = customerStores.find((candidate) => candidate.id === order.storeId);
                       return bag && store ? (
                         <OrderCard
                           key={order.id}

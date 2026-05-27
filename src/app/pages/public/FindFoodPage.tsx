@@ -4,7 +4,7 @@ import BagCard from '../../components/customer/BagCard';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
-import { bags } from '../../data/mock/bags';
+import { getCustomerMarketplaceBags } from '../../data/mock/bags';
 import {
   getCustomerStoreImageOverrideForStoreId,
   getCustomerStoresWithPartnerImageOverrides,
@@ -58,6 +58,7 @@ export default function FindFoodPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const customerStores = useMemo(() => getCustomerStoresWithPartnerImageOverrides(), []);
+  const marketplaceBags = useMemo(() => getCustomerMarketplaceBags(), []);
 
   const cityOptions = ['All', ...new Set(customerStores.map((store) => store.city))];
   const categoryOptions = ['All', ...new Set(customerStores.map((store) => store.category))];
@@ -131,7 +132,7 @@ export default function FindFoodPage() {
 
   const visibleListings = useMemo(() => {
     // Later: move radius filtering server-side when Supabase geo queries are available.
-    return bags
+    return marketplaceBags
       .map((bag) => {
         const store = customerStores.find((candidate) => candidate.id === bag.storeId);
         if (!store || bag.quantityLeft < 1 || bag.status === 'sold_out') return null;
@@ -160,7 +161,7 @@ export default function FindFoodPage() {
       })
       .filter((listing): listing is NonNullable<typeof listing> => Boolean(listing))
       .sort((first, second) => first.distanceKm - second.distanceKm);
-  }, [city, customerStores, normalizedQuery, radiusKm, selectedCategory, selectedReference]);
+  }, [city, customerStores, marketplaceBags, normalizedQuery, radiusKm, selectedCategory, selectedReference]);
 
   const totalBags = visibleListings.reduce((sum, listing) => sum + listing.bag.quantityLeft, 0);
   const liveStatus = `${totalBags} bags within ${radiusKm.toFixed(radiusKm % 1 === 0 ? 0 : 1)} km`;
