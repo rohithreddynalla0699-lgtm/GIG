@@ -55,7 +55,7 @@ const customerOrderStatusLabels: Record<OrderStatus, string> = {
   new_reserved: 'Reserved',
   ready_for_pickup: 'Ready for pickup',
   collected: 'Collected',
-  no_show: 'Missed pickup',
+  no_show: 'No-show',
   cancelled: 'Cancelled',
   issue_reported: 'Issue reported',
   refunded: 'Refunded',

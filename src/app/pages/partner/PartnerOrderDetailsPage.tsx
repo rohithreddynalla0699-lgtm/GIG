@@ -59,6 +59,38 @@ export default function PartnerOrderDetailsPage() {
           setActionError('We could not update this order right now.');
         }
       },
+      markNoShow: () => {
+        try {
+          setActionError('');
+          const nextOrder = updateMockOrderStatus(order?.id ?? '', 'no_show');
+          if (nextOrder) {
+            setCurrentOrder(nextOrder);
+          }
+          setStatus(nextOrder?.status ?? 'no_show');
+        } catch (error) {
+          if (error instanceof MockOrderLifecycleError) {
+            setActionError('This order cannot move to no-show yet.');
+            return;
+          }
+          setActionError('We could not update this order right now.');
+        }
+      },
+      reportIssue: () => {
+        try {
+          setActionError('');
+          const nextOrder = updateMockOrderStatus(order?.id ?? '', 'issue_reported');
+          if (nextOrder) {
+            setCurrentOrder(nextOrder);
+          }
+          setStatus(nextOrder?.status ?? 'issue_reported');
+        } catch (error) {
+          if (error instanceof MockOrderLifecycleError) {
+            setActionError('This order cannot be reported right now.');
+            return;
+          }
+          setActionError('We could not update this order right now.');
+        }
+      },
     }),
     [order?.id]
   );
@@ -75,6 +107,8 @@ export default function PartnerOrderDetailsPage() {
 
   const canMarkReady = status === 'new_reserved';
   const canVerifyPickup = status === 'ready_for_pickup';
+  const canMarkNoShow = status === 'ready_for_pickup';
+  const canReportIssue = ['new_reserved', 'ready_for_pickup', 'collected', 'no_show'].includes(status);
 
   return (
     <div className="space-y-4">
@@ -201,6 +235,24 @@ export default function PartnerOrderDetailsPage() {
               </button>
 
               <OtpVerificationCard expectedCode={order.pickupCode} canCollect={canVerifyPickup} onCollected={actions.markCollected} />
+
+              <button
+                type="button"
+                onClick={actions.markNoShow}
+                disabled={!canMarkNoShow}
+                className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full border border-[rgba(192,90,43,0.22)] bg-[rgba(255,240,238,0.88)] px-4 py-2 text-[13px] font-semibold text-[#A6572E] transition hover:bg-[rgba(255,240,238,1)] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                Mark no-show
+              </button>
+
+              <button
+                type="button"
+                onClick={actions.reportIssue}
+                disabled={!canReportIssue}
+                className="inline-flex min-h-[40px] w-full items-center justify-center rounded-full border border-[rgba(166,107,0,0.18)] bg-[rgba(255,244,214,0.88)] px-4 py-2 text-[13px] font-semibold text-[#A66B00] transition hover:bg-[rgba(255,244,214,1)] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                Report issue
+              </button>
             </div>
           </section>
         </div>

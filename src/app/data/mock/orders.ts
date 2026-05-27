@@ -351,6 +351,10 @@ function getLifecycleSupportNote(status: Order['status']) {
       return 'Your order is packed and ready during the listed pickup window.';
     case 'collected':
       return 'Pickup completed successfully.';
+    case 'no_show':
+      return 'Pickup window passed without collection.';
+    case 'issue_reported':
+      return 'An issue was reported for this order.';
     case 'new_reserved':
     default:
       return 'Your reservation is confirmed for the listed pickup window.';
@@ -364,10 +368,14 @@ function canTransitionOrderStatus(currentStatus: Order['status'], nextStatus: Or
 
   switch (currentStatus) {
     case 'new_reserved':
-      return nextStatus === 'ready_for_pickup';
+      return nextStatus === 'ready_for_pickup' || nextStatus === 'issue_reported';
     case 'ready_for_pickup':
-      return nextStatus === 'collected';
+      return nextStatus === 'collected' || nextStatus === 'no_show' || nextStatus === 'issue_reported';
     case 'collected':
+      return nextStatus === 'issue_reported';
+    case 'no_show':
+      return nextStatus === 'issue_reported';
+    case 'issue_reported':
       return false;
     default:
       return false;
@@ -391,6 +399,20 @@ function getLifecycleTimelineEvent(order: Order, status: Order['status']): Order
         timeLabel,
         title: 'Collected',
         description: 'The pickup code was verified and the rescue bag was handed over successfully.',
+      };
+    case 'no_show':
+      return {
+        id: `${order.id}-no-show`,
+        timeLabel,
+        title: 'Marked no-show',
+        description: 'The pickup window ended without collection, so the order was marked as a no-show.',
+      };
+    case 'issue_reported':
+      return {
+        id: `${order.id}-issue`,
+        timeLabel,
+        title: 'Issue reported',
+        description: 'An issue was logged for this order and the support team should review the pickup details.',
       };
     case 'new_reserved':
     default:
