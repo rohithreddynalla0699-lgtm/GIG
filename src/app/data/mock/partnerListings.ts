@@ -126,6 +126,13 @@ export interface CreateMockPartnerListingInput {
   status: PartnerListing['status'];
 }
 
+export interface MockPartnerListingSellThroughSummary {
+  soldToday: number;
+  availableToday: number;
+  dailyQuantity: number;
+  sellThroughPercent: number;
+}
+
 export class MockPartnerListingValidationError extends Error {
   code: 'duplicate_title' | 'max_live_types_reached';
 
@@ -322,6 +329,22 @@ export function getMockPartnerWorkspaceLiveListingCount(workspaceId: string = ge
       .map((listing) => normalizeMockListingTitle(listing.title))
       .filter(Boolean),
   ).size;
+}
+
+export function getMockPartnerListingSellThrough(listing: Pick<PartnerListing, 'quantity' | 'quantityLeft'>): MockPartnerListingSellThroughSummary {
+  const dailyQuantity = Number.isFinite(listing.quantity) ? Math.max(0, Math.floor(listing.quantity)) : 0;
+  const availableToday = dailyQuantity > 0
+    ? Math.min(dailyQuantity, Math.max(0, Math.floor(listing.quantityLeft)))
+    : 0;
+  const soldToday = Math.max(0, dailyQuantity - availableToday);
+  const sellThroughPercent = dailyQuantity > 0 ? Math.round((soldToday / dailyQuantity) * 100) : 0;
+
+  return {
+    soldToday,
+    availableToday,
+    dailyQuantity,
+    sellThroughPercent,
+  };
 }
 
 export function canCreateMockPartnerLiveListing(workspaceId: string = getMockPartnerWorkspaceId()) {

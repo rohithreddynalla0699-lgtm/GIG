@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { PartnerOutlet } from '../../types/partner';
 import type { PartnerListing } from '../../types/listing';
+import { getMockPartnerListingSellThrough } from '../../data/mock/partnerListings';
 import { formatINR } from '../../lib/currency';
 import { getListingStatusClasses, getListingStatusLabel, getVegTypeLabel } from '../../lib/status';
 
@@ -24,6 +25,8 @@ export default function ListingCard({ listing, outlet, onUpdateInventory, onArch
     setShowArchiveConfirm(false);
     setError('');
   }, [listing.id, listing.quantity, listing.quantityLeft]);
+
+  const sellThrough = getMockPartnerListingSellThrough(listing);
 
   return (
     <article className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3.5 transition hover:-translate-y-[1px] hover:bg-white">
@@ -49,7 +52,7 @@ export default function ListingCard({ listing, outlet, onUpdateInventory, onArch
       <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
         <div>
           <div className="meta-text mb-1">Daily quantity</div>
-          <div className="text-[15px] font-semibold text-[color:var(--gig-text)]">{listing.quantity}</div>
+          <div className="text-[15px] font-semibold text-[color:var(--gig-text)]">{sellThrough.dailyQuantity}</div>
         </div>
         <div>
           <div className="meta-text mb-1">Rescue price</div>
@@ -57,7 +60,7 @@ export default function ListingCard({ listing, outlet, onUpdateInventory, onArch
         </div>
         <div>
           <div className="meta-text mb-1">Available today</div>
-          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.quantityLeft} left</div>
+          <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{sellThrough.availableToday} left</div>
         </div>
         <div>
           <div className="meta-text mb-1">Pickup</div>
@@ -69,9 +72,39 @@ export default function ListingCard({ listing, outlet, onUpdateInventory, onArch
         </div>
       </div>
 
+      <div className="mt-3 rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-[rgba(250,245,236,0.52)] px-4 py-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-[12px] font-semibold text-[color:var(--gig-text)]">Sell-through today</div>
+            <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">
+              Sold {sellThrough.soldToday} of {sellThrough.dailyQuantity}
+            </div>
+          </div>
+          <div className="rounded-full bg-white/86 px-3 py-1.5 text-[12px] font-semibold text-[color:var(--gig-text)]">
+            {sellThrough.sellThroughPercent}%
+          </div>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-[rgba(32,38,28,0.08)]">
+          <div
+            className="h-full rounded-full bg-[linear-gradient(90deg,#2f7d32_0%,#6bb55d_100%)] transition-[width]"
+            style={{ width: `${sellThrough.sellThroughPercent}%` }}
+          />
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div>
+            <div className="meta-text mb-1">Sold today</div>
+            <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{sellThrough.soldToday}</div>
+          </div>
+          <div>
+            <div className="meta-text mb-1">Available today</div>
+            <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{sellThrough.availableToday}</div>
+          </div>
+        </div>
+      </div>
+
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-[color:var(--gig-text-muted)]">
         <span className="line-through">{formatINR(listing.originalPrice)}</span>
-        <span>{listing.quantityLeft === 0 ? 'Sold through today' : `${listing.quantityLeft} units available today`}</span>
+        <span>{sellThrough.availableToday === 0 ? 'Sold through today' : `${sellThrough.availableToday} units available today`}</span>
       </div>
 
       {listing.dietaryTags.length > 0 ? (
