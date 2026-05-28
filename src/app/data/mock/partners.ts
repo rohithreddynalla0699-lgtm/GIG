@@ -8,6 +8,7 @@ import type {
   PartnerSignupAcknowledgements,
   PartnerVerificationStatus,
 } from '../../types/partner';
+import { getMockPartnerWorkspaceLiveListings, getMockPartnerWorkspaceNotLiveReferenceListings } from './partnerListings';
 import { getMockOrders } from './orders';
 
 export const MOCK_PARTNER_SESSION_KEY = 'gig-partner-session';
@@ -75,6 +76,16 @@ export interface MockPartnerQualitySummary {
   issueRate: number;
   threshold: number;
   isAtRisk: boolean;
+}
+
+export interface MockPartnerOperationalSummary {
+  activePickups: number;
+  completedPickups: number;
+  cancelledReservations: number;
+  supportAttention: number;
+  liveBagTypes: number;
+  availableBagsToday: number;
+  notLiveBagTypes: number;
 }
 
 function createPartnerWorkspaceId(businessName: string) {
@@ -535,6 +546,28 @@ export function getMockPartnerQualitySummary(workspaceId: string = getMockPartne
     issueRate,
     threshold,
     isAtRisk: totalOrders > 0 && issueRate >= threshold,
+  };
+}
+
+export function getMockPartnerOperationalSummary(
+  workspaceId: string = getMockPartnerWorkspaceId(),
+): MockPartnerOperationalSummary {
+  const workspaceOrders = isSeedPartnerWorkspaceId(workspaceId) ? getMockPartnerWorkspaceOrders() : [];
+  const liveListings = getMockPartnerWorkspaceLiveListings(workspaceId);
+  const notLiveListings = getMockPartnerWorkspaceNotLiveReferenceListings(workspaceId);
+
+  return {
+    activePickups: workspaceOrders.filter(
+      (order) => order.status === 'new_reserved' || order.status === 'ready_for_pickup',
+    ).length,
+    completedPickups: workspaceOrders.filter((order) => order.status === 'collected').length,
+    cancelledReservations: workspaceOrders.filter((order) => order.status === 'cancelled').length,
+    supportAttention: workspaceOrders.filter(
+      (order) => order.status === 'issue_reported' || order.status === 'no_show',
+    ).length,
+    liveBagTypes: liveListings.length,
+    availableBagsToday: liveListings.reduce((sum, listing) => sum + Math.max(listing.quantityLeft, 0), 0),
+    notLiveBagTypes: notLiveListings.length,
   };
 }
 

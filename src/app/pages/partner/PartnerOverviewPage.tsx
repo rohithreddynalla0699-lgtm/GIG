@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { getMockPartnerWorkspaceListings } from '../../data/mock/partnerListings';
 import {
   getMockPartnerActivationState,
+  getMockPartnerOperationalSummary,
   getMockPartnerOperationalReadiness,
   getMockPartnerProfile,
   getMockPartnerQualitySummary,
@@ -92,12 +93,12 @@ export default function PartnerOverviewPage() {
   const listings = getMockPartnerWorkspaceListings();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const partnerOrders = getMockPartnerWorkspaceOrders();
+  const operationalSummary = getMockPartnerOperationalSummary();
   const qualitySummary = getMockPartnerQualitySummary();
 
-  const activeListings = listings.filter((listing) => ['live', 'scheduled'].includes(listing.status));
-  const reservedOrders = partnerOrders.filter((order) => ['new_reserved', 'ready_for_pickup'].includes(order.status));
-  const todayPickups = partnerOrders.filter((order) => order.pickupDateLabel === 'Today');
-  const nextOrders = reservedOrders.slice(0, 3);
+  const nextOrders = partnerOrders
+    .filter((order) => order.status === 'new_reserved' || order.status === 'ready_for_pickup')
+    .slice(0, 3);
   const newestListings = [...listings]
     .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     .slice(0, 3);
@@ -235,14 +236,19 @@ export default function PartnerOverviewPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <CompactStat
-            label="Rescue bags"
-            value={activeListings.length}
-            note={pluralize(activeListings.filter((listing) => listing.status === 'live').length, 'live bag', 'live bags')}
+            label="Active pickups"
+            value={operationalSummary.activePickups}
+            note={pluralize(operationalSummary.liveBagTypes, 'live bag type', 'live bag types')}
           />
-          <CompactStat label="Orders" value={reservedOrders.length} note="Reserved now" />
-          <CompactStat label="Today" value={todayPickups.length} note="Pickups today" />
+          <CompactStat
+            label="Available today"
+            value={operationalSummary.availableBagsToday}
+            note={pluralize(operationalSummary.notLiveBagTypes, 'not-live type', 'not-live types')}
+          />
+          <CompactStat label="Completed pickups" value={operationalSummary.completedPickups} note="Collected orders" />
+          <CompactStat label="Support attention" value={operationalSummary.supportAttention} note="Issue-reported or no-show" />
         </div>
 
         <div
