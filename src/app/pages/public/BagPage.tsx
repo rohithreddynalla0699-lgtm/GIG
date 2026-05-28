@@ -176,8 +176,11 @@ export default function BagPage() {
               ) : null}
 
               {isSoldOut ? (
-                <div className="mb-5 rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-[rgba(32,38,28,0.04)] px-4 py-3 text-[13px] font-medium text-[color:var(--gig-text-muted)]">
-                  This rescue bag is sold out.
+                <div className="mb-5 rounded-[18px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,248,230,0.36)] px-4 py-3">
+                  <div className="text-[13px] font-semibold text-[#8A5600]">Sold out for today</div>
+                  <div className="mt-1 text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]">
+                    Check back for the next pickup window.
+                  </div>
                 </div>
               ) : null}
 

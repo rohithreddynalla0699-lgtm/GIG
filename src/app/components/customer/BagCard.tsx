@@ -22,6 +22,14 @@ export default function BagCard({ bag, store, imageUrlOverride, distanceKm, dela
   const discount = getDiscountPercentage(bag.originalPrice, bag.rescuePrice);
   const [signedIn, setSignedIn] = useState(false);
   const [liked, setLiked] = useState(false);
+  const availabilityBadgeLabel =
+    bag.quantityLeft <= 2
+      ? `Only ${bag.quantityLeft} left`
+      : `${bag.quantityLeft} bags left`;
+  const availabilitySummaryLabel =
+    bag.quantityLeft <= 2
+      ? `Only ${bag.quantityLeft} of ${bag.quantityTotal} bags left today`
+      : `${bag.quantityLeft} of ${bag.quantityTotal} bags available`;
 
   useEffect(() => {
     const isSignedIn = isMockCustomerSignedIn();
@@ -48,7 +56,7 @@ export default function BagCard({ bag, store, imageUrlOverride, distanceKm, dela
                 {store.category}
               </span>
               <span className="rounded-full bg-[rgba(11,122,77,0.9)] px-3 py-[7px] text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
-                {bag.quantityLeft} bags left
+                {availabilityBadgeLabel}
               </span>
             </div>
             {signedIn ? (
@@ -107,7 +115,7 @@ export default function BagCard({ bag, store, imageUrlOverride, distanceKm, dela
             <div>
               <div className="meta-text mb-1">Available</div>
               <div className="text-[13.5px] font-medium text-[color:var(--gig-text)]">
-                {bag.quantityLeft} of {bag.quantityTotal} bags
+                {availabilitySummaryLabel}
               </div>
             </div>
             <div>
