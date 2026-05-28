@@ -4,7 +4,7 @@ import OtpVerificationCard from '../../components/partner/OtpVerificationCard';
 import OrderStatusBadge from '../../components/partner/OrderStatusBadge';
 import OrderTimeline from '../../components/partner/OrderTimeline';
 import SectionCard from '../../components/shared/SectionCard';
-import { getBagById } from '../../data/mock/bags';
+import { getBagByIdIncludingInactive } from '../../data/mock/bags';
 import { MockOrderLifecycleError, updateMockOrderStatus, updateMockOrderSupportFollowUp } from '../../data/mock/orders';
 import { getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
@@ -25,7 +25,7 @@ export default function PartnerOrderDetailsPage() {
   const initialOrder = id ? workspaceOrders.find((entry) => entry.id === id) : undefined;
   const [currentOrder, setCurrentOrder] = useState(initialOrder);
   const order = currentOrder;
-  const bag = order ? getBagById(order.bagId) : undefined;
+  const bag = order ? getBagByIdIncludingInactive(order.bagId) : undefined;
   const outlet = order ? workspaceOutlets.find((item) => item.id === order.outletId) : undefined;
 
   const [status, setStatus] = useState<OrderStatus | null>(order?.status ?? null);

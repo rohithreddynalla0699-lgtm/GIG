@@ -1,6 +1,10 @@
 import type { Bag } from '../../types/bag';
 import type { PartnerListing } from '../../types/listing';
-import { getMockPartnerWorkspaceLiveListings, updateMockPartnerListingQuantityLeft } from './partnerListings';
+import {
+  getMockPartnerListings,
+  getMockPartnerWorkspaceLiveListings,
+  updateMockPartnerListingQuantityLeft,
+} from './partnerListings';
 import { getMockPartnerProfile } from './partners';
 import { getCustomerStoreByIdWithPartnerImageOverride } from './stores';
 
@@ -361,10 +365,14 @@ function buildMarketplaceIncludedItems(listing: PartnerListing) {
   return Array.from(new Set(includedItems)).slice(0, 4) as string[];
 }
 
-function createMarketplaceBagFromPartnerListing(listing: PartnerListing, storeId: string): Bag | null {
+function createMarketplaceBagFromPartnerListing(
+  listing: PartnerListing,
+  storeId: string,
+  { includeUnavailable = false }: { includeUnavailable?: boolean } = {},
+): Bag | null {
   const store = getCustomerStoreByIdWithPartnerImageOverride(storeId);
 
-  if (!store || listing.quantityLeft < 1) {
+  if (!store || (!includeUnavailable && listing.quantityLeft < 1)) {
     return null;
   }
 
@@ -409,6 +417,28 @@ function getDerivedMarketplaceBagsFromPartnerListings() {
     .filter((bag): bag is Bag => Boolean(bag));
 }
 
+function getInactiveMarketplaceBagById(bagId: string) {
+  if (!bagId.startsWith('bag-from-')) {
+    return undefined;
+  }
+
+  const profile = getMockPartnerProfile();
+  const customerStoreId = profile.customerStoreId?.trim();
+
+  if (!customerStoreId) {
+    return undefined;
+  }
+
+  const listingId = bagId.replace(/^bag-from-/, '');
+  const listing = getMockPartnerListings().find((item) => item.id === listingId);
+
+  if (!listing) {
+    return undefined;
+  }
+
+  return createMarketplaceBagFromPartnerListing(listing, customerStoreId, { includeUnavailable: true }) ?? undefined;
+}
+
 export function getCustomerMarketplaceBags() {
   const quantityOverrides = readStoredBagQuantityOverrides();
   return [...getDerivedMarketplaceBagsFromPartnerListings(), ...bags.map((bag) => applyStaticBagQuantityOverride(bag, quantityOverrides))];
@@ -416,6 +446,10 @@ export function getCustomerMarketplaceBags() {
 
 export function getBagById(bagId: string) {
   return getCustomerMarketplaceBags().find((bag) => bag.id === bagId);
+}
+
+export function getBagByIdIncludingInactive(bagId: string) {
+  return getBagById(bagId) ?? getInactiveMarketplaceBagById(bagId);
 }
 
 export function getBagsByStoreId(storeId: string) {

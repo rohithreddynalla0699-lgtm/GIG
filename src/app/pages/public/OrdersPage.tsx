@@ -6,7 +6,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MotionReveal from '../../components/shared/MotionReveal';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
-import { getBagById } from '../../data/mock/bags';
+import { getBagByIdIncludingInactive } from '../../data/mock/bags';
 import { currentCustomer } from '../../data/mock/customers';
 import { getCustomerStoresWithPartnerImageOverrides } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
@@ -146,7 +146,7 @@ export default function OrdersPage() {
 
                         <div className="space-y-4">
                           {group.orders.map((order, index) => {
-                            const bag = getBagById(order.bagId);
+                            const bag = getBagByIdIncludingInactive(order.bagId);
                             const store = customerStores.find((candidate) => candidate.id === order.storeId);
                             return bag && store ? (
                               <OrderCard
@@ -187,7 +187,7 @@ export default function OrdersPage() {
                 ) : (
                   <div className="space-y-4">
                     {completed.map((order, index) => {
-                      const bag = getBagById(order.bagId);
+                      const bag = getBagByIdIncludingInactive(order.bagId);
                       const store = customerStores.find((candidate) => candidate.id === order.storeId);
                       return bag && store ? (
                         <OrderCard

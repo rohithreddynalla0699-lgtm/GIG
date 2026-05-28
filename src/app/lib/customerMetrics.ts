@@ -1,4 +1,4 @@
-import { getBagById } from '../data/mock/bags';
+import { getBagByIdIncludingInactive } from '../data/mock/bags';
 import { getMockOrders } from '../data/mock/orders';
 
 export function getCustomerOrderMetrics(customerId: string) {
@@ -7,7 +7,7 @@ export function getCustomerOrderMetrics(customerId: string) {
   const upcoming = customerOrders.filter((order) => ['new_reserved', 'ready_for_pickup'].includes(order.status));
   const completed = customerOrders.filter((order) => order.status === 'collected');
   const totalSaved = completed.reduce((sum, order) => {
-    const bag = getBagById(order.bagId);
+    const bag = getBagByIdIncludingInactive(order.bagId);
     return bag ? sum + Math.max(bag.originalPrice - order.amountPaid, 0) : sum;
   }, 0);
 

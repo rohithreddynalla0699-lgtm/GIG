@@ -136,6 +136,16 @@ export class MockPartnerListingValidationError extends Error {
   }
 }
 
+export class MockPartnerListingManagementError extends Error {
+  code: 'listing_not_found' | 'invalid_quantity' | 'invalid_quantity_left';
+
+  constructor(code: 'listing_not_found' | 'invalid_quantity' | 'invalid_quantity_left', message: string) {
+    super(message);
+    this.name = 'MockPartnerListingManagementError';
+    this.code = code;
+  }
+}
+
 function getCreatedAtLabel(status: PartnerListing['status']) {
   switch (status) {
     case 'live':
@@ -181,6 +191,12 @@ function readStoredPartnerListings() {
   }
 }
 
+function getMergedPartnerListings(storedListings: PartnerListing[]) {
+  const storedIds = new Set(storedListings.map((listing) => listing.id));
+  const seedListings = partnerListings.filter((listing) => !storedIds.has(listing.id));
+  return [...storedListings, ...seedListings];
+}
+
 function readStoredPartnerListingQuantityOverrides() {
   if (typeof window === 'undefined') {
     return {};
@@ -218,6 +234,18 @@ function writeStoredPartnerListingQuantityOverrides(overrides: Record<string, nu
   window.localStorage.setItem(MOCK_PARTNER_LISTING_QUANTITY_OVERRIDES_KEY, JSON.stringify(overrides));
 }
 
+function clearStoredPartnerListingQuantityOverride(listingId: string) {
+  const overrides = readStoredPartnerListingQuantityOverrides();
+
+  if (!(listingId in overrides)) {
+    return;
+  }
+
+  const nextOverrides = { ...overrides };
+  delete nextOverrides[listingId];
+  writeStoredPartnerListingQuantityOverrides(nextOverrides);
+}
+
 function applyPartnerListingQuantityOverride(listing: PartnerListing, overrides: Record<string, number>) {
   const quantityLeft = overrides[listing.id];
 
@@ -240,9 +268,16 @@ function writeStoredPartnerListings(listings: PartnerListing[]) {
   window.localStorage.setItem(MOCK_PARTNER_LISTINGS_KEY, JSON.stringify(listings));
 }
 
+function upsertStoredPartnerListing(nextListing: PartnerListing) {
+  const storedListings = readStoredPartnerListings().filter((listing) => listing.id !== nextListing.id);
+  const nextListings = [nextListing, ...storedListings];
+  writeStoredPartnerListings(nextListings);
+  return nextListing;
+}
+
 export function getMockPartnerListings() {
   const quantityOverrides = readStoredPartnerListingQuantityOverrides();
-  return [...partnerListings, ...readStoredPartnerListings()].map((listing) =>
+  return getMergedPartnerListings(readStoredPartnerListings()).map((listing) =>
     applyPartnerListingQuantityOverride(listing, quantityOverrides),
   );
 }
@@ -252,7 +287,11 @@ export function getMockPartnerWorkspaceListings(workspaceId: string = getMockPar
   const storedListings = readStoredPartnerListings().filter((listing) => listing.workspaceId === workspaceId);
 
   if (isSeedPartnerWorkspaceId(workspaceId)) {
-    return [...partnerListings, ...storedListings].map((listing) =>
+    const seedStoredListings = readStoredPartnerListings().filter(
+      (listing) => listing.workspaceId === workspaceId || partnerListings.some((seedListing) => seedListing.id === listing.id),
+    );
+
+    return getMergedPartnerListings(seedStoredListings).map((listing) =>
       applyPartnerListingQuantityOverride(listing, quantityOverrides),
     );
   }
@@ -363,4 +402,55 @@ export function updateMockPartnerListingQuantityLeft(listingId: string, quantity
 
   writeStoredPartnerListingQuantityOverrides(nextOverrides);
   return applyPartnerListingQuantityOverride(existingListing, nextOverrides);
+}
+
+export function updateMockPartnerListingInventory(listingId: string, quantity: number, quantityLeft: number) {
+  const existingListing = getMockPartnerListings().find((listing) => listing.id === listingId);
+
+  if (!existingListing) {
+    throw new MockPartnerListingManagementError('listing_not_found', 'This rescue bag type could not be found.');
+  }
+
+  if (!Number.isFinite(quantity) || quantity < 0) {
+    throw new MockPartnerListingManagementError('invalid_quantity', 'Enter a valid daily quantity.');
+  }
+
+  if (!Number.isFinite(quantityLeft) || quantityLeft < 0 || quantityLeft > quantity) {
+    throw new MockPartnerListingManagementError(
+      'invalid_quantity_left',
+      'Available quantity must be between 0 and the daily quantity.',
+    );
+  }
+
+  const normalizedQuantity = Math.floor(quantity);
+  const normalizedQuantityLeft = Math.floor(quantityLeft);
+  const nextListing: PartnerListing = {
+    ...existingListing,
+    quantity: normalizedQuantity,
+    quantityLeft: normalizedQuantityLeft,
+    status: normalizedQuantityLeft <= 0 ? 'sold_out' : existingListing.status === 'live' ? 'live' : existingListing.status,
+    createdAtLabel: 'Updated just now',
+  };
+
+  clearStoredPartnerListingQuantityOverride(listingId);
+  upsertStoredPartnerListing(nextListing);
+  return nextListing;
+}
+
+export function archiveMockPartnerListing(listingId: string) {
+  const existingListing = getMockPartnerListings().find((listing) => listing.id === listingId);
+
+  if (!existingListing) {
+    throw new MockPartnerListingManagementError('listing_not_found', 'This rescue bag type could not be found.');
+  }
+
+  const nextListing: PartnerListing = {
+    ...existingListing,
+    status: 'archived',
+    createdAtLabel: getCreatedAtLabel('archived'),
+  };
+
+  clearStoredPartnerListingQuantityOverride(listingId);
+  upsertStoredPartnerListing(nextListing);
+  return nextListing;
 }

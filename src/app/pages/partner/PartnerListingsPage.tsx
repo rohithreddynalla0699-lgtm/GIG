@@ -5,9 +5,11 @@ import ListingCard from '../../components/partner/ListingCard';
 import ListingForm from '../../components/partner/ListingForm';
 import {
   MAX_RESCUE_BAG_TYPES_PER_PARTNER,
+  archiveMockPartnerListing,
   canCreateMockPartnerLiveListing,
   getMockPartnerWorkspaceLiveListingCount,
   getMockPartnerWorkspaceLiveListings,
+  updateMockPartnerListingInventory,
 } from '../../data/mock/partnerListings';
 import {
   getMockPartnerWorkspaceAccessState,
@@ -99,6 +101,16 @@ export default function PartnerListingsPage() {
   const handleCreated = () => {
     refreshLiveListings();
     setIsCreateModalOpen(false);
+  };
+
+  const handleUpdateInventory = (listingId: string, quantity: number, quantityLeft: number) => {
+    updateMockPartnerListingInventory(listingId, quantity, quantityLeft);
+    refreshLiveListings();
+  };
+
+  const handleArchiveListing = (listingId: string) => {
+    archiveMockPartnerListing(listingId);
+    refreshLiveListings();
   };
 
   if (workspaceAccessState === 'restricted') {
@@ -222,7 +234,15 @@ export default function PartnerListingsPage() {
           <div className="space-y-3">
             {liveListings.map((listing) => {
               const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
-              return outlet ? <ListingCard key={listing.id} listing={listing} outlet={outlet} /> : null;
+              return outlet ? (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  outlet={outlet}
+                  onUpdateInventory={handleUpdateInventory}
+                  onArchive={handleArchiveListing}
+                />
+              ) : null;
             })}
           </div>
         )}
