@@ -63,17 +63,29 @@ export default function OrderCard({ order, bag, store, variant, delay = 0 }: Ord
 
           <div className={`flex flex-col ${isUpcoming ? 'p-5 md:p-6' : 'p-5 md:p-5.5'}`}>
             {isUpcoming ? (
-              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <div className="meta-text mb-1">Pickup window</div>
-                  <div className="text-[15px] font-medium text-[color:var(--gig-text)]">
-                    {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
+              <div className="mb-5 space-y-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
+                    <div className="meta-text mb-1">Pickup window</div>
+                    <div className="text-[15px] font-medium text-[color:var(--gig-text)]">
+                      {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
+                    </div>
+                    <div className="mt-2 text-[13px] font-medium text-[color:var(--gig-text-muted)]">
+                      {store.name} · {store.area}, {store.city}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[22px] bg-[linear-gradient(135deg,#17362e_0%,#0f241f_100%)] px-4.5 py-4 text-white shadow-[0_16px_34px_rgba(9,26,23,0.16)]">
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/52">Pickup code</div>
+                    <div className="text-[26px] font-semibold leading-none tracking-[0.16em] text-white">{order.pickupCode}</div>
                   </div>
                 </div>
 
-                <div className="rounded-[22px] bg-[linear-gradient(135deg,#17362e_0%,#0f241f_100%)] px-4.5 py-4 text-white shadow-[0_16px_34px_rgba(9,26,23,0.16)]">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/52">Pickup code</div>
-                  <div className="text-[26px] font-semibold leading-none tracking-[0.16em] text-white">{order.pickupCode}</div>
+                <div className="rounded-[22px] border border-[rgba(15,48,40,0.1)] bg-[rgba(255,255,255,0.72)] px-4 py-3.5">
+                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">
+                    Next step
+                  </div>
+                  <div className="text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]">{supportHint}</div>
                 </div>
               </div>
             ) : (
@@ -101,7 +113,7 @@ export default function OrderCard({ order, bag, store, variant, delay = 0 }: Ord
               </div>
             )}
 
-            <div className={`grid gap-3 rounded-[22px] bg-[rgba(32,38,28,0.04)] p-4 sm:grid-cols-2 xl:grid-cols-4 ${isUpcoming ? 'mb-5' : 'mb-4.5'}`}>
+            <div className={`grid gap-3 rounded-[22px] bg-[rgba(32,38,28,0.04)] p-4 ${isUpcoming ? 'sm:grid-cols-2 xl:grid-cols-3 mb-5' : 'sm:grid-cols-2 xl:grid-cols-4 mb-4.5'}`}>
               <div>
                 <div className="meta-text mb-1">Pickup location</div>
                 <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{store.addressLine}</div>
@@ -115,14 +127,20 @@ export default function OrderCard({ order, bag, store, variant, delay = 0 }: Ord
                 <div className="text-[14px] font-medium text-[color:var(--gig-green-deep)]">{formatINR(amountSaved)}</div>
               </div>
               <div>
-                <div className="meta-text mb-1">{isUpcoming ? 'Pickup city' : 'Outlet area'}</div>
-                <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{store.area}, {store.city}</div>
+                <div className="meta-text mb-1">{isUpcoming ? 'Pickup status' : 'Outlet area'}</div>
+                {isUpcoming ? (
+                  <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${getOrderStatusClasses(order.status)}`}>
+                    {getCustomerOrderStatusLabel(order.status)}
+                  </div>
+                ) : (
+                  <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{store.area}, {store.city}</div>
+                )}
               </div>
             </div>
 
-            <div className={`${isUpcoming ? 'mb-5' : 'mb-4.5'} text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]`}>
-              {supportHint}
-            </div>
+            {!isUpcoming ? (
+              <div className="mb-4.5 text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]">{supportHint}</div>
+            ) : null}
 
             <div className="mt-auto flex justify-end">
               <Link to={`/orders/${order.id}`} className={`${isUpcoming ? 'btn-primary' : 'btn-secondary'} justify-center whitespace-nowrap`}>
