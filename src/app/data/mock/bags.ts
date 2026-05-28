@@ -436,7 +436,16 @@ function getInactiveMarketplaceBagById(bagId: string) {
     return undefined;
   }
 
-  return createMarketplaceBagFromPartnerListing(listing, customerStoreId, { includeUnavailable: true }) ?? undefined;
+  const bag = createMarketplaceBagFromPartnerListing(listing, customerStoreId, { includeUnavailable: true });
+
+  if (!bag) {
+    return undefined;
+  }
+
+  return {
+    ...bag,
+    status: listing.status === 'live' ? bag.status : 'sold_out',
+  };
 }
 
 export function getCustomerMarketplaceBags() {

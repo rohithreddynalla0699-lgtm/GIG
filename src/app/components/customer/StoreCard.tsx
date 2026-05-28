@@ -1,14 +1,26 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import type { Store } from '../../types/store';
+import { getMockCustomerSavedStoreIds, isMockCustomerSignedIn, toggleMockCustomerSavedStoreId } from '../../data/mock/customers';
 import { getVegTypeLabel } from '../../lib/status';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 interface StoreCardProps {
   store: Store;
   bagCount?: number;
+  onSavedChange?: () => void;
 }
 
-export default function StoreCard({ store, bagCount }: StoreCardProps) {
+export default function StoreCard({ store, bagCount, onSavedChange }: StoreCardProps) {
+  const [signedIn, setSignedIn] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const isSignedIn = isMockCustomerSignedIn();
+    setSignedIn(isSignedIn);
+    setSaved(isSignedIn && getMockCustomerSavedStoreIds().includes(store.id));
+  }, [store.id]);
+
   return (
     <article className="surface-card lift-hover overflow-hidden rounded-[28px]">
       <div className="grid gap-0 md:grid-cols-[0.9fr_1.1fr]">
@@ -39,6 +51,25 @@ export default function StoreCard({ store, bagCount }: StoreCardProps) {
               <div className="meta-text">{store.reviewCount} reviews</div>
             </div>
           </div>
+
+          {signedIn ? (
+            <button
+              type="button"
+              onClick={() => {
+                const next = toggleMockCustomerSavedStoreId(store.id);
+                setSaved(next.includes(store.id));
+                onSavedChange?.();
+              }}
+              className={`mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[12px] font-semibold transition-colors ${
+                saved
+                  ? 'border-[rgba(39,114,74,0.14)] bg-[rgba(39,114,74,0.08)] text-[color:var(--gig-green-deep)]'
+                  : 'border-[rgba(32,38,28,0.1)] bg-white/76 text-[color:var(--gig-text-muted)] hover:text-[color:var(--gig-green-deep)]'
+              }`}
+            >
+              <span>{saved ? '♥' : '♡'}</span>
+              <span>{saved ? 'Saved store' : 'Save store'}</span>
+            </button>
+          ) : null}
 
           <p className="mb-4 text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">
             {store.description}

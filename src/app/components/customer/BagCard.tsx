@@ -5,7 +5,7 @@ import type { Store } from '../../types/store';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
 import { getDiscountPercentage } from '../../lib/pricing';
-import { getMockCustomerLikedStoreIds, isMockCustomerSignedIn, toggleMockCustomerLikedStoreId } from '../../data/mock/customers';
+import { getMockCustomerSavedBagIds, isMockCustomerSignedIn, toggleMockCustomerSavedBagId } from '../../data/mock/customers';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import MotionReveal from '../shared/MotionReveal';
 
@@ -16,12 +16,27 @@ interface BagCardProps {
   distanceKm?: number;
   delay?: number;
   featured?: boolean;
+  onSavedChange?: () => void;
+  showUnavailableState?: boolean;
+  unavailableTitle?: string;
+  unavailableDescription?: string;
 }
 
-export default function BagCard({ bag, store, imageUrlOverride, distanceKm, delay = 0, featured = false }: BagCardProps) {
+export default function BagCard({
+  bag,
+  store,
+  imageUrlOverride,
+  distanceKm,
+  delay = 0,
+  featured = false,
+  onSavedChange,
+  showUnavailableState = false,
+  unavailableTitle = 'Not available today',
+  unavailableDescription = 'This rescue bag is no longer live.',
+}: BagCardProps) {
   const discount = getDiscountPercentage(bag.originalPrice, bag.rescuePrice);
   const [signedIn, setSignedIn] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
   const availabilityBadgeLabel =
     bag.quantityLeft <= 2
       ? `Only ${bag.quantityLeft} left`
@@ -34,14 +49,15 @@ export default function BagCard({ bag, store, imageUrlOverride, distanceKm, dela
   useEffect(() => {
     const isSignedIn = isMockCustomerSignedIn();
     setSignedIn(isSignedIn);
-    setLiked(isSignedIn && getMockCustomerLikedStoreIds().includes(store.id));
-  }, [store.id]);
+    setSaved(isSignedIn && getMockCustomerSavedBagIds().includes(bag.id));
+  }, [bag.id]);
 
-  function handleToggleLiked(event: React.MouseEvent<HTMLButtonElement>) {
+  function handleToggleSaved(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    const next = toggleMockCustomerLikedStoreId(store.id);
-    setLiked(next.includes(store.id));
+    const next = toggleMockCustomerSavedBagId(bag.id);
+    setSaved(next.includes(bag.id));
+    onSavedChange?.();
   }
 
   return (
@@ -62,15 +78,15 @@ export default function BagCard({ bag, store, imageUrlOverride, distanceKm, dela
             {signedIn ? (
               <button
                 type="button"
-                onClick={handleToggleLiked}
-                aria-label={liked ? `Remove ${store.name} from liked outlets` : `Like ${store.name}`}
+                onClick={handleToggleSaved}
+                aria-label={saved ? `Remove ${bag.title} from saved bags` : `Save ${bag.title}`}
                 className={`absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${
-                  liked
+                  saved
                     ? 'border-white/14 bg-[rgba(255,253,248,0.92)] text-[color:var(--gig-green-deep)]'
                     : 'border-white/14 bg-[rgba(12,22,18,0.38)] text-white/88 hover:bg-[rgba(12,22,18,0.52)]'
                 }`}
               >
-                <span className="text-[18px] leading-none">{liked ? '♥' : '♡'}</span>
+                <span className="text-[18px] leading-none">{saved ? '♥' : '♡'}</span>
               </button>
             ) : null}
             <div className="absolute bottom-4 left-4 right-4">
@@ -140,17 +156,30 @@ export default function BagCard({ bag, store, imageUrlOverride, distanceKm, dela
             ))}
           </div>
 
+          {showUnavailableState ? (
+            <div className="mb-5 rounded-[18px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,248,230,0.36)] px-4 py-3">
+              <div className="text-[13px] font-semibold text-[#8A5600]">{unavailableTitle}</div>
+              <div className="mt-1 text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]">{unavailableDescription}</div>
+            </div>
+          ) : null}
+
           <div className="mt-auto flex items-center justify-between gap-3 border-t border-[color:var(--gig-border)] pt-4">
             <Link to={`/bag/${bag.id}`} className="text-[14px] font-medium text-[color:var(--gig-text-muted)] transition-colors hover:text-[color:var(--gig-green-deep)]">
               View listing
             </Link>
-            <Link
-              to={signedIn ? `/bag/${bag.id}` : '/customer-auth'}
-              state={signedIn ? undefined : { from: `/bag/${bag.id}` }}
-              className="btn-primary justify-center whitespace-nowrap"
-            >
-              Reserve bag
-            </Link>
+            {showUnavailableState ? (
+              <span className="rounded-full border border-[rgba(32,38,28,0.08)] bg-[rgba(32,38,28,0.04)] px-4 py-2 text-[12px] font-semibold text-[color:var(--gig-text-muted)]">
+                Not available today
+              </span>
+            ) : (
+              <Link
+                to={signedIn ? `/bag/${bag.id}` : '/customer-auth'}
+                state={signedIn ? undefined : { from: `/bag/${bag.id}` }}
+                className="btn-primary justify-center whitespace-nowrap"
+              >
+                Reserve bag
+              </Link>
+            )}
           </div>
         </div>
       </article>

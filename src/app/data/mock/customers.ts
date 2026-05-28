@@ -2,6 +2,8 @@ import type { Customer } from '../../types/customer';
 
 export const MOCK_CUSTOMER_SESSION_KEY = 'gig-customer-session';
 export const MOCK_CUSTOMER_LIKED_STORES_KEY = 'gig-customer-liked-stores';
+export const MOCK_CUSTOMER_SAVED_STORES_KEY = 'gig-customer-saved-stores';
+export const MOCK_CUSTOMER_SAVED_BAGS_KEY = 'gig-customer-saved-bags';
 
 export const customers: Customer[] = [
   {
@@ -71,4 +73,55 @@ export function toggleMockCustomerLikedStoreId(storeId: string) {
   const next = Array.from(current);
   window.localStorage.setItem(MOCK_CUSTOMER_LIKED_STORES_KEY, JSON.stringify(next));
   return next;
+}
+
+function readStoredStringList(storageKey: string, fallback: string[]) {
+  if (typeof window === 'undefined') return fallback;
+  const stored = window.localStorage.getItem(storageKey);
+  if (!stored) return fallback;
+
+  try {
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === 'string') : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredStringList(storageKey: string, values: string[]) {
+  if (typeof window === 'undefined') return values;
+  window.localStorage.setItem(storageKey, JSON.stringify(values));
+  return values;
+}
+
+export function getMockCustomerSavedStoreIds() {
+  return readStoredStringList(MOCK_CUSTOMER_SAVED_STORES_KEY, currentCustomer.savedStoreIds ?? []);
+}
+
+export function getMockCustomerSavedBagIds() {
+  return readStoredStringList(MOCK_CUSTOMER_SAVED_BAGS_KEY, currentCustomer.savedBagIds ?? []);
+}
+
+export function toggleMockCustomerSavedStoreId(storeId: string) {
+  const current = new Set(getMockCustomerSavedStoreIds());
+
+  if (current.has(storeId)) {
+    current.delete(storeId);
+  } else {
+    current.add(storeId);
+  }
+
+  return writeStoredStringList(MOCK_CUSTOMER_SAVED_STORES_KEY, Array.from(current));
+}
+
+export function toggleMockCustomerSavedBagId(bagId: string) {
+  const current = new Set(getMockCustomerSavedBagIds());
+
+  if (current.has(bagId)) {
+    current.delete(bagId);
+  } else {
+    current.add(bagId);
+  }
+
+  return writeStoredStringList(MOCK_CUSTOMER_SAVED_BAGS_KEY, Array.from(current));
 }

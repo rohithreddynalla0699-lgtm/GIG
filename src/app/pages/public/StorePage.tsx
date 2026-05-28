@@ -1,9 +1,11 @@
-import { Link, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 import BagCard from '../../components/customer/BagCard';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { getBagsByStoreId } from '../../data/mock/bags';
+import { getMockCustomerSavedStoreIds, isMockCustomerSignedIn, toggleMockCustomerSavedStoreId } from '../../data/mock/customers';
 import {
   getCustomerStoreByIdWithPartnerImageOverride,
   getCustomerStoreImageOverrideForStoreId,
@@ -12,9 +14,12 @@ import { getVegTypeLabel } from '../../lib/status';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 
 export default function StorePage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const store = id ? getCustomerStoreByIdWithPartnerImageOverride(id) : undefined;
   const imageUrlOverride = store ? getCustomerStoreImageOverrideForStoreId(store.id) : undefined;
+  const [signedIn, setSignedIn] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   if (!store) {
     return (
@@ -36,6 +41,22 @@ export default function StorePage() {
   }
 
   const storeBags = getBagsByStoreId(store.id).filter((bag) => bag.quantityLeft > 0 && bag.status !== 'sold_out');
+
+  useEffect(() => {
+    const isSignedIn = isMockCustomerSignedIn();
+    setSignedIn(isSignedIn);
+    setSaved(isSignedIn && getMockCustomerSavedStoreIds().includes(store.id));
+  }, [store.id]);
+
+  function handleToggleSavedStore() {
+    if (!signedIn) {
+      navigate('/customer-auth', { state: { from: `/store/${store.id}` } });
+      return;
+    }
+
+    const next = toggleMockCustomerSavedStoreId(store.id);
+    setSaved(next.includes(store.id));
+  }
 
   return (
     <div className="min-h-screen">
@@ -68,6 +89,20 @@ export default function StorePage() {
               <div className="bg-[rgba(255,252,247,0.96)] p-6 md:p-8">
                 <div className="mb-5">
                   <div className="eyebrow mb-2">Store details</div>
+                  <div className="mb-3">
+                    <button
+                      type="button"
+                      onClick={handleToggleSavedStore}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[12px] font-semibold transition-colors ${
+                        saved
+                          ? 'border-[rgba(39,114,74,0.14)] bg-[rgba(39,114,74,0.08)] text-[color:var(--gig-green-deep)]'
+                          : 'border-[rgba(32,38,28,0.1)] bg-white/76 text-[color:var(--gig-text-muted)] hover:text-[color:var(--gig-green-deep)]'
+                      }`}
+                    >
+                      <span>{saved ? '♥' : '♡'}</span>
+                      <span>{saved ? 'Saved store' : 'Save store'}</span>
+                    </button>
+                  </div>
                   <div className="text-[28px] font-semibold tracking-[-0.05em] text-[color:var(--gig-text)]">
                     {store.area}, {store.city}
                   </div>

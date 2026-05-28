@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
@@ -6,7 +6,7 @@ import Footer from '../../components/Footer';
 import { getBagById } from '../../data/mock/bags';
 import { MockReservationError, createMockReservationFromBag } from '../../data/mock/orders';
 import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
-import { isMockCustomerSignedIn } from '../../data/mock/customers';
+import { getMockCustomerSavedBagIds, isMockCustomerSignedIn, toggleMockCustomerSavedBagId } from '../../data/mock/customers';
 import { formatINR } from '../../lib/currency';
 import { getDiscountPercentage } from '../../lib/pricing';
 import { getVegTypeLabel } from '../../lib/status';
@@ -19,6 +19,7 @@ export default function BagPage() {
   const store = bag ? getCustomerStoreByIdWithPartnerImageOverride(bag.storeId) : undefined;
   const [reservationError, setReservationError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   if (!bag || !store) {
     return (
@@ -42,6 +43,10 @@ export default function BagPage() {
   const discount = getDiscountPercentage(bag.originalPrice, bag.rescuePrice);
   const signedIn = isMockCustomerSignedIn();
   const isSoldOut = bag.quantityLeft <= 0 || bag.status === 'sold_out';
+
+  useEffect(() => {
+    setSaved(signedIn && getMockCustomerSavedBagIds().includes(bag.id));
+  }, [bag.id, signedIn]);
 
   async function handleReserveBag() {
     if (!bag) {
@@ -78,6 +83,16 @@ export default function BagPage() {
     }
   }
 
+  function handleToggleSavedBag() {
+    if (!signedIn) {
+      navigate('/customer-auth', { state: { from: `/bag/${bag.id}` } });
+      return;
+    }
+
+    const next = toggleMockCustomerSavedBagId(bag.id);
+    setSaved(next.includes(bag.id));
+  }
+
   return (
     <div className="min-h-screen">
       <MarketplaceHeader />
@@ -107,6 +122,20 @@ export default function BagPage() {
             <div className="surface-card rounded-[32px] p-6 md:p-8 xl:sticky xl:top-24">
               <div className="mb-3 text-[13px] font-medium text-[color:var(--gig-green-deep)]">
                 {store.name} · {store.area}, {store.city}
+              </div>
+              <div className="mb-3">
+                <button
+                  type="button"
+                  onClick={handleToggleSavedBag}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[12px] font-semibold transition-colors ${
+                    saved
+                      ? 'border-[rgba(39,114,74,0.14)] bg-[rgba(39,114,74,0.08)] text-[color:var(--gig-green-deep)]'
+                      : 'border-[rgba(32,38,28,0.1)] bg-white/76 text-[color:var(--gig-text-muted)] hover:text-[color:var(--gig-green-deep)]'
+                  }`}
+                >
+                  <span>{saved ? '♥' : '♡'}</span>
+                  <span>{saved ? 'Saved bag' : 'Save bag'}</span>
+                </button>
               </div>
               <h1 className="mb-3 font-['Fraunces',serif] text-[clamp(34px,4.3vw,52px)] font-semibold leading-[1.02] tracking-[-0.05em] text-[color:var(--gig-text)]">
                 {bag.title}
