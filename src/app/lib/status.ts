@@ -67,6 +67,10 @@ export function getCustomerOrderStatusLabel(status: OrderStatus) {
 
 export function getOrderSupportHint(status: OrderStatus, supportNote: string) {
   switch (status) {
+    case 'new_reserved':
+      return 'Show your pickup code at the store.';
+    case 'ready_for_pickup':
+      return 'Ready during your pickup window.';
     case 'issue_reported':
       return "Issue noted. We'll follow up from support.";
     case 'no_show':

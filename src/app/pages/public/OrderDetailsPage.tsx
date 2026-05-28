@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
@@ -15,10 +15,22 @@ import {
 } from '../../lib/status';
 
 export default function OrderDetailsPage() {
+  const location = useLocation();
   const { id } = useParams();
   const order = id ? getOrderById(id) : undefined;
   const bag = order ? getBagByIdIncludingInactive(order.bagId) : undefined;
   const store = order ? getCustomerStoreByIdWithPartnerImageOverride(order.storeId) : undefined;
+  const routeNotice =
+    location.state && typeof location.state === 'object' && 'notice' in location.state && typeof location.state.notice === 'string'
+      ? location.state.notice
+      : '';
+  const routeNoticeDetail =
+    location.state &&
+    typeof location.state === 'object' &&
+    'noticeDetail' in location.state &&
+    typeof location.state.noticeDetail === 'string'
+      ? location.state.noticeDetail
+      : '';
 
   if (!order || !bag || !store) {
     return (
@@ -54,6 +66,15 @@ export default function OrderDetailsPage() {
           </Link>
 
           <section className="motion-reveal surface-card rounded-[30px] p-6 md:p-8">
+            {routeNotice ? (
+              <div className="mb-5 rounded-[22px] border border-[rgba(39,114,74,0.12)] bg-[rgba(39,114,74,0.08)] px-5 py-4">
+                <div className="text-[14px] font-semibold text-[#255b3d]">{routeNotice}</div>
+                {routeNoticeDetail ? (
+                  <div className="mt-1 text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]">{routeNoticeDetail}</div>
+                ) : null}
+              </div>
+            ) : null}
+
             <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="mb-2 text-[13px] font-medium text-[color:var(--gig-green-deep)]">
@@ -68,28 +89,69 @@ export default function OrderDetailsPage() {
 
             {isUpcoming ? (
               <div className="mb-5 rounded-[24px] bg-[linear-gradient(135deg,#17362e_0%,#0f241f_100%)] px-5 py-5 text-white">
-                <div className="meta-text mb-2 text-white/62">Pickup code</div>
-                <div className="text-[34px] font-semibold tracking-[0.16em] text-white">{order.pickupCode}</div>
+                <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="meta-text mb-2 text-white/62">Pickup code</div>
+                    <div className="text-[34px] font-semibold tracking-[0.16em] text-white">{order.pickupCode}</div>
+                  </div>
+                  <div className="rounded-full border border-white/12 bg-white/[0.08] px-3.5 py-2 text-[12px] font-semibold text-white/88">
+                    {getCustomerOrderStatusLabel(order.status)}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <div className="meta-text mb-1 text-white/56">Pickup window</div>
+                    <div className="text-[15px] font-medium text-white">
+                      {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="meta-text mb-1 text-white/56">Store</div>
+                    <div className="text-[15px] font-medium text-white">{store.name}</div>
+                  </div>
+                  <div>
+                    <div className="meta-text mb-1 text-white/56">Pickup location</div>
+                    <div className="text-[15px] font-medium text-white">{store.addressLine}</div>
+                  </div>
+                  <div>
+                    <div className="meta-text mb-1 text-white/56">What happens next</div>
+                    <div className="text-[15px] font-medium text-white">Show this pickup code at the store during your window.</div>
+                  </div>
+                </div>
               </div>
             ) : null}
 
             <div className="grid gap-3 rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5 sm:grid-cols-2">
               <div>
-                <div className="meta-text mb-1">Pickup window</div>
-                <div className="text-[15px] font-medium text-[color:var(--gig-text)]">{formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}</div>
+                <div className="meta-text mb-1">{isUpcoming ? 'Store location' : 'Pickup window'}</div>
+                <div className="text-[15px] font-medium text-[color:var(--gig-text)]">
+                  {isUpcoming ? `${store.area}, ${store.city}` : formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
+                </div>
               </div>
               <div>
-                <div className="meta-text mb-1">Pickup location</div>
-                <div className="text-[15px] font-medium text-[color:var(--gig-text)]">{store.addressLine}</div>
+                <div className="meta-text mb-1">{isUpcoming ? 'Amount paid' : 'Pickup location'}</div>
+                <div className="text-[15px] font-medium text-[color:var(--gig-text)]">
+                  {isUpcoming ? formatINR(order.amountPaid) : store.addressLine}
+                </div>
               </div>
               <div>
-                <div className="meta-text mb-1">Amount paid</div>
-                <div className="text-[15px] font-medium text-[color:var(--gig-text)]">{formatINR(order.amountPaid)}</div>
+                <div className="meta-text mb-1">{isUpcoming ? 'Amount saved' : 'Amount paid'}</div>
+                <div className="text-[15px] font-medium text-[color:var(--gig-text)]">
+                  {isUpcoming ? formatINR(amountSaved) : formatINR(order.amountPaid)}
+                </div>
               </div>
               <div>
-                <div className="meta-text mb-1">Amount saved</div>
-                <div className="text-[15px] font-medium text-[color:var(--gig-green-deep)]">{formatINR(amountSaved)}</div>
+                <div className="meta-text mb-1">{isUpcoming ? 'Pickup city' : 'Amount saved'}</div>
+                <div className={`text-[15px] font-medium ${isUpcoming ? 'text-[color:var(--gig-text)]' : 'text-[color:var(--gig-green-deep)]'}`}>
+                  {isUpcoming ? `${store.area}, ${store.city}` : formatINR(amountSaved)}
+                </div>
               </div>
+            </div>
+
+            <div className="mt-5 rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5">
+              <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Collection instructions</div>
+              <p className="body-regular">{order.collectionInstructions}</p>
             </div>
 
             <div className="mt-5">
@@ -123,12 +185,7 @@ export default function OrderDetailsPage() {
               </div>
             ) : null}
 
-            <div className="mt-5 grid gap-5 lg:grid-cols-[0.94fr_1.06fr]">
-              <div className="rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5">
-                <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Collection instructions</div>
-                <p className="body-regular">{order.collectionInstructions}</p>
-              </div>
-
+            <div className="mt-5">
               <div className="rounded-[24px] bg-[rgba(32,38,28,0.04)] p-5">
                 <div className="operational-label mb-3 text-[color:var(--gig-green-deep)]">Order timeline</div>
                 <div className="space-y-4">

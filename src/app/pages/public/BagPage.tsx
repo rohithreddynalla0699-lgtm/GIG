@@ -62,7 +62,12 @@ export default function BagPage() {
 
     try {
       const order = createMockReservationFromBag(bag.id);
-      navigate(`/orders/${order.id}`, { state: { notice: 'Reserved successfully' } });
+      navigate(`/orders/${order.id}`, {
+        state: {
+          notice: 'Reserved successfully',
+          noticeDetail: 'Show this pickup code at the store.',
+        },
+      });
     } catch (error) {
       if (error instanceof MockReservationError) {
         setReservationError(error.message);
