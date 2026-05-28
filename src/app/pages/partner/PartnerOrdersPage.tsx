@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import OrderTable from '../../components/partner/OrderTable';
-import { getMockPartnerWorkspaceAccessState, getMockPartnerWorkspaceOrders } from '../../data/mock/partners';
+import { getMockPartnerQualitySummary, getMockPartnerWorkspaceAccessState, getMockPartnerWorkspaceOrders } from '../../data/mock/partners';
 import type { Order } from '../../types/order';
 
 function sortOrdersByPickupWindow(orders: Order[]) {
@@ -82,6 +82,7 @@ export default function PartnerOrdersPage() {
   );
 
   const groupedOrders = useMemo(() => getOperationalOrderGroups(partnerOrders), [partnerOrders]);
+  const qualitySummary = useMemo(() => getMockPartnerQualitySummary(), []);
   const todayOrders = partnerOrders.filter((order) => order.pickupDateLabel === 'Today');
 
   const summary = {
@@ -174,6 +175,15 @@ export default function PartnerOrdersPage() {
             <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.today}</div>
           </div>
         </div>
+
+        {qualitySummary.isAtRisk ? (
+          <div className="rounded-[18px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.34)] px-4 py-3">
+            <div className="text-[13px] font-semibold text-[#8A5600]">Quality review needed</div>
+            <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+              Issue rate has crossed the {qualitySummary.threshold}% review threshold.
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <QueueSection

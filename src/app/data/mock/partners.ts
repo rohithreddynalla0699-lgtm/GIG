@@ -69,6 +69,14 @@ interface MockPartnerOperationalReadiness {
   activationEligible: boolean;
 }
 
+export interface MockPartnerQualitySummary {
+  totalOrders: number;
+  issueOrders: number;
+  issueRate: number;
+  threshold: number;
+  isAtRisk: boolean;
+}
+
 function createPartnerWorkspaceId(businessName: string) {
   const slug = businessName
     .toLowerCase()
@@ -512,6 +520,22 @@ export function getMockPartnerWorkspaceOrders() {
   }
 
   return getMockOrders().filter((order) => outletIds.includes(order.outletId));
+}
+
+export function getMockPartnerQualitySummary(workspaceId: string = getMockPartnerWorkspaceId()): MockPartnerQualitySummary {
+  const workspaceOrders = isSeedPartnerWorkspaceId(workspaceId) ? getMockPartnerWorkspaceOrders() : [];
+  const totalOrders = workspaceOrders.length;
+  const issueOrders = workspaceOrders.filter((order) => order.status === 'issue_reported').length;
+  const threshold = 30;
+  const issueRate = totalOrders > 0 ? Math.round((issueOrders / totalOrders) * 100) : 0;
+
+  return {
+    totalOrders,
+    issueOrders,
+    issueRate,
+    threshold,
+    isAtRisk: totalOrders > 0 && issueRate >= threshold,
+  };
 }
 
 export function getMockPartnerCreateBagRoute() {

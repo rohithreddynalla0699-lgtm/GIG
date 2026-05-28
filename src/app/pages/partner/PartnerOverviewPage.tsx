@@ -4,6 +4,7 @@ import {
   getMockPartnerActivationState,
   getMockPartnerOperationalReadiness,
   getMockPartnerProfile,
+  getMockPartnerQualitySummary,
   getMockPartnerWorkspaceAccessState,
   getMockPartnerWorkspaceOrders,
   getMockPartnerWorkspaceOutlets,
@@ -91,6 +92,7 @@ export default function PartnerOverviewPage() {
   const listings = getMockPartnerWorkspaceListings();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const partnerOrders = getMockPartnerWorkspaceOrders();
+  const qualitySummary = getMockPartnerQualitySummary();
 
   const activeListings = listings.filter((listing) => ['live', 'scheduled'].includes(listing.status));
   const reservedOrders = partnerOrders.filter((order) => ['new_reserved', 'ready_for_pickup'].includes(order.status));
@@ -241,6 +243,35 @@ export default function PartnerOverviewPage() {
           />
           <CompactStat label="Orders" value={reservedOrders.length} note="Reserved now" />
           <CompactStat label="Today" value={todayPickups.length} note="Pickups today" />
+        </div>
+
+        <div
+          className={`rounded-[18px] border px-4 py-3 ${
+            qualitySummary.isAtRisk
+              ? 'border-[rgba(166,107,0,0.16)] bg-[rgba(255,244,214,0.34)]'
+              : 'border-[rgba(11,122,77,0.12)] bg-[rgba(11,122,77,0.06)]'
+          }`}
+        >
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className={`text-[13px] font-semibold ${qualitySummary.isAtRisk ? 'text-[#8A5600]' : 'text-[#0b7a4d]'}`}>
+                {qualitySummary.isAtRisk ? 'Quality review needed' : 'Quality standing is healthy'}
+              </div>
+              <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+                {qualitySummary.isAtRisk
+                  ? `Issue rate has crossed the ${qualitySummary.threshold}% review threshold.`
+                  : `Issue rate is ${qualitySummary.issueRate}% across ${qualitySummary.totalOrders} total orders.`}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-white/78 px-3 py-2 text-[12px] font-semibold text-[color:var(--gig-text)]">
+                {qualitySummary.issueOrders} issue{qualitySummary.issueOrders === 1 ? '' : 's'}
+              </div>
+              <div className={`text-[24px] font-semibold tracking-[-0.04em] ${qualitySummary.isAtRisk ? 'text-[#8A5600]' : 'text-[color:var(--gig-text)]'}`}>
+                {qualitySummary.issueRate}%
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
