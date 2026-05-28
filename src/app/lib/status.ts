@@ -51,6 +51,39 @@ export function getOrderStatusClasses(status: OrderStatus) {
   return orderStatusClasses[status];
 }
 
+export function getPartnerOrderQueueHint(status: OrderStatus) {
+  switch (status) {
+    case 'new_reserved':
+      return 'Needs preparation';
+    case 'ready_for_pickup':
+      return 'Ready and waiting';
+    case 'issue_reported':
+      return 'Needs support follow-up';
+    case 'no_show':
+      return 'Pickup window missed';
+    case 'collected':
+      return 'Completed quietly';
+    default:
+      return '';
+  }
+}
+
+export function getPartnerOrderRowClasses(status: OrderStatus) {
+  switch (status) {
+    case 'new_reserved':
+      return 'bg-[rgba(238,245,255,0.44)]';
+    case 'ready_for_pickup':
+      return 'bg-[rgba(232,245,233,0.52)]';
+    case 'issue_reported':
+      return 'bg-[rgba(255,244,214,0.38)]';
+    case 'no_show':
+      return 'bg-[rgba(255,240,238,0.42)]';
+    case 'collected':
+    default:
+      return '';
+  }
+}
+
 const customerOrderStatusLabels: Record<OrderStatus, string> = {
   new_reserved: 'Reserved',
   ready_for_pickup: 'Ready for pickup',
