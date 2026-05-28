@@ -19,7 +19,7 @@ const orderStatusClasses: Record<OrderStatus, string> = {
   ready_for_pickup: 'bg-[#E8F5E9] text-[#00A661]',
   collected: 'bg-[#F5F5F5] text-[#5A5A5A]',
   no_show: 'bg-[#FFF0EE] text-[#C05A2B]',
-  cancelled: 'bg-[#FFE8E6] text-[#FF3B30]',
+  cancelled: 'bg-[#F1F1EF] text-[#6A6A64]',
   issue_reported: 'bg-[#FFF4D6] text-[#A66B00]',
   refunded: 'bg-[#FFF4D6] text-[#A66B00]',
 };
@@ -61,6 +61,8 @@ export function getPartnerOrderQueueHint(status: OrderStatus) {
       return 'Needs support follow-up';
     case 'no_show':
       return 'Pickup window missed';
+    case 'cancelled':
+      return 'Cancelled before pickup';
     case 'collected':
       return 'Completed quietly';
     default:

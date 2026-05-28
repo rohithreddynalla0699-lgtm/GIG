@@ -23,7 +23,7 @@ function getOperationalOrderGroups(orders: Order[]) {
       orders.filter((order) => order.status === 'issue_reported' || order.status === 'no_show'),
     ),
     completed: sortOrdersByPickupWindow(
-      orders.filter((order) => order.status === 'collected'),
+      orders.filter((order) => order.status === 'collected' || order.status === 'cancelled'),
     ),
   };
 }
@@ -166,7 +166,7 @@ export default function PartnerOrdersPage() {
             <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.support}</div>
           </div>
           <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Completed</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Closed</div>
             <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.completed}</div>
           </div>
           <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
@@ -195,11 +195,11 @@ export default function PartnerOrdersPage() {
       />
 
       <QueueSection
-        title="Completed pickups"
-        description="Collected orders move here after handover is complete."
+        title="Completed and closed"
+        description="Collected and cancelled orders stay here for operational reference."
         count={groupedOrders.completed.length}
-        emptyTitle="No completed pickups yet."
-        emptyDescription="Collected orders will move here after pickup is completed."
+        emptyTitle="No closed orders yet."
+        emptyDescription="Collected and cancelled orders will appear here after the active queue is cleared."
         orders={groupedOrders.completed}
       />
     </div>

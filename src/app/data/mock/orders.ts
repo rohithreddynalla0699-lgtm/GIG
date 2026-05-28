@@ -1,6 +1,7 @@
 import type { Order } from '../../types/order';
-import { getBagById, updateMockBagQuantityLeft } from './bags';
+import { getBagById, getBagByIdIncludingInactive, updateMockBagQuantityLeft } from './bags';
 import { currentCustomer, isMockCustomerSignedIn } from './customers';
+import { getMockPartnerListings, updateMockPartnerListingQuantityLeft } from './partnerListings';
 import { getMockPartnerProfile, getMockPartnerWorkspaceOutlets } from './partners';
 import { getCustomerStoreByIdWithPartnerImageOverride } from './stores';
 
@@ -190,6 +191,10 @@ export class MockOrderLifecycleError extends Error {
     this.name = 'MockOrderLifecycleError';
     this.code = code;
   }
+}
+
+export function isMockOrderCancellableStatus(status: Order['status']) {
+  return status === 'new_reserved';
 }
 
 function isValidOrderTimelineEvent(value: unknown): value is Order['timeline'][number] {
@@ -386,6 +391,8 @@ function getLifecycleSupportNote(status: Order['status']) {
       return 'Pickup completed successfully.';
     case 'no_show':
       return 'Pickup window passed without collection.';
+    case 'cancelled':
+      return 'Reservation cancelled before pickup.';
     case 'issue_reported':
       return "Issue noted. We'll follow up from support.";
     case 'new_reserved':
@@ -401,13 +408,14 @@ function canTransitionOrderStatus(currentStatus: Order['status'], nextStatus: Or
 
   switch (currentStatus) {
     case 'new_reserved':
-      return nextStatus === 'ready_for_pickup' || nextStatus === 'issue_reported';
+      return nextStatus === 'ready_for_pickup' || nextStatus === 'cancelled' || nextStatus === 'issue_reported';
     case 'ready_for_pickup':
       return nextStatus === 'collected' || nextStatus === 'no_show' || nextStatus === 'issue_reported';
     case 'collected':
       return nextStatus === 'issue_reported';
     case 'no_show':
       return nextStatus === 'issue_reported';
+    case 'cancelled':
     case 'issue_reported':
       return false;
     default:
@@ -439,6 +447,13 @@ function getLifecycleTimelineEvent(order: Order, status: Order['status']): Order
         timeLabel,
         title: 'Marked no-show',
         description: 'The pickup window ended without collection, so the order was marked as a no-show.',
+      };
+    case 'cancelled':
+      return {
+        id: `${order.id}-cancelled`,
+        timeLabel,
+        title: 'Cancelled',
+        description: 'The reservation was cancelled before pickup and the bag was released back to the marketplace.',
       };
     case 'issue_reported':
       return {
@@ -507,6 +522,28 @@ export function getOrdersByBagId(bagId: string) {
   return getMockOrders().filter((order) => order.bagId === bagId);
 }
 
+function restoreInventoryForCancelledOrder(order: Order) {
+  if (order.relatedPartnerListingId) {
+    const listing = getMockPartnerListings().find((entry) => entry.id === order.relatedPartnerListingId);
+
+    if (!listing) {
+      return undefined;
+    }
+
+    const nextQuantityLeft = Math.min(listing.quantity, listing.quantityLeft + order.quantity);
+    return updateMockPartnerListingQuantityLeft(listing.id, nextQuantityLeft);
+  }
+
+  const bag = getBagByIdIncludingInactive(order.bagId);
+
+  if (!bag) {
+    return undefined;
+  }
+
+  const nextQuantityLeft = Math.min(bag.quantityTotal, bag.quantityLeft + order.quantity);
+  return updateMockBagQuantityLeft(bag.id, nextQuantityLeft);
+}
+
 export function updateMockOrderStatus(
   orderId: string,
   status: Order['status'],
@@ -563,6 +600,50 @@ export function updateMockOrderStatus(
 
   writeStoredOrderOverrides(nextOverrides);
   return applyOrderOverride(existingOrder, nextOverrides);
+}
+
+export function cancelMockOrder(orderId: string) {
+  const baseOrder = getAllMockOrders().find((order) => order.id === orderId);
+
+  if (!baseOrder) {
+    return undefined;
+  }
+
+  const overrides = readStoredOrderOverrides();
+  const mergedOrder = applyOrderOverride(baseOrder, overrides);
+
+  if (mergedOrder.status === 'cancelled') {
+    return mergedOrder;
+  }
+
+  if (!isMockOrderCancellableStatus(mergedOrder.status)) {
+    throw new MockOrderLifecycleError(
+      'invalid_transition',
+      `Cannot move order from ${mergedOrder.status} to cancelled.`,
+    );
+  }
+
+  const restoredInventory = restoreInventoryForCancelledOrder(mergedOrder);
+
+  if (!restoredInventory) {
+    throw new MockOrderLifecycleError(
+      'invalid_transition',
+      'This reservation cannot be cancelled right now.',
+    );
+  }
+
+  const nextOverrides = {
+    ...overrides,
+    [orderId]: {
+      ...overrides[orderId],
+      status: 'cancelled' as const,
+      supportNote: getLifecycleSupportNote('cancelled'),
+      timeline: mergeLifecycleTimeline(mergedOrder, 'cancelled'),
+    },
+  };
+
+  writeStoredOrderOverrides(nextOverrides);
+  return applyOrderOverride(baseOrder, nextOverrides);
 }
 
 export function updateMockOrderSupportFollowUp(

@@ -25,7 +25,7 @@ export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState<OrdersTab>('upcoming');
   const customerStores = useMemo(() => getCustomerStoresWithPartnerImageOverrides(), []);
 
-  const { upcoming, completed, totalSaved } = useMemo(() => getCustomerOrderMetrics(currentCustomer.id), []);
+  const { upcoming, history, completed, totalSaved } = useMemo(() => getCustomerOrderMetrics(currentCustomer.id), []);
 
   const groupedUpcoming = useMemo(() => {
     const buckets = new Map<string, typeof upcoming>();
@@ -70,8 +70,8 @@ export default function OrdersPage() {
                     <div className="text-[21px] font-semibold tracking-[-0.03em] text-white">{upcoming.length}</div>
                   </div>
                   <div className="min-w-[108px] sm:border-l sm:border-white/10 sm:pl-4">
-                    <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">Completed</div>
-                    <div className="text-[21px] font-semibold tracking-[-0.03em] text-white">{completed.length}</div>
+                    <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">History</div>
+                    <div className="text-[21px] font-semibold tracking-[-0.03em] text-white">{history.length}</div>
                   </div>
                   <div className="min-w-[132px] sm:border-l sm:border-white/10 sm:pl-4">
                     <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">Total saved</div>
@@ -179,14 +179,14 @@ export default function OrdersPage() {
                     <div className="eyebrow mb-2">History</div>
                     <h3 className="text-[24px] font-semibold tracking-[-0.035em] text-[color:var(--gig-text)]">Past orders</h3>
                   </div>
-                  <div className="meta-text">{completed.length} completed</div>
-                </div>
+                <div className="meta-text">{history.length} in history</div>
+              </div>
 
-                {completed.length === 0 ? (
-                  <EmptyState title="No completed orders yet" description="Completed pickups will appear here." />
+                {history.length === 0 ? (
+                  <EmptyState title="No order history yet" description="Collected and closed orders will appear here." />
                 ) : (
                   <div className="space-y-4">
-                    {completed.map((order, index) => {
+                    {history.map((order, index) => {
                       const bag = getBagByIdIncludingInactive(order.bagId);
                       const store = customerStores.find((candidate) => candidate.id === order.storeId);
                       return bag && store ? (

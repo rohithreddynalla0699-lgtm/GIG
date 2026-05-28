@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
 import EmptyState from '../../components/shared/EmptyState';
 import MarketplaceHeader from '../../components/shared/MarketplaceHeader';
 import Footer from '../../components/Footer';
 import { getBagByIdIncludingInactive } from '../../data/mock/bags';
-import { getOrderById } from '../../data/mock/orders';
+import { cancelMockOrder, getOrderById, isMockOrderCancellableStatus, MockOrderLifecycleError } from '../../data/mock/orders';
 import { getCustomerStoreByIdWithPartnerImageOverride } from '../../data/mock/stores';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
@@ -17,7 +18,11 @@ import {
 export default function OrderDetailsPage() {
   const location = useLocation();
   const { id } = useParams();
-  const order = id ? getOrderById(id) : undefined;
+  const initialOrder = id ? getOrderById(id) : undefined;
+  const [currentOrder, setCurrentOrder] = useState(initialOrder);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const order = currentOrder;
   const bag = order ? getBagByIdIncludingInactive(order.bagId) : undefined;
   const store = order ? getCustomerStoreByIdWithPartnerImageOverride(order.storeId) : undefined;
   const routeNotice =
@@ -47,6 +52,7 @@ export default function OrderDetailsPage() {
   }
 
   const isUpcoming = ['new_reserved', 'ready_for_pickup'].includes(order.status);
+  const canCancelReservation = isMockOrderCancellableStatus(order.status);
   const amountSaved = Math.max(bag.originalPrice - order.amountPaid, 0);
   const orderUpdateSummary = getOrderDetailSupportSummary(
     order.status,
@@ -54,6 +60,23 @@ export default function OrderDetailsPage() {
     order.supportFollowUpStatus,
     order.supportFollowUpNote,
   );
+
+  function handleCancelReservation() {
+    try {
+      setActionError('');
+      const nextOrder = cancelMockOrder(order.id);
+      if (nextOrder) {
+        setCurrentOrder(nextOrder);
+      }
+      setShowCancelConfirm(false);
+    } catch (error) {
+      if (error instanceof MockOrderLifecycleError) {
+        setActionError('This reservation cannot be cancelled right now.');
+        return;
+      }
+      setActionError('We could not cancel this reservation right now.');
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -153,6 +176,48 @@ export default function OrderDetailsPage() {
               <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Collection instructions</div>
               <p className="body-regular">{order.collectionInstructions}</p>
             </div>
+
+            {canCancelReservation || actionError ? (
+              <div className="mt-5 rounded-[24px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,253,248,0.82)] p-5">
+                <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Reservation actions</div>
+                <p className="body-regular text-[color:var(--gig-text-muted)]">
+                  Need to release this pickup before the store starts preparing it?
+                </p>
+                {actionError ? (
+                  <div className="mt-3 rounded-[18px] border border-[rgba(194,93,70,0.18)] bg-[rgba(194,93,70,0.08)] px-4 py-3 text-[13px] font-medium text-[#9a3f2d]">
+                    {actionError}
+                  </div>
+                ) : null}
+                {canCancelReservation ? (
+                  showCancelConfirm ? (
+                    <div className="mt-4 rounded-[20px] border border-[rgba(166,107,0,0.16)] bg-[rgba(255,248,230,0.34)] p-4">
+                      <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">Cancel this reservation?</div>
+                      <div className="mt-1 text-[13px] leading-[1.7] text-[color:var(--gig-text-muted)]">
+                        This will release the bag back to today&apos;s marketplace availability.
+                      </div>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <button type="button" onClick={handleCancelReservation} className="btn-secondary justify-center">
+                          Confirm cancellation
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCancelConfirm(false)}
+                          className="inline-flex min-h-[44px] items-center justify-center rounded-full px-4 text-[13px] font-semibold text-[color:var(--gig-text-muted)] transition hover:text-[color:var(--gig-green-deep)]"
+                        >
+                          Keep reservation
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4">
+                      <button type="button" onClick={() => setShowCancelConfirm(true)} className="btn-secondary justify-center">
+                        Cancel reservation
+                      </button>
+                    </div>
+                  )
+                ) : null}
+              </div>
+            ) : null}
 
             <div className="mt-5">
               <div className="operational-label mb-2 text-[color:var(--gig-green-deep)]">Order update</div>

@@ -19,6 +19,16 @@ interface OrderCardProps {
 export default function OrderCard({ order, bag, store, variant, delay = 0 }: OrderCardProps) {
   const amountSaved = Math.max(bag.originalPrice - order.amountPaid, 0);
   const isUpcoming = variant === 'upcoming';
+  const isCollected = order.status === 'collected';
+  const historyMetaLabel = isCollected ? 'Collected' : 'Order status';
+  const historyStateLabel =
+    order.status === 'issue_reported'
+      ? order.supportFollowUpStatus === 'reviewed'
+        ? 'Support reviewed'
+        : 'Needs follow-up'
+      : order.status === 'no_show'
+        ? 'No-show'
+        : 'Closed';
   const supportHint = getOrderListSupportHint(
     order.status,
     order.supportNote,
@@ -101,14 +111,22 @@ export default function OrderCard({ order, bag, store, variant, delay = 0 }: Ord
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="meta-text mb-1">Collected</div>
+                    <div className="meta-text mb-1">{historyMetaLabel}</div>
                     <div className="text-[15px] font-medium text-[color:var(--gig-text)]">
-                      {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
+                      {isCollected
+                        ? formatPickupWindow(order.pickupDateLabel, order.pickupWindow)
+                        : getCustomerOrderStatusLabel(order.status)}
                     </div>
                   </div>
-                  <div className="rounded-full bg-[rgba(11,122,77,0.08)] px-3 py-2 text-[12px] font-semibold text-[color:var(--gig-green-deep)]">
-                    Saved {formatINR(amountSaved)}
-                  </div>
+                  {isCollected ? (
+                    <div className="rounded-full bg-[rgba(11,122,77,0.08)] px-3 py-2 text-[12px] font-semibold text-[color:var(--gig-green-deep)]">
+                      Saved {formatINR(amountSaved)}
+                    </div>
+                  ) : (
+                    <div className="rounded-full bg-[rgba(32,38,28,0.06)] px-3 py-2 text-[12px] font-semibold text-[color:var(--gig-text-muted)]">
+                      {historyStateLabel}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
