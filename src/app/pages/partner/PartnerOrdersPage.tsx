@@ -1,7 +1,12 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import OrderTable from '../../components/partner/OrderTable';
-import { getMockPartnerQualitySummary, getMockPartnerWorkspaceAccessState, getMockPartnerWorkspaceOrders } from '../../data/mock/partners';
+import {
+  getMockPartnerPickupReadinessSummary,
+  getMockPartnerQualitySummary,
+  getMockPartnerWorkspaceAccessState,
+  getMockPartnerWorkspaceOrders,
+} from '../../data/mock/partners';
 import type { Order } from '../../types/order';
 
 function sortOrdersByPickupWindow(orders: Order[]) {
@@ -83,6 +88,7 @@ export default function PartnerOrdersPage() {
 
   const groupedOrders = useMemo(() => getOperationalOrderGroups(partnerOrders), [partnerOrders]);
   const qualitySummary = useMemo(() => getMockPartnerQualitySummary(), []);
+  const pickupReadiness = useMemo(() => getMockPartnerPickupReadinessSummary(), []);
   const todayOrders = partnerOrders.filter((order) => order.pickupDateLabel === 'Today');
 
   const summary = {
@@ -181,6 +187,22 @@ export default function PartnerOrdersPage() {
             <div className="text-[13px] font-semibold text-[#8A5600]">Quality review needed</div>
             <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
               Issue rate has crossed the {qualitySummary.threshold}% review threshold.
+            </div>
+          </div>
+        ) : null}
+
+        {pickupReadiness.status === 'prep_needed' ? (
+          <div className="rounded-[18px] border border-[rgba(198,146,63,0.16)] bg-[rgba(255,248,229,0.72)] px-4 py-3">
+            <div className="text-[13px] font-semibold text-[#7A5210]">Prep needed</div>
+            <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+              {pickupReadiness.notYetReadyOrders} new reservation{pickupReadiness.notYetReadyOrders === 1 ? '' : 's'} still need pickup preparation.
+            </div>
+          </div>
+        ) : pickupReadiness.activePickupOrders > 0 && pickupReadiness.readyOrders === pickupReadiness.activePickupOrders ? (
+          <div className="rounded-[18px] border border-[rgba(11,122,77,0.12)] bg-[rgba(11,122,77,0.06)] px-4 py-3">
+            <div className="text-[13px] font-semibold text-[#0b7a4d]">All active pickups are ready</div>
+            <div className="mt-1 text-[12px] leading-6 text-[color:var(--gig-text-muted)]">
+              {pickupReadiness.readyOrders} order{pickupReadiness.readyOrders === 1 ? '' : 's'} are marked ready for today&apos;s pickup queue.
             </div>
           </div>
         ) : null}

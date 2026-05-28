@@ -88,6 +88,34 @@ export interface MockPartnerOperationalSummary {
   notLiveBagTypes: number;
 }
 
+export interface MockPartnerPickupReadinessSummary {
+  liveBagTypes: number;
+  availableBagsToday: number;
+  activePickupOrders: number;
+  readyOrders: number;
+  notYetReadyOrders: number;
+  nextPickupWindow?: string;
+  status: 'no_live_bags' | 'ready_for_pickup' | 'prep_needed' | 'available_today';
+}
+
+function getPickupWindowSortValue(pickupStart: string) {
+  const match = pickupStart.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+  if (!match) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  let hours = Number.parseInt(match[1], 10) % 12;
+  const minutes = Number.parseInt(match[2], 10);
+  const meridiem = match[3].toUpperCase();
+
+  if (meridiem === 'PM') {
+    hours += 12;
+  }
+
+  return hours * 60 + minutes;
+}
+
 function createPartnerWorkspaceId(businessName: string) {
   const slug = businessName
     .toLowerCase()
@@ -568,6 +596,68 @@ export function getMockPartnerOperationalSummary(
     liveBagTypes: liveListings.length,
     availableBagsToday: liveListings.reduce((sum, listing) => sum + Math.max(listing.quantityLeft, 0), 0),
     notLiveBagTypes: notLiveListings.length,
+  };
+}
+
+export function getMockPartnerPickupReadinessSummary(
+  workspaceId: string = getMockPartnerWorkspaceId(),
+): MockPartnerPickupReadinessSummary {
+  const workspaceOrders = isSeedPartnerWorkspaceId(workspaceId) ? getMockPartnerWorkspaceOrders() : [];
+  const liveListings = getMockPartnerWorkspaceLiveListings(workspaceId);
+  const liveBagTypes = liveListings.length;
+  const availableBagsToday = liveListings.reduce((sum, listing) => sum + Math.max(0, listing.quantityLeft), 0);
+  const readyOrders = workspaceOrders.filter((order) => order.status === 'ready_for_pickup').length;
+  const notYetReadyOrders = workspaceOrders.filter((order) => order.status === 'new_reserved').length;
+  const activePickupOrders = readyOrders + notYetReadyOrders;
+  const nextListing = [...liveListings].sort(
+    (first, second) => getPickupWindowSortValue(first.pickupStart) - getPickupWindowSortValue(second.pickupStart),
+  )[0];
+  const nextPickupWindow = nextListing ? `${nextListing.pickupStart} to ${nextListing.pickupEnd}` : undefined;
+
+  if (liveBagTypes === 0) {
+    return {
+      liveBagTypes,
+      availableBagsToday,
+      activePickupOrders,
+      readyOrders,
+      notYetReadyOrders,
+      nextPickupWindow,
+      status: 'no_live_bags',
+    };
+  }
+
+  if (notYetReadyOrders > 0) {
+    return {
+      liveBagTypes,
+      availableBagsToday,
+      activePickupOrders,
+      readyOrders,
+      notYetReadyOrders,
+      nextPickupWindow,
+      status: 'prep_needed',
+    };
+  }
+
+  if (activePickupOrders > 0 && readyOrders === activePickupOrders) {
+    return {
+      liveBagTypes,
+      availableBagsToday,
+      activePickupOrders,
+      readyOrders,
+      notYetReadyOrders,
+      nextPickupWindow,
+      status: 'ready_for_pickup',
+    };
+  }
+
+  return {
+    liveBagTypes,
+    availableBagsToday,
+    activePickupOrders,
+    readyOrders,
+    notYetReadyOrders,
+    nextPickupWindow,
+    status: 'available_today',
   };
 }
 

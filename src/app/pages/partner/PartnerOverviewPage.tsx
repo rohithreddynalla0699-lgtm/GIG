@@ -4,6 +4,7 @@ import {
   getMockPartnerActivationState,
   getMockPartnerOperationalSummary,
   getMockPartnerOperationalReadiness,
+  getMockPartnerPickupReadinessSummary,
   getMockPartnerProfile,
   getMockPartnerQualitySummary,
   getMockPartnerWorkspaceAccessState,
@@ -35,6 +36,20 @@ function CompactStat({
       {note ? <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{note}</div> : null}
     </div>
   );
+}
+
+function getReadinessLabel(status: ReturnType<typeof getMockPartnerPickupReadinessSummary>['status']) {
+  switch (status) {
+    case 'no_live_bags':
+      return 'No live bags';
+    case 'ready_for_pickup':
+      return 'Ready for pickup';
+    case 'prep_needed':
+      return 'Prep needed';
+    case 'available_today':
+    default:
+      return 'Available today';
+  }
 }
 
 function CompactRow({
@@ -94,6 +109,7 @@ export default function PartnerOverviewPage() {
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const partnerOrders = getMockPartnerWorkspaceOrders();
   const operationalSummary = getMockPartnerOperationalSummary();
+  const pickupReadiness = getMockPartnerPickupReadinessSummary();
   const qualitySummary = getMockPartnerQualitySummary();
 
   const nextOrders = partnerOrders
@@ -249,6 +265,31 @@ export default function PartnerOverviewPage() {
           />
           <CompactStat label="Completed pickups" value={operationalSummary.completedPickups} note="Collected orders" />
           <CompactStat label="Support attention" value={operationalSummary.supportAttention} note="Issue-reported or no-show" />
+        </div>
+
+        <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">
+                Today&apos;s readiness
+              </div>
+              <div className="mt-1 text-[20px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">
+                {getReadinessLabel(pickupReadiness.status)}
+              </div>
+              <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">
+                {pickupReadiness.nextPickupWindow
+                  ? `Next pickup window: ${pickupReadiness.nextPickupWindow}.`
+                  : 'Keep live rescue bags and pickup windows aligned for today.'}
+              </div>
+            </div>
+
+            <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <CompactStat label="Available bags" value={pickupReadiness.availableBagsToday} />
+              <CompactStat label="Active pickups" value={pickupReadiness.activePickupOrders} />
+              <CompactStat label="Ready orders" value={pickupReadiness.readyOrders} />
+              <CompactStat label="Prep needed" value={pickupReadiness.notYetReadyOrders} />
+            </div>
+          </div>
         </div>
 
         <div
