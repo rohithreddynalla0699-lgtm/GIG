@@ -59,7 +59,7 @@ export default function OrdersPage() {
                   Your pickups
                 </h1>
                 <p className="mt-2 max-w-[44ch] text-[13px] leading-[1.68] text-white/68 md:text-[13.5px]">
-                  Pickup codes, upcoming windows, and the rescue bags you have already brought home.
+                  Track upcoming pickups and closed reservations in one calm timeline.
                 </p>
               </div>
 
@@ -85,9 +85,9 @@ export default function OrdersPage() {
           <MotionReveal delay={0.04} className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <div className="eyebrow mb-1.5">Orders</div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">Upcoming first, then your collected history.</h2>
+              <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">Upcoming first, then completed and closed history.</h2>
               <p className="mt-1 text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">
-                Simple pickup details up top, quieter history below.
+                Simple pickup details up top, with quieter closed history below.
               </p>
             </div>
 

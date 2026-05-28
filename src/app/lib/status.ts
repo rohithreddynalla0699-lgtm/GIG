@@ -106,6 +106,8 @@ export function getOrderSupportHint(status: OrderStatus, supportNote: string) {
       return 'Show your pickup code at the store.';
     case 'ready_for_pickup':
       return 'Ready during your pickup window.';
+    case 'cancelled':
+      return 'This reservation was released back to availability.';
     case 'issue_reported':
       return "Issue noted. We'll follow up from support.";
     case 'no_show':

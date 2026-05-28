@@ -196,7 +196,7 @@ export default function PartnerOrdersPage() {
 
       <QueueSection
         title="Completed and closed"
-        description="Collected and cancelled orders stay here for operational reference."
+        description="Collected and cancelled orders stay here as closed operational records."
         count={groupedOrders.completed.length}
         emptyTitle="No closed orders yet."
         emptyDescription="Collected and cancelled orders will appear here after the active queue is cleared."
