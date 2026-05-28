@@ -1,27 +1,67 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router';
 import OrderTable from '../../components/partner/OrderTable';
 import { getMockPartnerWorkspaceAccessState, getMockPartnerWorkspaceOrders } from '../../data/mock/partners';
 import type { Order } from '../../types/order';
 
-type OrderFilter = 'reserved' | 'collected' | 'all';
+function sortOrdersByPickupWindow(orders: Order[]) {
+  return [...orders].sort((first, second) => {
+    if (first.pickupDateLabel !== second.pickupDateLabel) {
+      return first.pickupDateLabel.localeCompare(second.pickupDateLabel);
+    }
 
-const filterLabels: Record<OrderFilter, string> = {
-  reserved: 'Reserved',
-  collected: 'Collected',
-  all: 'All',
-};
+    return first.pickupWindow.localeCompare(second.pickupWindow);
+  });
+}
 
-function matchesFilter(order: Order, filter: OrderFilter) {
-  switch (filter) {
-    case 'reserved':
-      return ['new_reserved', 'ready_for_pickup'].includes(order.status);
-    case 'collected':
-      return order.status === 'collected';
-    case 'all':
-    default:
-      return true;
-  }
+function getOperationalOrderGroups(orders: Order[]) {
+  return {
+    active: sortOrdersByPickupWindow(
+      orders.filter((order) => order.status === 'new_reserved' || order.status === 'ready_for_pickup'),
+    ),
+    support: sortOrdersByPickupWindow(
+      orders.filter((order) => order.status === 'issue_reported' || order.status === 'no_show'),
+    ),
+    completed: sortOrdersByPickupWindow(
+      orders.filter((order) => order.status === 'collected'),
+    ),
+  };
+}
+
+function QueueSection({
+  title,
+  description,
+  count,
+  emptyTitle,
+  emptyDescription,
+  orders,
+}: {
+  title: string;
+  description: string;
+  count: number;
+  emptyTitle: string;
+  emptyDescription: string;
+  orders: Order[];
+}) {
+  return (
+    <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-[16px] font-semibold text-[#1E1E1E]">{title}</h2>
+          <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{description}</p>
+        </div>
+        <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">
+          {count} order{count === 1 ? '' : 's'}
+        </div>
+      </div>
+
+      {orders.length === 0 ? (
+        <CompactEmptyState title={emptyTitle} description={emptyDescription} />
+      ) : (
+        <OrderTable orders={orders} />
+      )}
+    </section>
+  );
 }
 
 function CompactEmptyState({ title, description }: { title: string; description: string }) {
@@ -34,7 +74,6 @@ function CompactEmptyState({ title, description }: { title: string; description:
 }
 
 export default function PartnerOrdersPage() {
-  const [activeFilter, setActiveFilter] = useState<OrderFilter>('reserved');
   const workspaceAccessState = getMockPartnerWorkspaceAccessState();
 
   const partnerOrders = useMemo(
@@ -42,14 +81,13 @@ export default function PartnerOrdersPage() {
     []
   );
 
-  const visibleOrders = partnerOrders.filter((order) => matchesFilter(order, activeFilter));
-  const reservedOrders = partnerOrders.filter((order) => ['new_reserved', 'ready_for_pickup'].includes(order.status));
-  const collectedOrders = partnerOrders.filter((order) => order.status === 'collected');
+  const groupedOrders = useMemo(() => getOperationalOrderGroups(partnerOrders), [partnerOrders]);
   const todayOrders = partnerOrders.filter((order) => order.pickupDateLabel === 'Today');
 
   const summary = {
-    reserved: reservedOrders.length,
-    collected: collectedOrders.length,
+    active: groupedOrders.active.length,
+    support: groupedOrders.support.length,
+    completed: groupedOrders.completed.length,
     today: todayOrders.length,
   };
 
@@ -118,14 +156,18 @@ export default function PartnerOrdersPage() {
           <p className="text-[13px] text-[color:var(--gig-text-muted)]">Track reserved pickups, completed handovers, and today&apos;s queue.</p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Reserved</div>
-            <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.reserved}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Active pickups</div>
+            <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.active}</div>
           </div>
           <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Collected</div>
-            <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.collected}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Support attention</div>
+            <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.support}</div>
+          </div>
+          <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Completed</div>
+            <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em] text-[color:var(--gig-text)]">{summary.completed}</div>
           </div>
           <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Today</div>
@@ -134,42 +176,32 @@ export default function PartnerOrdersPage() {
         </div>
       </section>
 
-      <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Queue</h2>
-            <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{visibleOrders.length} orders in this view</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(Object.keys(filterLabels) as OrderFilter[]).map((filter) => {
-              const active = filter === activeFilter;
-              return (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setActiveFilter(filter)}
-                  className={`min-h-[34px] rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
-                    active
-                      ? 'bg-[#1E2F24] text-white'
-                      : 'border border-[rgba(32,38,28,0.08)] bg-white/78 text-[#4D5E53] hover:bg-white'
-                  }`}
-                >
-                  {filterLabels[filter]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      <QueueSection
+        title="Active pickup queue"
+        description="New reservations and ready pickups appear here first."
+        count={groupedOrders.active.length}
+        emptyTitle="No active pickups."
+        emptyDescription="New reservations and ready pickups will appear here."
+        orders={groupedOrders.active}
+      />
 
-        {visibleOrders.length === 0 ? (
-          <CompactEmptyState
-            title="No orders yet."
-            description="Orders will appear after customers reserve your rescue bags."
-          />
-        ) : (
-          <OrderTable orders={visibleOrders} />
-        )}
-      </section>
+      <QueueSection
+        title="Support attention"
+        description="Issue-reported and no-show orders stay grouped here for follow-up."
+        count={groupedOrders.support.length}
+        emptyTitle="No support issues."
+        emptyDescription="Issue-reported or no-show orders will appear here if they need attention."
+        orders={groupedOrders.support}
+      />
+
+      <QueueSection
+        title="Completed pickups"
+        description="Collected orders move here after handover is complete."
+        count={groupedOrders.completed.length}
+        emptyTitle="No completed pickups yet."
+        emptyDescription="Collected orders will move here after pickup is completed."
+        orders={groupedOrders.completed}
+      />
     </div>
   );
 }
