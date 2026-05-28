@@ -310,6 +310,12 @@ export function getMockPartnerWorkspaceLiveListings(workspaceId: string = getMoc
   return getMockPartnerWorkspaceListings(workspaceId).filter((listing) => listing.status === 'live');
 }
 
+export function getMockPartnerWorkspaceNotLiveReferenceListings(workspaceId: string = getMockPartnerWorkspaceId()) {
+  return getMockPartnerWorkspaceListings(workspaceId).filter(
+    (listing) => listing.status === 'archived' || listing.status === 'sold_out',
+  );
+}
+
 export function getMockPartnerWorkspaceLiveListingCount(workspaceId: string = getMockPartnerWorkspaceId()) {
   return new Set(
     getMockPartnerWorkspaceLiveListings(workspaceId)

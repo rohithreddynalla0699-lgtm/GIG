@@ -9,6 +9,7 @@ import {
   canCreateMockPartnerLiveListing,
   getMockPartnerWorkspaceLiveListingCount,
   getMockPartnerWorkspaceLiveListings,
+  getMockPartnerWorkspaceNotLiveReferenceListings,
   updateMockPartnerListingInventory,
 } from '../../data/mock/partnerListings';
 import {
@@ -17,6 +18,8 @@ import {
   isMockPartnerVerified,
 } from '../../data/mock/partners';
 import type { PartnerListing } from '../../types/listing';
+import { formatINR } from '../../lib/currency';
+import { getListingStatusClasses, getListingStatusLabel } from '../../lib/status';
 
 function CompactStat({ label, value }: { label: string; value: number }) {
   return (
@@ -86,6 +89,8 @@ function Modal({
 export default function PartnerListingsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [liveListings, setLiveListings] = useState<PartnerListing[]>(() => getMockPartnerWorkspaceLiveListings());
+  const [notLiveListings, setNotLiveListings] = useState<PartnerListing[]>(() => getMockPartnerWorkspaceNotLiveReferenceListings());
+  const [notice, setNotice] = useState('');
 
   const canPostBags = isMockPartnerVerified();
   const workspaceAccessState = getMockPartnerWorkspaceAccessState();
@@ -94,23 +99,38 @@ export default function PartnerListingsPage() {
   const remainingSlots = Math.max(0, MAX_RESCUE_BAG_TYPES_PER_PARTNER - liveTypeCount);
   const canCreate = canCreateMockPartnerLiveListing();
 
-  const refreshLiveListings = () => {
+  useEffect(() => {
+    if (!notice) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setNotice('');
+    }, 3200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [notice]);
+
+  const refreshListings = () => {
     setLiveListings(getMockPartnerWorkspaceLiveListings());
+    setNotLiveListings(getMockPartnerWorkspaceNotLiveReferenceListings());
   };
 
   const handleCreated = () => {
-    refreshLiveListings();
+    refreshListings();
     setIsCreateModalOpen(false);
   };
 
   const handleUpdateInventory = (listingId: string, quantity: number, quantityLeft: number) => {
     updateMockPartnerListingInventory(listingId, quantity, quantityLeft);
-    refreshLiveListings();
+    refreshListings();
+    setNotice('Rescue bag updated.');
   };
 
   const handleArchiveListing = (listingId: string) => {
     archiveMockPartnerListing(listingId);
-    refreshLiveListings();
+    refreshListings();
+    setNotice('Rescue bag archived. You can create another type.');
   };
 
   if (workspaceAccessState === 'restricted') {
@@ -214,6 +234,12 @@ export default function PartnerListingsPage() {
           <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">{workspaceOutlets.length} outlet{workspaceOutlets.length === 1 ? '' : 's'}</div>
         </div>
 
+        {notice ? (
+          <div className="mb-4 rounded-[16px] border border-[rgba(39,114,74,0.12)] bg-[rgba(39,114,74,0.08)] px-4 py-3 text-[13px] font-medium text-[#255b3d]">
+            {notice}
+          </div>
+        ) : null}
+
         {liveListings.length === 0 ? (
           <div className="rounded-[16px] border border-dashed border-[rgba(32,38,28,0.12)] px-4 py-6 text-center">
             <div className="text-[14px] font-medium text-[#1E1E1E]">No rescue bag types yet.</div>
@@ -247,6 +273,76 @@ export default function PartnerListingsPage() {
           </div>
         )}
       </section>
+
+      {notLiveListings.length > 0 ? (
+        <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(250,245,236,0.58)] p-4">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Not live</h2>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">
+                Archived and sold-out bag types stay here for reference.
+              </p>
+            </div>
+            <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">
+              {notLiveListings.length} type{notLiveListings.length === 1 ? '' : 's'}
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            {notLiveListings.map((listing) => {
+              const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
+
+              return (
+                <article
+                  key={listing.id}
+                  className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3.5"
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--gig-text-muted)]">
+                        <span className="font-medium text-[color:var(--gig-text-soft)]">{outlet?.name ?? 'Store'}</span>
+                        <span>•</span>
+                        <span>{listing.category}</span>
+                      </div>
+                      <h3 className="truncate text-[16px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">
+                        {listing.title}
+                      </h3>
+                      <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{listing.createdAtLabel}</div>
+                    </div>
+
+                    <span
+                      className={`inline-flex self-start rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${getListingStatusClasses(listing.status)}`}
+                    >
+                      {getListingStatusLabel(listing.status)}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                    <div>
+                      <div className="meta-text mb-1">Rescue price</div>
+                      <div className="text-[14px] font-semibold text-[color:var(--gig-text)]">{formatINR(listing.rescuePrice)}</div>
+                    </div>
+                    <div>
+                      <div className="meta-text mb-1">Daily quantity</div>
+                      <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.quantity}</div>
+                    </div>
+                    <div>
+                      <div className="meta-text mb-1">Last available</div>
+                      <div className="text-[14px] font-medium text-[color:var(--gig-text)]">{listing.quantityLeft}</div>
+                    </div>
+                    <div>
+                      <div className="meta-text mb-1">Pickup</div>
+                      <div className="text-[14px] font-medium text-[color:var(--gig-text)]">
+                        {listing.pickupStart} - {listing.pickupEnd}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {isCreateModalOpen ? (
         <Modal onClose={() => setIsCreateModalOpen(false)}>
