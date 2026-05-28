@@ -135,6 +135,8 @@ export default function PartnerOrderDetailsPage() {
     order.supportFollowUpStatus,
     order.supportFollowUpNote,
   );
+  const showPickupHandoffChecklist = status === 'new_reserved' || status === 'ready_for_pickup';
+  const showCollectedHandoffNote = status === 'collected';
 
   return (
     <div className="space-y-4">
@@ -235,6 +237,52 @@ export default function PartnerOrderDetailsPage() {
               </div>
             </div>
           </section>
+
+          {showPickupHandoffChecklist || showCollectedHandoffNote ? (
+            <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+              <div className="mb-3">
+                <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Pickup handoff</h2>
+                <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">
+                  {showPickupHandoffChecklist
+                    ? 'Use this quick checklist during same-day pickup handoff.'
+                    : 'This pickup was completed after code verification and handoff.'}
+                </p>
+              </div>
+
+              {showPickupHandoffChecklist ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">1. Prepare</div>
+                    <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                      Confirm the rescue bag is packed and ready at the outlet before the pickup window.
+                    </div>
+                  </div>
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">2. Verify code</div>
+                    <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                      Ask for the pickup code before handover and verify it against this order.
+                    </div>
+                  </div>
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">3. Hand over</div>
+                    <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                      Complete the handoff during {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}.
+                    </div>
+                  </div>
+                  <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+                    <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">4. Close out</div>
+                    <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                      Mark collected after the code is verified so the pickup queue stays accurate.
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-[16px] border border-[rgba(11,122,77,0.12)] bg-[rgba(11,122,77,0.06)] px-4 py-3 text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
+                  This handoff is complete. The order has already been marked collected after pickup verification.
+                </div>
+              )}
+            </section>
+          ) : null}
         </div>
 
         <div className="space-y-4">

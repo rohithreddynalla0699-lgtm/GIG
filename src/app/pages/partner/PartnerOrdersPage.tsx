@@ -210,7 +210,7 @@ export default function PartnerOrdersPage() {
 
       <QueueSection
         title="Active pickup queue"
-        description="New reservations and ready pickups appear here first."
+        description="New reservations and ready pickups appear here first. Prepare bags, verify pickup code, then mark collected."
         count={groupedOrders.active.length}
         emptyTitle="No active pickups."
         emptyDescription="New reservations and ready pickups will appear here."
