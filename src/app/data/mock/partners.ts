@@ -537,12 +537,9 @@ export function getMockPartnerWorkspaceOutlets() {
   return [buildWorkspaceOutlet(profile)];
 }
 
-export function getMockPartnerActiveStoreSummary(
-  workspaceId: string = getMockPartnerWorkspaceId(),
-): MockPartnerActiveStoreSummary {
+export function getMockPartnerActiveStoreSummary(): MockPartnerActiveStoreSummary {
   const profile = getMockPartnerProfile();
-  const storeOutlets =
-    workspaceId === profile.workspaceId ? getMockPartnerWorkspaceOutlets() : getMockPartnerWorkspaceOutlets();
+  const storeOutlets = getMockPartnerWorkspaceOutlets();
   const primaryOutlet = storeOutlets[0];
   const storeName =
     profile.tradingName.trim() ||
