@@ -13,6 +13,7 @@ import {
   updateMockPartnerListingInventory,
 } from '../../data/mock/partnerListings';
 import {
+  getMockPartnerActiveStoreSummary,
   getMockPartnerWorkspaceAccessState,
   getMockPartnerWorkspaceOutlets,
   isMockPartnerVerified,
@@ -94,6 +95,7 @@ export default function PartnerListingsPage() {
 
   const canPostBags = isMockPartnerVerified();
   const workspaceAccessState = getMockPartnerWorkspaceAccessState();
+  const activeStore = getMockPartnerActiveStoreSummary();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const liveTypeCount = useMemo(() => getMockPartnerWorkspaceLiveListingCount(), [liveListings]);
   const remainingSlots = Math.max(0, MAX_RESCUE_BAG_TYPES_PER_PARTNER - liveTypeCount);
@@ -199,6 +201,10 @@ export default function PartnerListingsPage() {
             <p className="mt-1 text-[13px] text-[color:var(--gig-text-muted)]">
               Create up to 3 live rescue bag types. Each type can have its own daily quantity.
             </p>
+            <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-full border border-[rgba(32,38,28,0.08)] bg-white/78 px-3 py-2 text-[12px] font-medium text-[#4D5E53]">
+              <span className="h-2 w-2 rounded-full bg-[#0b7a4d]"></span>
+              Pickup hub: {activeStore.storeName} · {activeStore.area}, {activeStore.city}
+            </div>
           </div>
 
           <div className="flex flex-col items-start gap-2 sm:items-end">
@@ -229,9 +235,9 @@ export default function PartnerListingsPage() {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[16px] font-semibold text-[#1E1E1E]">Live rescue bag types</h2>
-            <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{liveListings.length} live types in this workspace</p>
+            <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{liveListings.length} live types for your pickup hub</p>
           </div>
-          <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">{workspaceOutlets.length} outlet{workspaceOutlets.length === 1 ? '' : 's'}</div>
+          <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">{activeStore.area}, {activeStore.city}</div>
         </div>
 
         {notice ? (
@@ -290,8 +296,6 @@ export default function PartnerListingsPage() {
 
           <div className="space-y-2.5">
             {notLiveListings.map((listing) => {
-              const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
-
               return (
                 <article
                   key={listing.id}
@@ -300,7 +304,7 @@ export default function PartnerListingsPage() {
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
                       <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--gig-text-muted)]">
-                        <span className="font-medium text-[color:var(--gig-text-soft)]">{outlet?.name ?? 'Store'}</span>
+                        <span className="font-medium text-[color:var(--gig-text-soft)]">{activeStore.storeName}</span>
                         <span>•</span>
                         <span>{listing.category}</span>
                       </div>

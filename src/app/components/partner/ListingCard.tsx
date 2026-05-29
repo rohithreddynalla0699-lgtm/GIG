@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { PartnerOutlet } from '../../types/partner';
 import type { PartnerListing } from '../../types/listing';
 import { getMockPartnerListingSellThrough } from '../../data/mock/partnerListings';
+import { getMockPartnerActiveStoreSummary } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { getListingStatusClasses, getListingStatusLabel, getVegTypeLabel } from '../../lib/status';
 
@@ -13,6 +14,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing, outlet, onUpdateInventory, onArchive }: ListingCardProps) {
+  const activeStore = getMockPartnerActiveStoreSummary();
   const [isManaging, setIsManaging] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [quantityValue, setQuantityValue] = useState(String(listing.quantity));
@@ -33,7 +35,7 @@ export default function ListingCard({ listing, outlet, onUpdateInventory, onArch
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--gig-text-muted)]">
-            <span className="font-medium text-[color:var(--gig-green-deep)]">{outlet.name}</span>
+            <span className="font-medium text-[color:var(--gig-green-deep)]">{activeStore.storeName || outlet.name}</span>
             <span>•</span>
             <span>{listing.category}</span>
           </div>

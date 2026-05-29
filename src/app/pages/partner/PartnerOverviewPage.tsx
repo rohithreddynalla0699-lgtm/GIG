@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { getMockPartnerWorkspaceListings } from '../../data/mock/partnerListings';
 import {
   getMockPartnerActivationState,
+  getMockPartnerActiveStoreSummary,
   getMockPartnerOperationalSummary,
   getMockPartnerOperationalReadiness,
   getMockPartnerPickupReadinessSummary,
@@ -9,7 +10,6 @@ import {
   getMockPartnerQualitySummary,
   getMockPartnerWorkspaceAccessState,
   getMockPartnerWorkspaceOrders,
-  getMockPartnerWorkspaceOutlets,
   isMockPartnerVerified,
   PARTNER_COMMISSION_RATE,
   PARTNER_PLATFORM_FEE_INR,
@@ -105,8 +105,8 @@ export default function PartnerOverviewPage() {
   const activationState = getMockPartnerActivationState();
   const workspaceAccessState = getMockPartnerWorkspaceAccessState(profile);
   const readiness = getMockPartnerOperationalReadiness(profile);
+  const activeStore = getMockPartnerActiveStoreSummary();
   const listings = getMockPartnerWorkspaceListings();
-  const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const partnerOrders = getMockPartnerWorkspaceOrders();
   const operationalSummary = getMockPartnerOperationalSummary();
   const pickupReadiness = getMockPartnerPickupReadinessSummary();
@@ -267,6 +267,16 @@ export default function PartnerOverviewPage() {
           <CompactStat label="Support attention" value={operationalSummary.supportAttention} note="Issue-reported or no-show" />
         </div>
 
+        <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gig-text-soft)]">Pickup hub</div>
+          <div className="mt-1 text-[18px] font-semibold tracking-[-0.03em] text-[color:var(--gig-text)]">
+            {activeStore.storeName}
+          </div>
+          <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">
+            {activeStore.area}, {activeStore.city}
+          </div>
+        </div>
+
         <div className="rounded-[18px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
@@ -374,12 +384,11 @@ export default function PartnerOverviewPage() {
             ) : (
               <div className="space-y-2.5">
                 {newestListings.map((listing) => {
-                  const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
                   return (
                     <CompactRow
                       key={listing.id}
                       title={listing.title}
-                      meta={`${outlet?.name ?? 'Partner outlet'} · ${listing.pickupStart} - ${listing.pickupEnd} · Qty ${listing.quantityLeft}/${listing.quantity}`}
+                      meta={`${activeStore.storeName} · ${listing.pickupStart} - ${listing.pickupEnd} · Qty ${listing.quantityLeft}/${listing.quantity}`}
                       trailing={`Rs. ${listing.rescuePrice}`}
                     />
                   );

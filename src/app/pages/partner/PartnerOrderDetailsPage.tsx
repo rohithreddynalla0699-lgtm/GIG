@@ -6,7 +6,7 @@ import OrderTimeline from '../../components/partner/OrderTimeline';
 import SectionCard from '../../components/shared/SectionCard';
 import { getBagByIdIncludingInactive } from '../../data/mock/bags';
 import { MockOrderLifecycleError, updateMockOrderStatus, updateMockOrderSupportFollowUp } from '../../data/mock/orders';
-import { getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
+import { getMockPartnerActiveStoreSummary, getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
 import {
@@ -22,6 +22,7 @@ export default function PartnerOrderDetailsPage() {
   const { id } = useParams();
   const workspaceOrders = getMockPartnerWorkspaceOrders();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
+  const activeStore = getMockPartnerActiveStoreSummary();
   const initialOrder = id ? workspaceOrders.find((entry) => entry.id === id) : undefined;
   const [currentOrder, setCurrentOrder] = useState(initialOrder);
   const order = currentOrder;
@@ -154,6 +155,9 @@ export default function PartnerOrderDetailsPage() {
             <p className="mt-1 text-[13px] text-[color:var(--gig-text-muted)]">
               {order.customerName} · {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
             </p>
+            <p className="mt-1 text-[12px] font-medium text-[#4D5E53]">
+              Pickup hub: {activeStore.storeName} · {activeStore.area}, {activeStore.city}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -170,7 +174,8 @@ export default function PartnerOrderDetailsPage() {
           <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
             <div className="mb-3">
               <h2 className="text-[16px] font-semibold text-[#1E1E1E]">{order.listingTitle}</h2>
-              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{outlet.name}</p>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{activeStore.storeName}</p>
+              <p className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{activeStore.addressLine}</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -189,9 +194,9 @@ export default function PartnerOrderDetailsPage() {
                 <div className="text-[14px] font-semibold text-[#1E1E1E]">{getPaymentStatusLabel(order.paymentStatus)}</div>
               </div>
               <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
-                <div className="meta-text mb-1">Outlet</div>
-                <div className="text-[14px] font-semibold text-[#1E1E1E]">{outlet.name}</div>
-                <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{outlet.addressLine}</div>
+                <div className="meta-text mb-1">Pickup hub</div>
+                <div className="text-[14px] font-semibold text-[#1E1E1E]">{activeStore.storeName}</div>
+                <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{activeStore.addressLine}</div>
               </div>
               <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
                 <div className="meta-text mb-1">Pickup window</div>
@@ -254,7 +259,7 @@ export default function PartnerOrderDetailsPage() {
                   <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
                     <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-[color:var(--gig-text-soft)]">1. Prepare</div>
                     <div className="text-[13px] leading-6 text-[color:var(--gig-text-muted)]">
-                      Confirm the rescue bag is packed and ready at the outlet before the pickup window.
+                      Confirm the rescue bag is packed and ready at the pickup hub before the pickup window.
                     </div>
                   </div>
                   <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">

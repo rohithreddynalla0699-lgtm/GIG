@@ -88,6 +88,15 @@ export interface MockPartnerOperationalSummary {
   notLiveBagTypes: number;
 }
 
+export interface MockPartnerActiveStoreSummary {
+  storeName: string;
+  area: string;
+  city: string;
+  addressLine: string;
+  customerStoreId: string;
+  storeImageUrl: string;
+}
+
 export interface MockPartnerPickupReadinessSummary {
   liveBagTypes: number;
   availableBagsToday: number;
@@ -526,6 +535,32 @@ export function getMockPartnerWorkspaceOutlets() {
   }
 
   return [buildWorkspaceOutlet(profile)];
+}
+
+export function getMockPartnerActiveStoreSummary(
+  workspaceId: string = getMockPartnerWorkspaceId(),
+): MockPartnerActiveStoreSummary {
+  const profile = getMockPartnerProfile();
+  const storeOutlets =
+    workspaceId === profile.workspaceId ? getMockPartnerWorkspaceOutlets() : getMockPartnerWorkspaceOutlets();
+  const primaryOutlet = storeOutlets[0];
+  const storeName =
+    profile.tradingName.trim() ||
+    primaryOutlet?.name?.trim() ||
+    profile.legalBusinessName.trim() ||
+    'Primary store';
+  const area = primaryOutlet?.area?.trim() || profile.city.trim() || 'Primary area';
+  const city = primaryOutlet?.city?.trim() || profile.city.trim() || 'Add city';
+  const addressLine = primaryOutlet?.addressLine?.trim() || profile.addressLine1.trim() || 'Complete store address in Partner Profile.';
+
+  return {
+    storeName,
+    area,
+    city,
+    addressLine,
+    customerStoreId: profile.customerStoreId.trim(),
+    storeImageUrl: profile.storeImageUrl.trim(),
+  };
 }
 
 export function getMockPartnerWorkspacePartner(): Partner {

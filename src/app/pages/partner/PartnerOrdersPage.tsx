@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router';
 import OrderTable from '../../components/partner/OrderTable';
 import {
+  getMockPartnerActiveStoreSummary,
   getMockPartnerPickupReadinessSummary,
   getMockPartnerQualitySummary,
   getMockPartnerWorkspaceAccessState,
@@ -80,6 +81,7 @@ function CompactEmptyState({ title, description }: { title: string; description:
 
 export default function PartnerOrdersPage() {
   const workspaceAccessState = getMockPartnerWorkspaceAccessState();
+  const activeStore = getMockPartnerActiveStoreSummary();
 
   const partnerOrders = useMemo(
     () => getMockPartnerWorkspaceOrders(),
@@ -161,6 +163,9 @@ export default function PartnerOrdersPage() {
             Orders
           </h1>
           <p className="text-[13px] text-[color:var(--gig-text-muted)]">Track reserved pickups, completed handovers, and today&apos;s queue.</p>
+          <div className="text-[12px] font-medium text-[#4D5E53]">
+            Pickup hub: {activeStore.storeName} · {activeStore.area}, {activeStore.city}
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -210,7 +215,7 @@ export default function PartnerOrdersPage() {
 
       <QueueSection
         title="Active pickup queue"
-        description="New reservations and ready pickups appear here first. Prepare bags, verify pickup code, then mark collected."
+        description={`New reservations and ready pickups for ${activeStore.storeName} appear here first. Prepare bags, verify pickup code, then mark collected.`}
         count={groupedOrders.active.length}
         emptyTitle="No active pickups."
         emptyDescription="New reservations and ready pickups will appear here."

@@ -8,7 +8,7 @@ import {
   MockPartnerListingValidationError,
 } from '../../data/mock/partnerListings';
 import type { VegType } from '../../types/store';
-import { getMockPartnerWorkspaceId, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
+import { getMockPartnerActiveStoreSummary, getMockPartnerWorkspaceId, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
 
 interface ListingFormValues {
   title: string;
@@ -78,6 +78,7 @@ export default function ListingForm({
 }) {
   const navigate = useNavigate();
   const workspaceId = getMockPartnerWorkspaceId();
+  const activeStore = getMockPartnerActiveStoreSummary();
   const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const [values, setValues] = useState<ListingFormValues>(() => ({
     ...getInitialValues(workspaceOutlets[0]?.id ?? ''),
@@ -88,7 +89,6 @@ export default function ListingForm({
   }));
   const [error, setError] = useState('');
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
-  const selectedOutlet = workspaceOutlets.find((outlet) => outlet.id === values.outletId) ?? workspaceOutlets[0];
   const selectedPickupSlotId = getPickupSlotId(values.pickupStart, values.pickupEnd);
 
   useEffect(() => {
@@ -228,11 +228,11 @@ export default function ListingForm({
                 <span className={labelClass}>Store</span>
                 <div className="rounded-[14px] border border-[rgba(32,38,28,0.08)] bg-[rgba(250,245,236,0.9)] px-3.5 py-2.5">
                   <div className="text-[14px] font-medium text-[color:var(--gig-text)]">
-                    {selectedOutlet?.name ?? 'Store'}
+                    {activeStore.storeName}
                   </div>
-                  {selectedOutlet?.area ? (
+                  {activeStore.area ? (
                     <div className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">
-                      {selectedOutlet.area}
+                      {activeStore.area}, {activeStore.city}
                     </div>
                   ) : null}
                 </div>
@@ -409,7 +409,7 @@ export default function ListingForm({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-[12px] font-medium text-[color:var(--gig-text-muted)]">
-                    {selectedOutlet?.name ?? 'Store'}
+                    {activeStore.storeName}
                   </div>
                   <div className="mt-1 text-[18px] font-semibold leading-tight tracking-[-0.03em] text-[color:var(--gig-text)]">
                     {previewTitle}
@@ -472,12 +472,15 @@ export default function ListingForm({
                   />
                 </label>
                 <label className="block">
-                  <span className="operational-label mb-2 block">Outlet</span>
-                  <select value={values.outletId} onChange={(event) => updateField('outletId', event.target.value)} className={inputClass}>
-                    {workspaceOutlets.map((outlet) => (
-                      <option key={outlet.id} value={outlet.id}>{outlet.name}</option>
-                    ))}
-                  </select>
+                  <span className="operational-label mb-2 block">Pickup hub</span>
+                  <div className="rounded-[14px] border border-[rgba(32,38,28,0.08)] bg-[rgba(250,245,236,0.9)] px-3.5 py-2.5">
+                    <div className="text-[14px] font-medium text-[color:var(--gig-text)]">
+                      {activeStore.storeName}
+                    </div>
+                    <div className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">
+                      {activeStore.area}, {activeStore.city}
+                    </div>
+                  </div>
                 </label>
                 <label className="block">
                   <span className="operational-label mb-2 block">Type</span>
