@@ -15,7 +15,6 @@ import {
 import {
   getMockPartnerActiveStoreSummary,
   getMockPartnerWorkspaceAccessState,
-  getMockPartnerWorkspaceOutlets,
   isMockPartnerVerified,
 } from '../../data/mock/partners';
 import type { PartnerListing } from '../../types/listing';
@@ -96,7 +95,6 @@ export default function PartnerListingsPage() {
   const canPostBags = isMockPartnerVerified();
   const workspaceAccessState = getMockPartnerWorkspaceAccessState();
   const activeStore = getMockPartnerActiveStoreSummary();
-  const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const liveTypeCount = useMemo(() => getMockPartnerWorkspaceLiveListingCount(), [liveListings]);
   const remainingSlots = Math.max(0, MAX_RESCUE_BAG_TYPES_PER_PARTNER - liveTypeCount);
   const canCreate = canCreateMockPartnerLiveListing();
@@ -265,8 +263,7 @@ export default function PartnerListingsPage() {
         ) : (
           <div className="space-y-3">
             {liveListings.map((listing) => {
-              const pickupHubLabel =
-                workspaceOutlets.find((item) => item.id === listing.outletId)?.name ?? activeStore.storeName;
+              const pickupHubLabel = activeStore.storeName;
 
               return (
                 <ListingCard
