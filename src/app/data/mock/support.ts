@@ -29,18 +29,18 @@ export const supportCategories: SupportCategory[] = [
     ],
   },
   {
-    id: 'refunds',
-    title: 'Refunds and cancellations',
-    description: 'What happens if a store runs out, closes early, or your order is cancelled.',
+    id: 'changes',
+    title: 'Order changes and cancellations',
+    description: 'What happens if a store runs out, closes early, or your reservation changes before pickup.',
     topics: [
       {
-        id: 'refund-timeline',
-        title: 'How do refunds work?',
-        description: 'Refunds are handled through the mobile app payment flow.',
+        id: 'cancel-timeline',
+        title: 'How do cancellations work?',
+        description: 'Cancellations only release a reservation before pickup and return the bag to availability.',
         guidance: [
-          'Open the app to see the live refund status for the affected order.',
-          'UPI refunds are usually the fastest, followed by cards and wallets.',
-          'If your refund looks delayed, contact support with your order ID.',
+          'Open the app to see whether the reservation is still active or has been cancelled.',
+          'If cancellation happens before pickup, the bag is released back into marketplace availability.',
+          'If you still need help, contact support with your order ID and pickup details.',
         ],
       },
       {
@@ -50,7 +50,7 @@ export const supportCategories: SupportCategory[] = [
         guidance: [
           'Show your order detail to the store team first.',
           'If they still cannot fulfill it, report the issue in the app.',
-          'The support team can review and help with refund or replacement options.',
+          'The support team can review the issue and log follow-up for partner quality monitoring.',
         ],
       },
     ],

@@ -14,13 +14,19 @@ const VALID_ORDER_STATUSES = new Set<Order['status']>([
   'no_show',
   'cancelled',
   'issue_reported',
-  'refunded',
 ]);
-const VALID_PAYMENT_STATUSES = new Set<Order['paymentStatus']>(['paid', 'refunded', 'issue_hold']);
+const VALID_PAYMENT_STATUSES = new Set<Order['paymentStatus']>(['paid']);
 const VALID_SUPPORT_FOLLOW_UP_STATUSES = new Set<NonNullable<Order['supportFollowUpStatus']>>([
   'needs_follow_up',
   'reviewed',
 ]);
+const LEGACY_ORDER_STATUS_MAP: Record<string, Order['status']> = {
+  refunded: 'issue_reported',
+};
+const LEGACY_PAYMENT_STATUS_MAP: Record<string, Order['paymentStatus']> = {
+  refunded: 'paid',
+  issue_hold: 'paid',
+};
 
 export const orders: Order[] = [
   {
@@ -218,6 +224,19 @@ function isValidStoredOrder(value: unknown): value is Order {
 
   const candidate = value as Partial<Order>;
 
+  const normalizedStatus =
+    typeof candidate.status === 'string'
+      ? VALID_ORDER_STATUSES.has(candidate.status as Order['status'])
+        ? (candidate.status as Order['status'])
+        : LEGACY_ORDER_STATUS_MAP[candidate.status]
+      : undefined;
+  const normalizedPaymentStatus =
+    typeof candidate.paymentStatus === 'string'
+      ? VALID_PAYMENT_STATUSES.has(candidate.paymentStatus as Order['paymentStatus'])
+        ? (candidate.paymentStatus as Order['paymentStatus'])
+        : LEGACY_PAYMENT_STATUS_MAP[candidate.paymentStatus]
+      : undefined;
+
   return (
     typeof candidate.id === 'string' &&
     typeof candidate.customerId === 'string' &&
@@ -230,10 +249,8 @@ function isValidStoredOrder(value: unknown): value is Order {
     typeof candidate.quantity === 'number' &&
     Number.isFinite(candidate.quantity) &&
     candidate.quantity > 0 &&
-    typeof candidate.status === 'string' &&
-    VALID_ORDER_STATUSES.has(candidate.status as Order['status']) &&
-    typeof candidate.paymentStatus === 'string' &&
-    VALID_PAYMENT_STATUSES.has(candidate.paymentStatus as Order['paymentStatus']) &&
+    typeof normalizedStatus === 'string' &&
+    typeof normalizedPaymentStatus === 'string' &&
     typeof candidate.orderedAt === 'string' &&
     typeof candidate.pickupDateLabel === 'string' &&
     typeof candidate.pickupWindow === 'string' &&
@@ -254,6 +271,21 @@ function isValidStoredOrder(value: unknown): value is Order {
   );
 }
 
+function normalizeStoredOrder(order: Order): Order {
+  const normalizedStatus =
+    VALID_ORDER_STATUSES.has(order.status) ? order.status : LEGACY_ORDER_STATUS_MAP[order.status as string] ?? 'issue_reported';
+  const normalizedPaymentStatus =
+    VALID_PAYMENT_STATUSES.has(order.paymentStatus)
+      ? order.paymentStatus
+      : LEGACY_PAYMENT_STATUS_MAP[order.paymentStatus as string] ?? 'paid';
+
+  return {
+    ...order,
+    status: normalizedStatus,
+    paymentStatus: normalizedPaymentStatus,
+  };
+}
+
 function readStoredCreatedOrders() {
   if (typeof window === 'undefined') {
     return [];
@@ -266,7 +298,9 @@ function readStoredCreatedOrders() {
 
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((order): order is Order => isValidStoredOrder(order)) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((order): order is Order => isValidStoredOrder(order)).map((order) => normalizeStoredOrder(order))
+      : [];
   } catch {
     return [];
   }
@@ -307,9 +341,12 @@ function readStoredOrderOverrides() {
 
         if (
           typeof override.status === 'string' &&
-          VALID_ORDER_STATUSES.has(override.status as Order['status'])
+          (VALID_ORDER_STATUSES.has(override.status as Order['status']) || typeof LEGACY_ORDER_STATUS_MAP[override.status] === 'string')
         ) {
-          nextOverride.status = override.status as Order['status'];
+          nextOverride.status =
+            (VALID_ORDER_STATUSES.has(override.status as Order['status'])
+              ? override.status
+              : LEGACY_ORDER_STATUS_MAP[override.status]) as Order['status'];
         }
 
         if (typeof override.supportNote === 'string' && override.supportNote.trim().length > 0) {

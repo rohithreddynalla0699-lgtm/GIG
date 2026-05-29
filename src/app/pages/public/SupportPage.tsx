@@ -13,14 +13,14 @@ export default function SupportPage() {
         <div className="mx-auto max-w-[1180px]">
           <PublicPageIntro
             eyebrow="Customer support"
-            title="Guidance for pickups, refunds, and bag questions"
-            description="Start with the most common answers here. If you need live reservation help, payment updates, or refund progress, continue in the app."
+            title="Guidance for pickups, cancellations, and bag questions"
+            description="Start with the most common answers here. If you need live reservation help, pickup updates, or issue support, continue in the app."
           />
 
           <section className="motion-reveal mb-8 grid gap-4 md:grid-cols-3">
             {[
               ['Pickup support', 'Short windows, clear handoff guidance'],
-              ['Refund questions', 'What to expect if an order changes'],
+              ['Cancellation guidance', 'What to expect if an order changes before pickup'],
               ['App-first help', 'Live order support continues in the app'],
             ].map(([title, copy]) => (
               <div key={title} className="surface-quiet rounded-[24px] p-5">
@@ -67,7 +67,7 @@ export default function SupportPage() {
                 <div className="eyebrow mb-2">Contact support</div>
                 <h2 className="text-[28px] font-semibold tracking-[-0.05em] text-[color:var(--gig-text)]">Need help with a live reservation?</h2>
                 <p className="body-regular mt-3">
-                  Use the app for the fastest support path, especially for refund status, pickup delays, and store messaging.
+                  Use the app for the fastest support path, especially for cancellation status, pickup delays, and store messaging.
                 </p>
                 <div className="mt-5 space-y-3 text-[14px] leading-[1.7] text-[color:var(--gig-text-muted)]">
                   <div>Email: <a className="font-semibold text-[color:var(--gig-green-deep)]" href={`mailto:${supportContact.email}`}>{supportContact.email}</a></div>

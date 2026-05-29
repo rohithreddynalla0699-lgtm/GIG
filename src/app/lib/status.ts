@@ -1,4 +1,4 @@
-import type { Order, OrderStatus } from '../types/order';
+import type { Order, OrderStatus, PaymentStatus } from '../types/order';
 import type { ListingStatus } from '../types/listing';
 import type { PayoutStatus } from '../types/payout';
 import type { VegType } from '../types/store';
@@ -11,7 +11,6 @@ const orderStatusLabels: Record<OrderStatus, string> = {
   no_show: 'No-show',
   cancelled: 'Cancelled',
   issue_reported: 'Issue reported',
-  refunded: 'Refunded',
 };
 
 const orderStatusClasses: Record<OrderStatus, string> = {
@@ -21,20 +20,15 @@ const orderStatusClasses: Record<OrderStatus, string> = {
   no_show: 'bg-[#FFF0EE] text-[#C05A2B]',
   cancelled: 'bg-[#F1F1EF] text-[#6A6A64]',
   issue_reported: 'bg-[#FFF4D6] text-[#A66B00]',
-  refunded: 'bg-[#FFF4D6] text-[#A66B00]',
 };
 
-const paymentStatusLabels = {
+const paymentStatusLabels: Record<PaymentStatus, string> = {
   paid: 'Paid',
-  refunded: 'Refunded',
-  issue_hold: 'Under review',
-} as const;
+};
 
-const paymentStatusClasses = {
+const paymentStatusClasses: Record<PaymentStatus, string> = {
   paid: 'bg-[#E8F5E9] text-[#00A661]',
-  refunded: 'bg-[#F5F5F5] text-[#5A5A5A]',
-  issue_hold: 'bg-[#FFF4D6] text-[#A66B00]',
-} as const;
+};
 
 const vegTypeLabels: Record<VegType, string> = {
   veg: 'Veg',
@@ -93,7 +87,6 @@ const customerOrderStatusLabels: Record<OrderStatus, string> = {
   no_show: 'No-show',
   cancelled: 'Cancelled',
   issue_reported: 'Issue reported',
-  refunded: 'Refunded',
 };
 
 export function getCustomerOrderStatusLabel(status: OrderStatus) {
@@ -187,11 +180,11 @@ export function getListingStatusClasses(status: ListingStatus) {
   return listingStatusClasses[status];
 }
 
-export function getPaymentStatusLabel(status: keyof typeof paymentStatusLabels) {
+export function getPaymentStatusLabel(status: PaymentStatus) {
   return paymentStatusLabels[status];
 }
 
-export function getPaymentStatusClasses(status: keyof typeof paymentStatusClasses) {
+export function getPaymentStatusClasses(status: PaymentStatus) {
   return paymentStatusClasses[status];
 }
 

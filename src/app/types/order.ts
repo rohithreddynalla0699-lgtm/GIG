@@ -4,12 +4,11 @@ export type OrderStatus =
   | 'collected'
   | 'no_show'
   | 'cancelled'
-  | 'issue_reported'
-  | 'refunded';
+  | 'issue_reported';
 
 export type SupportFollowUpStatus = 'needs_follow_up' | 'reviewed';
 
-export type PaymentStatus = 'paid' | 'refunded' | 'issue_hold';
+export type PaymentStatus = 'paid';
 
 export interface OrderTimelineEvent {
   id: string;
