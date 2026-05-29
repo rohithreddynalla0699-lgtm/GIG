@@ -6,7 +6,7 @@ import OrderTimeline from '../../components/partner/OrderTimeline';
 import SectionCard from '../../components/shared/SectionCard';
 import { getBagByIdIncludingInactive } from '../../data/mock/bags';
 import { MockOrderLifecycleError, updateMockOrderStatus, updateMockOrderSupportFollowUp } from '../../data/mock/orders';
-import { getMockPartnerActiveStoreSummary, getMockPartnerWorkspaceOrders, getMockPartnerWorkspaceOutlets } from '../../data/mock/partners';
+import { getMockPartnerActiveStoreSummary, getMockPartnerWorkspaceOrders } from '../../data/mock/partners';
 import { formatINR } from '../../lib/currency';
 import { formatPickupWindow } from '../../lib/dates';
 import {
@@ -21,13 +21,11 @@ import type { OrderStatus } from '../../types/order';
 export default function PartnerOrderDetailsPage() {
   const { id } = useParams();
   const workspaceOrders = getMockPartnerWorkspaceOrders();
-  const workspaceOutlets = getMockPartnerWorkspaceOutlets();
   const activeStore = getMockPartnerActiveStoreSummary();
   const initialOrder = id ? workspaceOrders.find((entry) => entry.id === id) : undefined;
   const [currentOrder, setCurrentOrder] = useState(initialOrder);
   const order = currentOrder;
   const bag = order ? getBagByIdIncludingInactive(order.bagId) : undefined;
-  const outlet = order ? workspaceOutlets.find((item) => item.id === order.outletId) : undefined;
 
   const [status, setStatus] = useState<OrderStatus | null>(order?.status ?? null);
   const [actionError, setActionError] = useState('');
@@ -130,8 +128,9 @@ export default function PartnerOrderDetailsPage() {
   const canMarkNoShow = status === 'ready_for_pickup';
   const canReportIssue = ['new_reserved', 'ready_for_pickup', 'collected', 'no_show'].includes(status);
   const canMarkSupportReviewed = status === 'issue_reported' && order.supportFollowUpStatus !== 'reviewed';
-  const pickupHubName = activeStore.storeName || outlet?.name || 'Pickup hub';
-  const pickupHubAddress = activeStore.addressLine || outlet?.addressLine || 'Pickup location available in partner profile.';
+  const pickupHubName = activeStore.storeName || 'Pickup hub';
+  const pickupHubAddress = activeStore.addressLine || 'Pickup location available in partner profile.';
+  const pickupHubLocation = [activeStore.area, activeStore.city].filter(Boolean).join(', ') || 'Store location';
   const orderUpdateSummary = getOrderDetailSupportSummary(
     order.status,
     order.supportNote,
@@ -158,7 +157,7 @@ export default function PartnerOrderDetailsPage() {
               {order.customerName} · {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
             </p>
             <p className="mt-1 text-[12px] font-medium text-[#4D5E53]">
-              Pickup hub: {pickupHubName} · {activeStore.area}, {activeStore.city}
+              Pickup hub: {pickupHubName} · {pickupHubLocation}
             </p>
           </div>
 
