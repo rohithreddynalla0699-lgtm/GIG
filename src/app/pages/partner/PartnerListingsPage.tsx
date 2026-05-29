@@ -265,16 +265,18 @@ export default function PartnerListingsPage() {
         ) : (
           <div className="space-y-3">
             {liveListings.map((listing) => {
-              const outlet = workspaceOutlets.find((item) => item.id === listing.outletId);
-              return outlet ? (
+              const pickupHubLabel =
+                workspaceOutlets.find((item) => item.id === listing.outletId)?.name ?? activeStore.storeName;
+
+              return (
                 <ListingCard
                   key={listing.id}
                   listing={listing}
-                  outlet={outlet}
+                  pickupHubLabel={pickupHubLabel}
                   onUpdateInventory={handleUpdateInventory}
                   onArchive={handleArchiveListing}
                 />
-              ) : null;
+              );
             })}
           </div>
         )}

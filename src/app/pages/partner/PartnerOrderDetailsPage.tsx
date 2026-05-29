@@ -115,7 +115,7 @@ export default function PartnerOrderDetailsPage() {
     [issueNoteDraft, order?.id]
   );
 
-  if (!order || !bag || !outlet || !status) {
+  if (!order || !bag || !status) {
     return (
       <SectionCard title="Order not found" description="This order is not available in the current demo data.">
         <Link to="/partner/orders" className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-[#1E2F24] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#17241c]">
@@ -130,6 +130,8 @@ export default function PartnerOrderDetailsPage() {
   const canMarkNoShow = status === 'ready_for_pickup';
   const canReportIssue = ['new_reserved', 'ready_for_pickup', 'collected', 'no_show'].includes(status);
   const canMarkSupportReviewed = status === 'issue_reported' && order.supportFollowUpStatus !== 'reviewed';
+  const pickupHubName = activeStore.storeName || outlet?.name || 'Pickup hub';
+  const pickupHubAddress = activeStore.addressLine || outlet?.addressLine || 'Pickup location available in partner profile.';
   const orderUpdateSummary = getOrderDetailSupportSummary(
     order.status,
     order.supportNote,
@@ -156,7 +158,7 @@ export default function PartnerOrderDetailsPage() {
               {order.customerName} · {formatPickupWindow(order.pickupDateLabel, order.pickupWindow)}
             </p>
             <p className="mt-1 text-[12px] font-medium text-[#4D5E53]">
-              Pickup hub: {activeStore.storeName} · {activeStore.area}, {activeStore.city}
+              Pickup hub: {pickupHubName} · {activeStore.area}, {activeStore.city}
             </p>
           </div>
 
@@ -174,8 +176,8 @@ export default function PartnerOrderDetailsPage() {
           <section className="rounded-[20px] border border-[rgba(32,38,28,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
             <div className="mb-3">
               <h2 className="text-[16px] font-semibold text-[#1E1E1E]">{order.listingTitle}</h2>
-              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{activeStore.storeName}</p>
-              <p className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{activeStore.addressLine}</p>
+              <p className="mt-0.5 text-[12px] text-[color:var(--gig-text-muted)]">{pickupHubName}</p>
+              <p className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{pickupHubAddress}</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -195,8 +197,8 @@ export default function PartnerOrderDetailsPage() {
               </div>
               <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
                 <div className="meta-text mb-1">Pickup hub</div>
-                <div className="text-[14px] font-semibold text-[#1E1E1E]">{activeStore.storeName}</div>
-                <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{activeStore.addressLine}</div>
+                <div className="text-[14px] font-semibold text-[#1E1E1E]">{pickupHubName}</div>
+                <div className="mt-1 text-[12px] text-[color:var(--gig-text-muted)]">{pickupHubAddress}</div>
               </div>
               <div className="rounded-[16px] border border-[rgba(32,38,28,0.08)] bg-white/78 px-4 py-3">
                 <div className="meta-text mb-1">Pickup window</div>
