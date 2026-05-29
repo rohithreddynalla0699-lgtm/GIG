@@ -3,7 +3,7 @@ export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
 export interface PayoutLedgerRow {
   id: string;
   label: string;
-  type: 'gross_sales' | 'partner_share' | 'platform_share' | 'refund' | 'adjustment';
+  type: 'gross_sales' | 'partner_share' | 'platform_share' | 'review_adjustment' | 'adjustment';
   amount: number;
   note: string;
 }
@@ -16,7 +16,7 @@ export interface PayoutCycle {
   grossSales: number;
   partnerShare: number;
   platformShare: number;
-  refunds: number;
+  reviewAdjustments: number;
   adjustments: number;
   netPayout: number;
   status: PayoutStatus;
